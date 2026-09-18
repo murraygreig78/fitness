@@ -1,16 +1,25 @@
-import type { Exercise, LoggedSet, Session } from './schema';
+import type { Activity, Exercise, LoggedSet, Session } from './schema';
 
-export type LogField = 'kg' | 'reps' | 'durationSeconds' | 'distanceKm';
+export type ExerciseField = 'kg' | 'reps' | 'durationSeconds';
+export type LogField = ExerciseField | 'distanceKm';
+
+export function setFieldValue(set: LoggedSet, field: LogField): number | undefined {
+	if (field === 'distanceKm') return undefined;
+	return set[field];
+}
 
 export function targetFieldValue(exercise: Exercise, field: LogField): number | undefined {
 	const target = exercise.target;
 	if (field === 'kg' && 'kg' in target) return target.kg;
 	if (field === 'reps' && 'reps' in target) return target.reps;
 	if (field === 'durationSeconds' && 'durationSeconds' in target) return target.durationSeconds;
-	if (field === 'distanceKm' && 'distanceKm' in target) {
-		return target.distanceKm ?? target.distanceKmMin;
-	}
 	return undefined;
+}
+
+export function cardioTargetValue(activity: Activity, field: 'distanceKm' | 'durationSeconds') {
+	if (activity.kind !== 'cardio') return undefined;
+	if (field === 'durationSeconds') return activity.target.durationSeconds;
+	return activity.target.distanceKm ?? activity.target.distanceKmMin;
 }
 
 export function fieldsForExercise(exercise: Exercise): LogField[] {
@@ -22,18 +31,6 @@ export function fieldsForExercise(exercise: Exercise): LogField[] {
 		case 'timed':
 		case 'stretch':
 			return ['durationSeconds'];
-		case 'cardio': {
-			const fields: LogField[] = [];
-			if (
-				exercise.target.distanceKm != null ||
-				exercise.target.distanceKmMin != null ||
-				exercise.target.distanceKmMax != null
-			) {
-				fields.push('distanceKm');
-			}
-			fields.push('durationSeconds');
-			return fields;
-		}
 	}
 }
 
@@ -53,9 +50,20 @@ export function previousSetValue(
 ): number | undefined {
 	for (const session of sessionsNewestFirst) {
 		const match = findSet(session.sets, exerciseId, setIndex);
-		if (match?.completed && match[field] != null) {
-			return match[field];
+		if (match?.completed) {
+			const value = setFieldValue(match, field);
+			if (value != null) return value;
 		}
+	}
+	return undefined;
+}
+
+export function previousCardioValue(
+	sessionsNewestFirst: Session[],
+	field: 'distanceKm' | 'durationSeconds'
+): number | undefined {
+	for (const session of sessionsNewestFirst) {
+		if (session[field] != null) return session[field];
 	}
 	return undefined;
 }
@@ -63,14 +71,15 @@ export function previousSetValue(
 export function previousSessionsFor(
 	all: Session[],
 	planId: string,
-	dayId: string,
+	activityId: string,
 	weekStart: string,
+	dayId: string,
 	weekdayIndex = 0,
 	dayIndexById: Record<string, number> = {}
 ): Session[] {
 	return all
 		.filter((session) => {
-			if (session.planId !== planId) return false;
+			if (session.planId !== planId || session.activityId !== activityId) return false;
 			if (session.weekStart < weekStart) return true;
 			if (session.weekStart !== weekStart || session.dayId === dayId) return false;
 			const otherIndex = dayIndexById[session.dayId];
@@ -109,6 +118,6 @@ export function fieldLabel(field: LogField): string {
 	}
 }
 
-export function durationUsesMinutes(exercise: Exercise): boolean {
-	return exercise.kind === 'cardio';
+export function durationUsesMinutes(kind: 'cardio' | Exercise['kind']): boolean {
+	return kind === 'cardio';
 }

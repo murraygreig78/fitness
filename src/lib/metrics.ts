@@ -1,4 +1,4 @@
-import type { Exercise, LoggedSet, Plan, PlanDay, Session } from './schema';
+import type { Activity, Exercise, LoggedSet, Plan, PlanDay, Session } from './schema';
 import { setCount } from './schema';
 import { formatDuration, formatKg, formatNumber } from './format';
 
@@ -27,29 +27,28 @@ export function volumeForSet(set: LoggedSet): number {
 	return kg * reps;
 }
 
-export function metricsForDay(
-	day: PlanDay,
-	session: Session | undefined
-): DayMetrics {
-	const planned = day.exercises.reduce((sum, exercise) => sum + setCount(exercise), 0);
-	const sets = session?.sets ?? [];
-	const completed = sets.filter((set) => set.completed);
-	const cardioIds = new Set(
-		day.exercises.filter((exercise) => exercise.kind === 'cardio').map((exercise) => exercise.id)
-	);
+export function metricsForDay(day: PlanDay, sessions: Session[]): DayMetrics {
+	const planned = day.activities
+		.filter((activity) => activity.kind === 'strength' || activity.kind === 'mobility')
+		.reduce(
+			(sum, activity) =>
+				sum + activity.exercises.reduce((inner, exercise) => inner + setCount(exercise), 0),
+			0
+		);
+	const completed = sessions.flatMap((session) => session.sets.filter((set) => set.completed));
+	const cardio = sessions.filter((session) => session.kind === 'cardio');
+	const durations = sessions
+		.map((session) => sessionSeconds(session))
+		.filter((value): value is number => value != null);
 
 	return {
 		dayId: day.id,
 		setsCompleted: completed.length,
 		setsPlanned: planned,
 		volumeKg: completed.reduce((sum, set) => sum + volumeForSet(set), 0),
-		cardioSeconds: completed
-			.filter((set) => cardioIds.has(set.exerciseId))
-			.reduce((sum, set) => sum + (set.durationSeconds ?? 0), 0),
-		cardioKm: completed
-			.filter((set) => cardioIds.has(set.exerciseId))
-			.reduce((sum, set) => sum + (set.distanceKm ?? 0), 0),
-		sessionSeconds: sessionSeconds(session)
+		cardioSeconds: cardio.reduce((sum, session) => sum + (session.durationSeconds ?? 0), 0),
+		cardioKm: cardio.reduce((sum, session) => sum + (session.distanceKm ?? 0), 0),
+		sessionSeconds: durations.length ? durations.reduce((sum, value) => sum + value, 0) : null
 	};
 }
 
@@ -81,25 +80,6 @@ export function deltaText(current: number, previous: number, formatter: (value: 
 	return `${sign}${formatter(Math.abs(delta))}`;
 }
 
-export function formatMetricValue(
-	key: 'sets' | 'volume' | 'cardioTime' | 'cardioKm' | 'session',
-	value: number | null
-): string {
-	if (value == null) return '—';
-	switch (key) {
-		case 'sets':
-			return String(value);
-		case 'volume':
-			return `${formatKg(value)} kg`;
-		case 'cardioTime':
-			return formatDuration(value);
-		case 'cardioKm':
-			return `${formatNumber(value)} km`;
-		case 'session':
-			return formatDuration(value);
-	}
-}
-
 function repsPreview(reps: number, repsMin?: number): string {
 	return repsMin != null && repsMin !== reps ? `${repsMin}–${reps}` : String(reps);
 }
@@ -113,19 +93,24 @@ export function targetPreview(exercise: Exercise): string {
 		case 'timed':
 		case 'stretch':
 			return `${exercise.target.sets} × ${formatDuration(exercise.target.durationSeconds)}`;
-		case 'cardio': {
-			const target = exercise.target;
-			const parts: string[] = [];
-			if (target.sets && target.sets > 1) parts.push(`${target.sets} sets`);
-			if (target.distanceKmMin != null && target.distanceKmMax != null) {
-				parts.push(`${formatNumber(target.distanceKmMin)}–${formatNumber(target.distanceKmMax)} km`);
-			} else if (target.distanceKm) {
-				parts.push(`${formatNumber(target.distanceKm)} km`);
-			}
-			if (target.durationSeconds) parts.push(formatDuration(target.durationSeconds));
-			return parts.join(' · ') || 'Cardio';
-		}
 	}
+}
+
+export function activityPreview(activity: Activity): string {
+	if (activity.kind === 'cardio') {
+		const target = activity.target;
+		if (target.distanceKmMin != null && target.distanceKmMax != null) {
+			return `${formatNumber(target.distanceKmMin)}–${formatNumber(target.distanceKmMax)} km`;
+		}
+		if (target.distanceKm) return `${formatNumber(target.distanceKm)} km`;
+		if (target.durationSeconds) return formatDuration(target.durationSeconds);
+		return 'Cardio';
+	}
+	if (activity.kind === 'strength' || activity.kind === 'mobility') {
+		const count = activity.exercises.length;
+		return `${count} ${count === 1 ? 'exercise' : 'exercises'}`;
+	}
+	return activity.stats.map((stat) => stat.name).join(', ');
 }
 
 export function planHasDay(plan: Plan, dayId: string): PlanDay | undefined {

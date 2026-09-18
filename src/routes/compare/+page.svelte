@@ -7,8 +7,8 @@
 	const lastWeek = $derived(shiftWeek(fitness.weekStart, -1));
 	const rows = $derived(
 		(fitness.plan?.days ?? []).map((day) => {
-			const current = metricsForDay(day, fitness.sessionFor(day.id, fitness.weekStart));
-			const previous = metricsForDay(day, fitness.sessionFor(day.id, lastWeek));
+			const current = metricsForDay(day, fitness.sessionsForDay(day.id, fitness.weekStart));
+			const previous = metricsForDay(day, fitness.sessionsForDay(day.id, lastWeek));
 			return { day, current, previous };
 		})
 	);

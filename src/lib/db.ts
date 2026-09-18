@@ -18,10 +18,10 @@ class FitnessDB extends Dexie {
 	meta!: Table<AppMeta, string>;
 
 	constructor() {
-		super('fitness-local');
+		super('fitness-local-v2');
 		this.version(1).stores({
 			plans: 'id',
-			sessions: 'id, weekStart, dayId, planId',
+			sessions: 'id, weekStart, dayId, activityId, planId, kind',
 			meta: 'id'
 		});
 	}

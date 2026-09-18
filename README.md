@@ -1,44 +1,38 @@
 # Fitness
 
-A local-first weekly training log. Import a JSON plan, record sets on your phone, and compare this week with the last one. There is no server and no account: the plan lives in git, and session history stays in the browser.
+A local-first weekly training log. Import a JSON plan, record activities on your phone, and compare this week with the last one. There is no server and no account: the plan lives in git, and session history stays in the browser.
 
-The bundled programme is the current home week:
+A **day** is a list of **activities**. Activity kinds:
 
-- Every day: 3km walk (log distance and time)
-- Monday: back and shoulders
-- Tuesday / Thursday: mobility stretching (30s holds)
-- Wednesday: chest and arms
-- Friday: legs and abs, with a lying-leg-raise / front-plank superset
-- Saturday: 5–8km run (log distance and time)
-- Sunday: walk only
+- `cardio` — walk, run, row. Measured by distance and time.
+- `strength` — a session that contains nested **exercises** (sets, reps, kg).
+- `mobility` — a stretching session of nested exercises (timed holds).
+- `progress` — body stats over time (weight, height, waist, and a photo **link**, not the image file).
 
-Strength work is 3 × 6–8. Dumbbell kg starts at 12 as a placeholder — change it once, then use **Prev** on the keypad.
+The bundled week:
+
+- Every day: 3km walk (cardio)
+- Monday / Wednesday / Friday: strength
+- Tuesday / Thursday: mobility
+- Saturday: long run (second cardio)
+- Sunday: body stats (progress)
+
+Monday’s week card therefore reads **2 activities · cardio, strength**.
 
 ## Daily use
 
-1. Open **Plan** and load the sample week (or paste your own JSON).
-2. Train from **Week**. Tap a day, then tap kg / reps / time / distance to log with the number pad.
-3. Use **Prev** on the keypad to fill the last logged value for that set.
-4. Open **Compare** to see volume, sets, cardio, and session time against the previous week.
-
-The same weekly template repeats every Monday. Changing the JSON and re-importing updates the template; old logs stay in IndexedDB.
+1. Open **Plan** and load the sample week (version 2 JSON).
+2. From **Week**, open a day, then open an activity to log it.
+3. Use **Prev** on the keypad to fill the last logged value.
+4. **Compare** weeks. **Progress** lists body stats over time.
 
 ## Plan files
 
-Canonical example: [`plans/weekly.json`](plans/weekly.json). The same file is served from [`static/plans/weekly.json`](static/plans/weekly.json) so the app can load it in the browser.
-
-A plan is a repeating week of days. Each exercise has a `kind`:
-
-- `weighted` — sets, reps (`repsMin`–`reps` for a range), kg, rest
-- `bodyweight` — sets, reps, rest
-- `timed` / `stretch` — sets, duration in seconds, rest
-- `cardio` — distance and/or duration; log time even when the target is distance
-
-Use `supersetId` on two or more exercises to alternate them. Rest on the last exercise in the pair (Friday abs uses 2 minutes).
+Canonical example: [`plans/weekly.json`](plans/weekly.json) (`version: 2`). Strength and mobility nest `exercises`. Cardio has a `target` with distance/time. Progress lists `stats` with units.
 
 ## Logs
 
-Sessions are stored in IndexedDB. Export a JSON backup from **Plan** if you change browsers. Do not commit log backups.
+Sessions are stored in IndexedDB, one per activity. Export a JSON backup from **Plan** if you change browsers. Do not commit log backups. Re-import the sample week after this schema change.
 
 ## Develop
 
@@ -55,13 +49,9 @@ npm run preview
 
 ## Deploy (Cloudflare Pages)
 
-Zero server cost. Connect the GitHub repo to Cloudflare Pages:
-
 - Build command: `npm run build`
 - Output directory: `build`
 - Node version: `22` or later
-
-[`static/_redirects`](static/_redirects) sends unknown routes to `index.html` so `/session/...` works as a static SPA. The build also writes `404.html` as an SPA fallback for GitHub Pages.
 
 ## Stack
 
