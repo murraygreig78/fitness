@@ -1,0 +1,946 @@
+{
+	"version": 1,
+	"id": "home-dumbbell-week",
+	"name": "Home dumbbell week",
+	"notes": "Daily 3km walk. Strength Mon/Wed/Fri. Mobility Tue/Thu. Long run Saturday. Update kg to your dumbbells.",
+	"days": [
+		{
+			"id": "mon-back-shoulders",
+			"weekday": "monday",
+			"name": "Walk, back and shoulders",
+			"estimatedMinutes": 50,
+			"exercises": [
+				{
+					"id": "walk-3k",
+					"name": "3km walk",
+					"kind": "cardio",
+					"primaryMuscles": [
+						"cardio"
+					],
+					"instructions": "Easy daily walk. Log the distance and how long it took.",
+					"target": {
+						"distanceKm": 3
+					}
+				},
+				{
+					"id": "db-deadlift",
+					"name": "Dumbbell deadlift",
+					"kind": "weighted",
+					"primaryMuscles": [
+						"back",
+						"glutes",
+						"hamstrings"
+					],
+					"restSeconds": 90,
+					"target": {
+						"sets": 3,
+						"reps": 8,
+						"repsMin": 6,
+						"kg": 12
+					},
+					"notes": "Use the dumbbells you actually lift; 12kg is only a starting placeholder.",
+					"videoUrl": "https://www.youtube.com/watch?v=lJ3Qwaes88I",
+					"instructions": "Hinge, bar-path close, stand tall without shrugging."
+				},
+				{
+					"id": "db-bent-over-row",
+					"name": "Dumbbell bent-over row",
+					"kind": "weighted",
+					"primaryMuscles": [
+						"back",
+						"lats"
+					],
+					"restSeconds": 90,
+					"target": {
+						"sets": 3,
+						"reps": 8,
+						"repsMin": 6,
+						"kg": 12
+					},
+					"notes": "Use the dumbbells you actually lift; 12kg is only a starting placeholder.",
+					"videoUrl": "https://www.youtube.com/watch?v=pYCOY8gZ-8k",
+					"instructions": "Torso still. Pull elbows toward the hips."
+				},
+				{
+					"id": "db-shoulder-press",
+					"name": "Dumbbell standing shoulder press",
+					"kind": "weighted",
+					"primaryMuscles": [
+						"shoulders",
+						"triceps"
+					],
+					"restSeconds": 90,
+					"target": {
+						"sets": 3,
+						"reps": 8,
+						"repsMin": 6,
+						"kg": 12
+					},
+					"notes": "Use the dumbbells you actually lift; 12kg is only a starting placeholder.",
+					"videoUrl": "https://www.youtube.com/watch?v=qEwKCR5JCog",
+					"instructions": "Brace, press up, do not over-arch the lower back."
+				},
+				{
+					"id": "db-lateral-raise",
+					"name": "Dumbbell lateral raise",
+					"kind": "weighted",
+					"primaryMuscles": [
+						"shoulders"
+					],
+					"restSeconds": 90,
+					"target": {
+						"sets": 3,
+						"reps": 8,
+						"repsMin": 6,
+						"kg": 12
+					},
+					"notes": "Use the dumbbells you actually lift; 12kg is only a starting placeholder.",
+					"videoUrl": "https://www.youtube.com/watch?v=3VcKaXpKEUg",
+					"instructions": "Soft elbows, raise to just below shoulder height."
+				}
+			]
+		},
+		{
+			"id": "tue-mobility",
+			"weekday": "tuesday",
+			"name": "Walk and mobility",
+			"estimatedMinutes": 40,
+			"exercises": [
+				{
+					"id": "walk-3k",
+					"name": "3km walk",
+					"kind": "cardio",
+					"primaryMuscles": [
+						"cardio"
+					],
+					"instructions": "Easy daily walk. Log the distance and how long it took.",
+					"target": {
+						"distanceKm": 3
+					}
+				},
+				{
+					"id": "upward-salute",
+					"name": "Upward salute",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				},
+				{
+					"id": "toe-touch",
+					"name": "Toe touch",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				},
+				{
+					"id": "chest-opener",
+					"name": "Chest opener",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				},
+				{
+					"id": "wide-leg-bend",
+					"name": "Wide-leg bend",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				},
+				{
+					"id": "side-lunge",
+					"name": "Side lunge",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				},
+				{
+					"id": "lunge-stretch",
+					"name": "Lunge",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				},
+				{
+					"id": "upward-dog",
+					"name": "Upward dog",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				},
+				{
+					"id": "childs-pose",
+					"name": "Child's pose",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				},
+				{
+					"id": "downward-dog",
+					"name": "Downward dog",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				},
+				{
+					"id": "thunderbolt",
+					"name": "Thunderbolt",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				},
+				{
+					"id": "pigeon",
+					"name": "Pigeon",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				},
+				{
+					"id": "seated-twist",
+					"name": "Seated twist",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				},
+				{
+					"id": "knees-to-chest",
+					"name": "Knees to chest",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				},
+				{
+					"id": "lying-figure-four",
+					"name": "Lying figure four",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				},
+				{
+					"id": "lying-hamstring",
+					"name": "Lying hamstring",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				},
+				{
+					"id": "reclined-butterfly",
+					"name": "Reclined butterfly",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				},
+				{
+					"id": "spinal-twist",
+					"name": "Spinal twist",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				},
+				{
+					"id": "quad-stretch",
+					"name": "Quad stretch",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				},
+				{
+					"id": "butterfly",
+					"name": "Butterfly",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				},
+				{
+					"id": "seated-fold",
+					"name": "Seated fold",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				},
+				{
+					"id": "plow",
+					"name": "Plow",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				}
+			]
+		},
+		{
+			"id": "wed-chest-arms",
+			"weekday": "wednesday",
+			"name": "Walk, chest and arms",
+			"estimatedMinutes": 50,
+			"exercises": [
+				{
+					"id": "walk-3k",
+					"name": "3km walk",
+					"kind": "cardio",
+					"primaryMuscles": [
+						"cardio"
+					],
+					"instructions": "Easy daily walk. Log the distance and how long it took.",
+					"target": {
+						"distanceKm": 3
+					}
+				},
+				{
+					"id": "db-floor-press",
+					"name": "Dumbbell floor press",
+					"kind": "weighted",
+					"primaryMuscles": [
+						"chest",
+						"triceps"
+					],
+					"restSeconds": 90,
+					"target": {
+						"sets": 3,
+						"reps": 8,
+						"repsMin": 6,
+						"kg": 12
+					},
+					"notes": "Use the dumbbells you actually lift; 12kg is only a starting placeholder.",
+					"videoUrl": "https://www.youtube.com/watch?v=uUGDRwge4F8",
+					"instructions": "Upper arms touch the floor, then press. Keep ribs down."
+				},
+				{
+					"id": "db-floor-fly",
+					"name": "Dumbbell floor fly",
+					"kind": "weighted",
+					"primaryMuscles": [
+						"chest"
+					],
+					"restSeconds": 90,
+					"target": {
+						"sets": 3,
+						"reps": 8,
+						"repsMin": 6,
+						"kg": 12
+					},
+					"notes": "Use the dumbbells you actually lift; 12kg is only a starting placeholder.",
+					"instructions": "Wide arc, slight elbow bend. Stop when upper arms reach the floor."
+				},
+				{
+					"id": "db-curl",
+					"name": "Dumbbell curl",
+					"kind": "weighted",
+					"primaryMuscles": [
+						"biceps"
+					],
+					"restSeconds": 90,
+					"target": {
+						"sets": 3,
+						"reps": 8,
+						"repsMin": 6,
+						"kg": 12
+					},
+					"notes": "Use the dumbbells you actually lift; 12kg is only a starting placeholder.",
+					"videoUrl": "https://www.youtube.com/watch?v=ykJmrZ5v0Oo",
+					"instructions": "Elbows by the ribs. Lower under control."
+				},
+				{
+					"id": "db-tricep-extension",
+					"name": "Dumbbell standing tricep extension",
+					"kind": "weighted",
+					"primaryMuscles": [
+						"triceps"
+					],
+					"restSeconds": 90,
+					"target": {
+						"sets": 3,
+						"reps": 8,
+						"repsMin": 6,
+						"kg": 12
+					},
+					"notes": "Use the dumbbells you actually lift; 12kg is only a starting placeholder.",
+					"videoUrl": "https://www.youtube.com/watch?v=_gsUck-7M74",
+					"instructions": "Elbows high and still. Lower behind the head, then extend."
+				}
+			]
+		},
+		{
+			"id": "thu-mobility",
+			"weekday": "thursday",
+			"name": "Walk and mobility",
+			"estimatedMinutes": 40,
+			"exercises": [
+				{
+					"id": "walk-3k",
+					"name": "3km walk",
+					"kind": "cardio",
+					"primaryMuscles": [
+						"cardio"
+					],
+					"instructions": "Easy daily walk. Log the distance and how long it took.",
+					"target": {
+						"distanceKm": 3
+					}
+				},
+				{
+					"id": "upward-salute",
+					"name": "Upward salute",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				},
+				{
+					"id": "toe-touch",
+					"name": "Toe touch",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				},
+				{
+					"id": "chest-opener",
+					"name": "Chest opener",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				},
+				{
+					"id": "wide-leg-bend",
+					"name": "Wide-leg bend",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				},
+				{
+					"id": "side-lunge",
+					"name": "Side lunge",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				},
+				{
+					"id": "lunge-stretch",
+					"name": "Lunge",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				},
+				{
+					"id": "upward-dog",
+					"name": "Upward dog",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				},
+				{
+					"id": "childs-pose",
+					"name": "Child's pose",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				},
+				{
+					"id": "downward-dog",
+					"name": "Downward dog",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				},
+				{
+					"id": "thunderbolt",
+					"name": "Thunderbolt",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				},
+				{
+					"id": "pigeon",
+					"name": "Pigeon",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				},
+				{
+					"id": "seated-twist",
+					"name": "Seated twist",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				},
+				{
+					"id": "knees-to-chest",
+					"name": "Knees to chest",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				},
+				{
+					"id": "lying-figure-four",
+					"name": "Lying figure four",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				},
+				{
+					"id": "lying-hamstring",
+					"name": "Lying hamstring",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				},
+				{
+					"id": "reclined-butterfly",
+					"name": "Reclined butterfly",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				},
+				{
+					"id": "spinal-twist",
+					"name": "Spinal twist",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				},
+				{
+					"id": "quad-stretch",
+					"name": "Quad stretch",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				},
+				{
+					"id": "butterfly",
+					"name": "Butterfly",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				},
+				{
+					"id": "seated-fold",
+					"name": "Seated fold",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				},
+				{
+					"id": "plow",
+					"name": "Plow",
+					"kind": "stretch",
+					"primaryMuscles": [
+						"mobility"
+					],
+					"restSeconds": 5,
+					"target": {
+						"sets": 1,
+						"durationSeconds": 30
+					}
+				}
+			]
+		},
+		{
+			"id": "fri-legs-abs",
+			"weekday": "friday",
+			"name": "Walk, legs and abs",
+			"estimatedMinutes": 55,
+			"exercises": [
+				{
+					"id": "walk-3k",
+					"name": "3km walk",
+					"kind": "cardio",
+					"primaryMuscles": [
+						"cardio"
+					],
+					"instructions": "Easy daily walk. Log the distance and how long it took.",
+					"target": {
+						"distanceKm": 3
+					}
+				},
+				{
+					"id": "db-goblet-squat",
+					"name": "Dumbbell goblet squat",
+					"kind": "weighted",
+					"primaryMuscles": [
+						"quads",
+						"glutes"
+					],
+					"restSeconds": 90,
+					"target": {
+						"sets": 3,
+						"reps": 8,
+						"repsMin": 6,
+						"kg": 12
+					},
+					"notes": "Use the dumbbells you actually lift; 12kg is only a starting placeholder.",
+					"videoUrl": "https://www.youtube.com/watch?v=MeIiIdhvXT4",
+					"instructions": "Hold the bell at the chest. Sit between the hips."
+				},
+				{
+					"id": "db-lunge",
+					"name": "Dumbbell lunge",
+					"kind": "weighted",
+					"primaryMuscles": [
+						"quads",
+						"glutes"
+					],
+					"restSeconds": 90,
+					"target": {
+						"sets": 3,
+						"reps": 8,
+						"repsMin": 6,
+						"kg": 12
+					},
+					"notes": "Use the dumbbells you actually lift; 12kg is only a starting placeholder.",
+					"videoUrl": "https://www.youtube.com/watch?v=L8fvypGrgl4",
+					"instructions": "Long step, back knee close to the floor, torso tall."
+				},
+				{
+					"id": "db-rdl",
+					"name": "Dumbbell Romanian deadlift",
+					"kind": "weighted",
+					"primaryMuscles": [
+						"hamstrings",
+						"glutes"
+					],
+					"restSeconds": 90,
+					"target": {
+						"sets": 3,
+						"reps": 8,
+						"repsMin": 6,
+						"kg": 12
+					},
+					"notes": "Use the dumbbells you actually lift; 12kg is only a starting placeholder.",
+					"videoUrl": "https://www.youtube.com/watch?v=jEy_czb3RKA",
+					"instructions": "Soft knees, hinge, dumbbells close to the legs."
+				},
+				{
+					"id": "lying-leg-raise",
+					"name": "Lying leg raise",
+					"kind": "bodyweight",
+					"primaryMuscles": [
+						"core"
+					],
+					"supersetId": "abs-plank",
+					"restSeconds": 0,
+					"instructions": "Lower the legs without the lower back peeling up. Alternate with the plank.",
+					"notes": "Superset with front plank. No rest until both sets are done, then rest 2 minutes.",
+					"target": {
+						"sets": 3,
+						"reps": 8,
+						"repsMin": 6
+					}
+				},
+				{
+					"id": "front-plank",
+					"name": "Front plank",
+					"kind": "timed",
+					"primaryMuscles": [
+						"core"
+					],
+					"supersetId": "abs-plank",
+					"restSeconds": 120,
+					"videoUrl": "https://www.youtube.com/watch?v=ASdvN_XEl_c",
+					"instructions": "Ribs down, glutes on. Alternate with lying leg raises, then rest 2 minutes.",
+					"target": {
+						"sets": 3,
+						"durationSeconds": 30
+					}
+				}
+			]
+		},
+		{
+			"id": "sat-long-run",
+			"weekday": "saturday",
+			"name": "Walk and long run",
+			"estimatedMinutes": 70,
+			"exercises": [
+				{
+					"id": "walk-3k",
+					"name": "3km walk",
+					"kind": "cardio",
+					"primaryMuscles": [
+						"cardio"
+					],
+					"instructions": "Easy daily walk. Log the distance and how long it took.",
+					"target": {
+						"distanceKm": 3
+					}
+				},
+				{
+					"id": "long-run",
+					"name": "Long run",
+					"kind": "cardio",
+					"primaryMuscles": [
+						"cardio"
+					],
+					"instructions": "5–8km. Log the distance you actually ran and the time it took.",
+					"target": {
+						"distanceKm": 6,
+						"distanceKmMin": 5,
+						"distanceKmMax": 8
+					}
+				}
+			]
+		},
+		{
+			"id": "sun-walk",
+			"weekday": "sunday",
+			"name": "Walk",
+			"estimatedMinutes": 35,
+			"exercises": [
+				{
+					"id": "walk-3k",
+					"name": "3km walk",
+					"kind": "cardio",
+					"primaryMuscles": [
+						"cardio"
+					],
+					"instructions": "Easy daily walk. Log the distance and how long it took.",
+					"target": {
+						"distanceKm": 3
+					}
+				}
+			]
+		}
+	]
+}
