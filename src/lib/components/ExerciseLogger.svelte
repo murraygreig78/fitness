@@ -14,6 +14,7 @@
 		type LogField
 	} from '$lib/previous';
 	import {
+		displayedSetCount,
 		groupExercises,
 		setCount,
 		type Exercise,
@@ -26,12 +27,14 @@
 		session,
 		exercises,
 		previous,
-		onSave
+		onSave,
+		allowExtraSets = false
 	}: {
 		session: Session;
 		exercises: Exercise[];
 		previous: Session[];
 		onSave: (session: Session) => Promise<void>;
+		allowExtraSets?: boolean;
 	} = $props();
 
 	let tick = $state(Date.now());
@@ -42,6 +45,7 @@
 		setIndex: number;
 		field: LogField;
 	} | null>(null);
+	let extraByExercise = $state<Record<string, number>>({});
 
 	const interval = setInterval(() => {
 		tick = Date.now();
@@ -136,6 +140,50 @@
 			targetFieldValue(exercise, field)
 		);
 	}
+
+	function lastSet(exercise: Exercise): LoggedSet | undefined {
+		return session.sets
+			.filter((set) => set.exerciseId === exercise.id)
+			.sort((a, b) => a.setIndex - b.setIndex)
+			.at(-1);
+	}
+
+	function rowCount(exercise: Exercise): number {
+		return Math.max(
+			setCount(exercise) + (extraByExercise[exercise.id] ?? 0),
+			displayedSetCount(exercise, session.sets)
+		);
+	}
+
+	function setIndexes(exercise: Exercise): number[] {
+		return Array.from({ length: rowCount(exercise) }, (_, index) => index);
+	}
+
+	function addSet(exercise: Exercise) {
+		const nextIndex = rowCount(exercise);
+		extraByExercise = {
+			...extraByExercise,
+			[exercise.id]: (extraByExercise[exercise.id] ?? 0) + 1
+		};
+		const prior = lastSet(exercise);
+		const extra: LoggedSet = {
+			exerciseId: exercise.id,
+			setIndex: nextIndex,
+			completed: false,
+			kg: prior?.kg ?? targetFieldValue(exercise, 'kg'),
+			reps: prior?.reps ?? targetFieldValue(exercise, 'reps'),
+			durationSeconds: prior?.durationSeconds ?? targetFieldValue(exercise, 'durationSeconds')
+		};
+		void onSave({
+			...session,
+			startedAt: session.startedAt ?? new Date().toISOString(),
+			skipped: false,
+			endedAt: null,
+			sets: findSet(session.sets, exercise.id, nextIndex)
+				? session.sets
+				: [...session.sets, extra]
+		});
+	}
 </script>
 
 {#if restRemaining > 0}
@@ -184,12 +232,13 @@
 					<p class="mt-2 text-sm leading-6 text-zinc-400">{exercise.instructions}</p>
 				{/if}
 				<ol class="mt-3 space-y-2">
-					{#each Array.from({ length: setCount(exercise) }, (_, index) => index) as setIndex (setIndex)}
+					{#each setIndexes(exercise) as setIndex (setIndex)}
 						{@const logged = findSet(session.sets, exercise.id, setIndex)}
+						{@const extra = setIndex >= setCount(exercise)}
 						<li class="rounded-2xl bg-zinc-950/70 p-3">
 							<div class="mb-2 flex items-center justify-between">
 								<p class="text-xs font-semibold tracking-[0.16em] text-zinc-500 uppercase">
-									Set {setIndex + 1}
+									Set {setIndex + 1}{extra ? ' · extra' : ''}
 								</p>
 								<button
 									type="button"
@@ -232,6 +281,15 @@
 						</li>
 					{/each}
 				</ol>
+				{#if allowExtraSets}
+					<button
+						type="button"
+						class="mt-3 w-full rounded-2xl border border-dashed border-zinc-600 py-3 text-sm font-semibold text-zinc-200"
+						onclick={() => addSet(exercise)}
+					>
+						Add set
+					</button>
+				{/if}
 			</article>
 		{/each}
 	{/each}

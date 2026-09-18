@@ -19,6 +19,7 @@
 		type Session
 	} from '$lib/schema';
 	import { dateForWeekday, formatDayHeading, indexFromWeekday, mondayOf } from '$lib/week';
+	import { untrack } from 'svelte';
 
 	const dayId = $derived(page.params.dayId ?? '');
 	const activityId = $derived(page.params.activityId ?? '');
@@ -90,7 +91,12 @@
 	$effect(() => {
 		if (!fitness.ready || !day || !activity) return;
 		if (activity.kind === 'strength' || activity.kind === 'mobility' || activity.kind === 'progress') {
-			void fitness.ensureSession(day, activity, weekStart);
+			const currentDay = day;
+			const currentActivity = activity;
+			const currentWeek = weekStart;
+			untrack(() => {
+				void fitness.ensureSession(currentDay, currentActivity, currentWeek);
+			});
 		}
 	});
 </script>
@@ -203,6 +209,7 @@
 			exercises={exercisesInActivity(activity)}
 			{previous}
 			onSave={save}
+			allowExtraSets={activity.kind === 'strength'}
 		/>
 	{/if}
 

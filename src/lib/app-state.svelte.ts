@@ -2,6 +2,7 @@ import { browser } from '$app/environment';
 import { db } from './db';
 import {
 	createSession,
+	mergeLoggedSets,
 	parseLogsBackup,
 	parsePlanJson,
 	type Activity,
@@ -94,8 +95,12 @@ class FitnessApp {
 	}
 
 	async saveSession(session: Session) {
-		await db.sessions.put(session);
-		this.sessions = [...this.sessions.filter((item) => item.id !== session.id), session];
+		const current = this.sessionMap.get(session.id);
+		const toSave = current
+			? { ...current, ...session, sets: mergeLoggedSets(current.sets, session.sets) }
+			: session;
+		await db.sessions.put(toSave);
+		this.sessions = [...this.sessions.filter((item) => item.id !== toSave.id), toSave];
 	}
 
 	exportBackup(): LogsBackup {

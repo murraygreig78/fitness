@@ -213,6 +213,25 @@ export function setCount(exercise: Exercise): number {
 	return exercise.target.sets;
 }
 
+export function loggedSetCount(sets: LoggedSet[], exerciseId: string): number {
+	const indexes = sets.filter((set) => set.exerciseId === exerciseId).map((set) => set.setIndex);
+	if (!indexes.length) return 0;
+	return Math.max(...indexes) + 1;
+}
+
+export function displayedSetCount(exercise: Exercise, sets: LoggedSet[]): number {
+	return Math.max(setCount(exercise), loggedSetCount(sets, exercise.id));
+}
+
+export function mergeLoggedSets(current: LoggedSet[], incoming: LoggedSet[]): LoggedSet[] {
+	const map = new Map<string, LoggedSet>();
+	for (const set of current) map.set(`${set.exerciseId}:${set.setIndex}`, set);
+	for (const set of incoming) map.set(`${set.exerciseId}:${set.setIndex}`, set);
+	return [...map.values()].sort(
+		(a, b) => a.exerciseId.localeCompare(b.exerciseId) || a.setIndex - b.setIndex
+	);
+}
+
 export function sessionId(weekStart: string, dayId: string, activityId: string): string {
 	return `${weekStart}::${dayId}::${activityId}`;
 }
