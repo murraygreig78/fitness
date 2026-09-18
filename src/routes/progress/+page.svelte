@@ -21,15 +21,22 @@
 	);
 
 	function statName(day: PlanDay | undefined, statId: string): string {
-		const activity = day?.activities.find((item) => item.kind === 'progress');
-		if (activity?.kind !== 'progress') return statId;
-		return activity.stats.find((stat) => stat.id === statId)?.name ?? statId;
+		const planned = day?.activities.find((item) => item.kind === 'progress');
+		if (planned?.kind === 'progress') {
+			const named = planned.stats.find((stat) => stat.id === statId)?.name;
+			if (named) return named;
+		}
+		for (const custom of fitness.customActivities) {
+			if (custom.activity.kind !== 'progress') continue;
+			const named = custom.activity.stats.find((stat) => stat.id === statId)?.name;
+			if (named) return named;
+		}
+		return statId;
 	}
 </script>
 
 <header class="mb-6">
-	<p class="text-xs font-semibold tracking-[0.22em] text-lime-300 uppercase">Progress</p>
-	<h1 class="text-2xl font-bold">Body stats</h1>
+	<h1 class="text-2xl font-semibold">Body stats</h1>
 	<p class="mt-1 text-sm leading-6 text-zinc-400">
 		Weight, height, and other measures over time. Photos are stored as links, not image files.
 	</p>

@@ -7,7 +7,7 @@
 		fieldsForExercise,
 		fieldLabel,
 		findSet,
-		previousSetValue,
+		lastUsedFieldValue,
 		setFieldValue,
 		stepForField,
 		targetFieldValue,
@@ -16,7 +16,9 @@
 	import {
 		displayedSetCount,
 		groupExercises,
+		restSecondsFor,
 		setCount,
+		type Activity,
 		type Exercise,
 		type LoggedSet,
 		type Session
@@ -25,12 +27,14 @@
 
 	let {
 		session,
+		activity,
 		exercises,
 		previous,
 		onSave,
 		allowExtraSets = false
 	}: {
 		session: Session;
+		activity: Activity;
 		exercises: Exercise[];
 		previous: Session[];
 		onSave: (session: Session) => Promise<void>;
@@ -83,14 +87,26 @@
 		});
 	}
 
+	function startRest(exercise: Exercise) {
+		const seconds = restSecondsFor(exercise, activity);
+		if (seconds > 0) restUntil = Date.now() + seconds * 1000;
+	}
+
+	function isCompletingField(exercise: Exercise, field: LogField) {
+		const fields = fieldsForExercise(exercise);
+		return fields[fields.length - 1] === field;
+	}
+
 	async function saveField(next: number | undefined) {
-		if (!editor) return;
-		const { exercise, setIndex, field } = editor;
+		const current = editor;
+		if (!current) return;
+		const { exercise, setIndex, field } = current;
 		const existing = findSet(session.sets, exercise.id, setIndex);
+		const completing = next != null && isCompletingField(exercise, field);
 		const patch: LoggedSet = {
 			exerciseId: exercise.id,
 			setIndex,
-			completed: existing?.completed ?? false,
+			completed: completing ? true : (existing?.completed ?? false),
 			kg: existing?.kg ?? targetFieldValue(exercise, 'kg'),
 			reps: existing?.reps ?? targetFieldValue(exercise, 'reps'),
 			durationSeconds: existing?.durationSeconds ?? targetFieldValue(exercise, 'durationSeconds'),
@@ -98,11 +114,18 @@
 		};
 		const sets = existing
 			? session.sets.map((set) =>
-					set.exerciseId === exercise.id && set.setIndex === setIndex ? { ...set, [field]: next } : set
+					set.exerciseId === exercise.id && set.setIndex === setIndex ? { ...set, ...patch } : set
 				)
 			: [...session.sets, patch];
-		await onSave({ ...session, sets });
 		editor = null;
+		if (completing) startRest(exercise);
+		await onSave({
+			...session,
+			startedAt: session.startedAt ?? new Date().toISOString(),
+			skipped: false,
+			endedAt: null,
+			sets
+		});
 	}
 
 	async function toggleComplete(exercise: Exercise, setIndex: number) {
@@ -121,6 +144,8 @@
 					set.exerciseId === exercise.id && set.setIndex === setIndex ? patch : set
 				)
 			: [...session.sets, patch];
+		if (completed) startRest(exercise);
+		else restUntil = null;
 		await onSave({
 			...session,
 			startedAt: session.startedAt ?? new Date().toISOString(),
@@ -128,17 +153,10 @@
 			endedAt: null,
 			sets
 		});
-		if (completed && exercise.restSeconds) {
-			restUntil = Date.now() + exercise.restSeconds * 1000;
-		}
 	}
 
-	function previousFor(exercise: Exercise, setIndex: number, field: LogField) {
-		return (
-			previousSetValue(previous, exercise.id, setIndex, field) ??
-			previousSetValue(previous, exercise.id, Math.max(0, setIndex - 1), field) ??
-			targetFieldValue(exercise, field)
-		);
+	function lastFor(exercise: Exercise, setIndex: number, field: LogField) {
+		return lastUsedFieldValue(session.sets, previous, exercise.id, setIndex, field);
 	}
 
 	function lastSet(exercise: Exercise): LoggedSet | undefined {
@@ -267,14 +285,6 @@
 												logged ? setFieldValue(logged, field) : undefined
 											)}
 										</p>
-										<p class="text-[11px] text-zinc-500">
-											Prev {displayField(
-												exercise,
-												field,
-												previousSetValue(previous, exercise.id, setIndex, field) ??
-													previousSetValue(previous, exercise.id, Math.max(0, setIndex - 1), field)
-											)}
-										</p>
 									</button>
 								{/each}
 							</div>
@@ -301,8 +311,7 @@
 		label={`${editor.exercise.name} · set ${editor.setIndex + 1}`}
 		unit={fieldLabel(editor.field)}
 		value={currentSet ? setFieldValue(currentSet, editor.field) : undefined}
-		previous={previousFor(editor.exercise, editor.setIndex, editor.field)}
-		target={targetFieldValue(editor.exercise, editor.field)}
+		last={lastFor(editor.exercise, editor.setIndex, editor.field)}
 		step={stepForField(editor.field)}
 		allowDecimal={editor.field === 'kg'}
 		onCommit={saveField}

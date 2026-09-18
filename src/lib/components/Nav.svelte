@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import Icon from '$lib/components/Icon.svelte';
+	import type { IconName } from '$lib/components/Icon.svelte';
 
-	const items = [
-		{ href: '/', label: 'Week' },
-		{ href: '/compare', label: 'Compare' },
-		{ href: '/progress', label: 'Progress' },
-		{ href: '/plan', label: 'Plan' }
+	const items: { href: string; label: string; icon: IconName }[] = [
+		{ href: '/', label: 'Week', icon: 'calendar' },
+		{ href: '/progress', label: 'Progress', icon: 'stats' },
+		{ href: '/plan', label: 'Plan', icon: 'plan' }
 	];
 
 	function active(href: string): boolean {
@@ -20,18 +21,17 @@
 	class="fixed inset-x-0 bottom-0 z-30 border-t border-zinc-800 bg-zinc-950/95 backdrop-blur-md"
 	style="padding-bottom: env(safe-area-inset-bottom)"
 >
-	<ul class="mx-auto grid max-w-lg grid-cols-4">
+	<ul class="mx-auto grid max-w-lg grid-cols-3">
 		{#each items as item (item.href)}
 			<li>
 				<a
 					href={item.href}
-					class="flex min-h-14 items-center justify-center text-sm font-semibold tracking-wide {active(
-						item.href
-					)
+					aria-label={item.label}
+					class="flex min-h-14 items-center justify-center {active(item.href)
 						? 'text-lime-300'
-						: 'text-zinc-400'}"
+						: 'text-zinc-500'}"
 				>
-					{item.label}
+					<Icon name={item.icon} class="h-6 w-6" />
 				</a>
 			</li>
 		{/each}

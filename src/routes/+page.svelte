@@ -1,118 +1,182 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import { kindIconName, kindTextClass, statusIconName } from '$lib/activity-style';
 	import { fitness } from '$lib/app-state.svelte';
-	import { dayStatus, summarizeActivities, weekdays, type PlanDay } from '$lib/schema';
+	import Icon from '$lib/components/Icon.svelte';
+	import KindSheet from '$lib/components/KindSheet.svelte';
+	import WeekCalendar from '$lib/components/WeekCalendar.svelte';
+	import { activityPreview } from '$lib/metrics';
 	import {
+		createAdhocActivity,
+		dayIdForWeekday,
+		sessionStatus,
+		uniqueActivityKinds,
+		type Activity,
+		type ActivityKind,
+		type Weekday
+	} from '$lib/schema';
+	import {
+		calendarDays,
 		dateForWeekday,
-		formatDayHeading,
-		formatWeekRange,
+		formatDayLong,
+		formatMonthYear,
+		isPlanWeekday,
 		isSameWeek,
 		isToday,
-		shiftWeek
+		normalizeWeekStart,
+		shiftWeek,
+		toDateOnly,
+		weekdayFromDate
 	} from '$lib/week';
 
 	const weekFromUrl = $derived(page.url.searchParams.get('week'));
+	const dayFromUrl = $derived(page.url.searchParams.get('day'));
 
 	$effect(() => {
 		if (weekFromUrl && /^\d{4}-\d{2}-\d{2}$/.test(weekFromUrl)) {
-			fitness.weekStart = weekFromUrl;
+			fitness.weekStart = normalizeWeekStart(weekFromUrl);
 		}
 	});
 
-	function dayFor(weekday: (typeof weekdays)[number]): PlanDay | undefined {
-		return fitness.plan?.days.find((day) => day.weekday === weekday);
+	let selected = $state<Weekday | null>(null);
+	let picking = $state(false);
+
+	const selectedWeekday = $derived.by(() => {
+		if (selected) return selected;
+		if (isPlanWeekday(dayFromUrl)) return dayFromUrl;
+		if (isSameWeek(fitness.weekStart)) return weekdayFromDate(toDateOnly(new Date()));
+		return 'sunday';
+	});
+
+	const selectedDate = $derived(dateForWeekday(fitness.weekStart, selectedWeekday));
+	const selectedDayId = $derived(dayIdForWeekday(fitness.plan, selectedWeekday));
+	const selectedActivities = $derived(
+		fitness.activitiesForWeekday(selectedWeekday, fitness.weekStart)
+	);
+
+	const kindsByWeekday = $derived.by(() => {
+		const map = {} as Record<Weekday, ActivityKind[]>;
+		for (const weekday of calendarDays) {
+			map[weekday] = uniqueActivityKinds(
+				fitness.activitiesForWeekday(weekday, fitness.weekStart)
+			);
+		}
+		return map;
+	});
+
+	function selectDay(weekday: Weekday) {
+		selected = weekday;
 	}
 
-	function statusLabel(weekday: (typeof weekdays)[number]): string {
-		const day = dayFor(weekday);
-		if (!day) return 'Rest';
-		const status = dayStatus(day, fitness.sessionsForDay(day.id));
-		if (status === 'done') return 'Done';
-		if (status === 'skipped') return 'Skipped';
-		if (status === 'in-progress') return 'In progress';
-		return 'Scheduled';
+	function activityHref(activity: Activity): string {
+		return `/session/${selectedDayId}/${activity.id}?week=${fitness.weekStart}`;
+	}
+
+	function statusFor(activity: Activity) {
+		return sessionStatus(fitness.sessionFor(selectedDayId, activity.id, fitness.weekStart));
+	}
+
+	async function startUnscheduled(kind: ActivityKind) {
+		if (!fitness.plan) {
+			await goto('/plan');
+			return;
+		}
+		const activity = createAdhocActivity(kind);
+		const record = await fitness.addCustomActivity(selectedWeekday, activity, fitness.weekStart);
+		picking = false;
+		await goto(`/session/${record.dayId}/${record.activity.id}?week=${fitness.weekStart}`);
 	}
 </script>
 
-<header class="mb-6 flex items-center justify-between gap-3">
-	<div>
-		<p class="text-xs font-semibold tracking-[0.22em] text-lime-300 uppercase">This week</p>
-		<h1 class="text-2xl font-bold">{formatWeekRange(fitness.weekStart)}</h1>
-	</div>
-	<div class="flex gap-2">
+<header class="mb-5 flex items-center justify-between gap-3">
+	<p class="text-lg font-semibold">{formatMonthYear(fitness.weekStart)}</p>
+	<div class="flex items-center gap-1">
 		<button
 			type="button"
-			class="rounded-full border border-zinc-700 px-3 py-2 text-sm"
+			class="rounded-full p-2 text-zinc-300"
+			aria-label="Previous week"
 			onclick={() => (fitness.weekStart = shiftWeek(fitness.weekStart, -1))}
 		>
-			Prev
+			<Icon name="chevronLeft" class="h-5 w-5" />
 		</button>
 		<button
 			type="button"
-			class="rounded-full border border-zinc-700 px-3 py-2 text-sm disabled:opacity-40"
+			class="rounded-full p-2 text-zinc-300 disabled:opacity-30"
+			aria-label="Next week"
 			disabled={isSameWeek(fitness.weekStart)}
 			onclick={() => (fitness.weekStart = shiftWeek(fitness.weekStart, 1))}
 		>
-			Next
+			<Icon name="chevronRight" class="h-5 w-5" />
 		</button>
 	</div>
 </header>
 
+<WeekCalendar
+	weekStart={fitness.weekStart}
+	selected={selectedWeekday}
+	{kindsByWeekday}
+	onSelect={selectDay}
+/>
+
 {#if !fitness.plan}
-	<section class="rounded-3xl border border-zinc-800 bg-zinc-900 p-5">
-		<h2 class="text-lg font-semibold">Import a weekly plan</h2>
-		<p class="mt-2 text-sm leading-6 text-zinc-400">
-			Load a JSON template once. Days contain activities — cardio, strength, mobility, or progress.
+	<section class="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
+		<p class="text-sm leading-6 text-zinc-400">
+			Load a weekly plan once. Scheduled work shows as colored dots; plus starts something extra.
 		</p>
 		<a
 			href="/plan"
-			class="mt-4 inline-flex rounded-full bg-lime-400 px-4 py-2 text-sm font-bold text-zinc-950"
+			class="mt-4 inline-flex rounded-full bg-lime-400 px-4 py-2 text-sm font-semibold text-zinc-950"
 		>
-			Open plan import
+			Open plan
 		</a>
 	</section>
 {:else}
-	<p class="mb-4 text-sm text-zinc-400">{fitness.plan.name}</p>
-	<ol class="space-y-3">
-		{#each weekdays as weekday (weekday)}
-			{@const day = dayFor(weekday)}
-			{@const dateValue = dateForWeekday(fitness.weekStart, weekday)}
-			<li>
-				{#if day}
+	<div class="mt-6 mb-4 flex items-center justify-between gap-3">
+		<div>
+			<p class="text-lg font-semibold">{formatDayLong(selectedDate)}</p>
+			{#if isToday(selectedDate)}
+				<p class="text-sm text-zinc-500">Today</p>
+			{/if}
+		</div>
+		<button
+			type="button"
+			class="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 text-zinc-950"
+			aria-label="Start unscheduled activity"
+			onclick={() => (picking = true)}
+		>
+			<Icon name="plus" class="h-5 w-5" />
+		</button>
+	</div>
+
+	{#if selectedActivities.length === 0}
+		<p class="text-sm leading-6 text-zinc-500">Nothing scheduled. Use plus to log something.</p>
+	{:else}
+		<ol class="space-y-2">
+			{#each selectedActivities as activity (activity.id)}
+				{@const status = statusFor(activity)}
+				<li>
 					<a
-						href="/session/{day.id}?week={fitness.weekStart}"
-						class="block rounded-3xl border p-4 {isToday(dateValue)
-							? 'border-lime-400 bg-zinc-900'
-							: 'border-zinc-800 bg-zinc-900/70'}"
+						href={activityHref(activity)}
+						class="flex items-center gap-3 rounded-2xl border border-zinc-800 bg-zinc-900/80 px-3 py-3"
 					>
-						<div class="flex items-start justify-between gap-3">
-							<div>
-								<p class="text-xs font-semibold tracking-[0.18em] text-zinc-500 uppercase">
-									{formatDayHeading(dateValue)}
-								</p>
-								<h2 class="mt-1 text-lg font-semibold">{day.name}</h2>
-								<p class="mt-1 text-sm text-zinc-400">{summarizeActivities(day.activities)}</p>
-							</div>
-							<span
-								class="rounded-full px-3 py-1 text-xs font-semibold {statusLabel(weekday) === 'Done'
-									? 'bg-lime-400/15 text-lime-300'
-									: statusLabel(weekday) === 'In progress'
-										? 'bg-orange-400/15 text-orange-300'
-										: 'bg-zinc-800 text-zinc-300'}"
-							>
-								{statusLabel(weekday)}
-							</span>
-						</div>
+						<span class="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-950 {kindTextClass(activity.kind)}">
+							<Icon name={kindIconName(activity.kind)} class="h-5 w-5" />
+						</span>
+						<span class="min-w-0 flex-1">
+							<span class="block truncate font-medium">{activity.name}</span>
+							<span class="block truncate text-sm text-zinc-500">{activityPreview(activity)}</span>
+						</span>
+						<span class="text-zinc-500">
+							<Icon name={statusIconName(status)} class="h-5 w-5" />
+						</span>
 					</a>
-				{:else}
-					<div class="rounded-3xl border border-dashed border-zinc-800 px-4 py-4 text-zinc-500">
-						<p class="text-xs font-semibold tracking-[0.18em] uppercase">
-							{formatDayHeading(dateValue)}
-						</p>
-						<p class="mt-1 text-sm">Rest</p>
-					</div>
-				{/if}
-			</li>
-		{/each}
-	</ol>
+				</li>
+			{/each}
+		</ol>
+	{/if}
+{/if}
+
+{#if picking}
+	<KindSheet onPick={startUnscheduled} onClose={() => (picking = false)} />
 {/if}
