@@ -1,19 +1,21 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import Icon from '$lib/components/Icon.svelte';
 	import type { IconName } from '$lib/components/Icon.svelte';
 
-	const items: { href: string; label: string; icon: IconName }[] = [
+	const items: { href: '/' | '/progress' | '/plan'; label: string; icon: IconName }[] = [
 		{ href: '/', label: 'Week', icon: 'calendar' },
 		{ href: '/progress', label: 'Progress', icon: 'stats' },
 		{ href: '/plan', label: 'Plan', icon: 'plan' }
 	];
 
 	function active(href: string): boolean {
+		const id = page.route.id ?? '';
 		if (href === '/') {
-			return page.url.pathname === '/' || page.url.pathname.startsWith('/session/');
+			return id === '/' || id.startsWith('/session/');
 		}
-		return page.url.pathname === href || page.url.pathname.startsWith(`${href}/`);
+		return id === href || id.startsWith(`${href}/`);
 	}
 </script>
 
@@ -25,7 +27,7 @@
 		{#each items as item (item.href)}
 			<li>
 				<a
-					href={item.href}
+					href={resolve(item.href)}
 					aria-label={item.label}
 					class="flex min-h-14 items-center justify-center {active(item.href)
 						? 'text-lime-300'
