@@ -24,7 +24,7 @@
 
 {#if !fitness.plan}
 	<p class="text-sm text-zinc-400">Import a plan first.</p>
-	<a class="mt-3 inline-block text-lime-300" href={resolve('/plan')}>Go to plan</a>
+	<a class="mt-3 inline-block text-lime-300" href={resolve('/plan')}>Go to admin</a>
 {:else if !day && activities.length === 0}
 	<p class="text-sm text-zinc-400">That day is not in the current plan.</p>
 	<button type="button" class="mt-3 text-lime-300" onclick={() => goto(resolve('/'))}>Back to week</button>

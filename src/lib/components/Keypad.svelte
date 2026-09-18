@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Icon from '$lib/components/Icon.svelte';
 	import { formatNumber, parseDraftNumber } from '$lib/format';
 	import { onDestroy, onMount, untrack } from 'svelte';
 
@@ -7,19 +8,21 @@
 		unit,
 		value,
 		last,
-		step = 1,
 		allowDecimal = false,
+		showTimer = false,
 		onCommit,
-		onClose
+		onClose,
+		onTimer
 	}: {
 		label: string;
 		unit: string;
 		value: number | undefined;
 		last: number | undefined;
-		step?: number;
 		allowDecimal?: boolean;
+		showTimer?: boolean;
 		onCommit: (next: number | undefined) => void | Promise<void>;
 		onClose: () => void;
+		onTimer?: () => void;
 	} = $props();
 
 	let draft = $state(untrack(() => (value == null ? '' : String(value))));
@@ -57,17 +60,6 @@
 		draft += key;
 	}
 
-	function nudge(direction: 1 | -1) {
-		const current = parseDraftNumber(draft) ?? 0;
-		const next = Math.max(0, roundToStep(current + direction * step));
-		draft = String(next);
-	}
-
-	function roundToStep(n: number): number {
-		const scaled = Math.round(n / step) * step;
-		return Number(scaled.toFixed(allowDecimal ? 2 : 0));
-	}
-
 	function useLast() {
 		if (last == null) return;
 		draft = String(last);
@@ -84,6 +76,10 @@
 		}
 	}
 
+	function startTimer() {
+		onTimer?.();
+	}
+
 	function onBackdrop(event: MouseEvent) {
 		if (event.target === event.currentTarget) onClose();
 	}
@@ -93,7 +89,7 @@
 			onClose();
 			return;
 		}
-		if (event.key === 'Enter') {
+		if (event.key === 'Enter' || event.key === 'Tab') {
 			event.preventDefault();
 			void done();
 			return;
@@ -154,23 +150,6 @@
 			Last{last == null ? '' : ` ${formatNumber(last)}`}
 		</button>
 
-		<div class="mb-3 grid grid-cols-2 gap-2">
-			<button
-				type="button"
-				class="rounded-2xl bg-zinc-800 py-3 text-lg font-semibold"
-				onclick={() => nudge(-1)}
-			>
-				− {step}
-			</button>
-			<button
-				type="button"
-				class="rounded-2xl bg-zinc-800 py-3 text-lg font-semibold"
-				onclick={() => nudge(1)}
-			>
-				+ {step}
-			</button>
-		</div>
-
 		<div class="grid grid-cols-3 gap-2">
 			{#each keys as key (key || 'blank')}
 				<button
@@ -184,13 +163,26 @@
 			{/each}
 		</div>
 
-		<button
-			type="button"
-			class="mt-3 w-full rounded-2xl bg-lime-400 py-3 text-base font-semibold text-zinc-950 disabled:opacity-60"
-			disabled={saving}
-			onclick={(event) => void done(event)}
-		>
-			Save
-		</button>
+		<div class="mt-3 flex gap-2">
+			{#if showTimer}
+				<button
+					type="button"
+					class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-zinc-600 text-zinc-100"
+					aria-label="Start rest timer"
+					onclick={startTimer}
+				>
+					<Icon name="timer" class="h-6 w-6" />
+				</button>
+			{/if}
+			<button
+				type="button"
+				class="flex h-14 min-w-0 flex-1 items-center justify-center rounded-2xl bg-lime-400 font-mono text-2xl font-semibold text-zinc-950 disabled:opacity-60"
+				disabled={saving}
+				aria-label="Save and next"
+				onclick={(event) => void done(event)}
+			>
+				→|
+			</button>
+		</div>
 	</div>
 </div>
