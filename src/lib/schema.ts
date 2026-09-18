@@ -72,6 +72,8 @@ export const exerciseSchema = z.discriminatedUnion('kind', [
 
 export type Exercise = z.infer<typeof exerciseSchema>;
 
+export const DEFAULT_STRENGTH_REST_SECONDS = 120;
+
 const activityBase = {
 	id: idSchema,
 	name: z.string().min(1),
@@ -97,6 +99,7 @@ export const activitySchema = z.discriminatedUnion('kind', [
 	z.object({
 		...activityBase,
 		kind: z.literal('strength'),
+		restSeconds: z.number().nonnegative().default(DEFAULT_STRENGTH_REST_SECONDS),
 		exercises: z.array(exerciseSchema).min(1)
 	}),
 	z.object({
@@ -245,6 +248,14 @@ export function emptySetsForActivity(activity: Activity): LoggedSet[] {
 			completed: false
 		}))
 	);
+}
+
+export function restSecondsFor(exercise: Exercise, activity: Activity): number {
+	if (exercise.restSeconds != null) return exercise.restSeconds;
+	if (activity.kind === 'strength') {
+		return activity.restSeconds ?? DEFAULT_STRENGTH_REST_SECONDS;
+	}
+	return 0;
 }
 
 export function emptyStatsForActivity(activity: Activity): LoggedStat[] {
@@ -400,6 +411,7 @@ export function createAdhocActivity(kind: ActivityKind): Activity {
 				id,
 				name: 'Strength',
 				kind: 'strength',
+				restSeconds: DEFAULT_STRENGTH_REST_SECONDS,
 				exercises: [
 					{
 						id: `${id}-custom`,

@@ -51,10 +51,31 @@ export function previousSetValue(
 ): number | undefined {
 	for (const session of sessionsNewestFirst) {
 		const match = findSet(session.sets, exerciseId, setIndex);
-		if (match?.completed) {
-			const value = setFieldValue(match, field);
-			if (value != null) return value;
-		}
+		const value = match ? setFieldValue(match, field) : undefined;
+		if (value != null) return value;
+	}
+	return undefined;
+}
+
+export function lastUsedFieldValue(
+	currentSets: LoggedSet[],
+	previousSessions: Session[],
+	exerciseId: string,
+	setIndex: number,
+	field: LogField
+): number | undefined {
+	const fromThisSet = previousSetValue(previousSessions, exerciseId, setIndex, field);
+	if (fromThisSet != null) return fromThisSet;
+	if (setIndex > 0) {
+		const fromPriorSet = previousSetValue(previousSessions, exerciseId, setIndex - 1, field);
+		if (fromPriorSet != null) return fromPriorSet;
+	}
+	const earlier = currentSets
+		.filter((set) => set.exerciseId === exerciseId && set.setIndex < setIndex)
+		.sort((a, b) => b.setIndex - a.setIndex);
+	for (const set of earlier) {
+		const value = setFieldValue(set, field);
+		if (value != null) return value;
 	}
 	return undefined;
 }

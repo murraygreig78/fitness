@@ -23,6 +23,7 @@
 					"id": "back-shoulders",
 					"name": "Back and shoulders",
 					"kind": "strength",
+					"restSeconds": 120,
 					"exercises": [
 						{
 							"id": "db-deadlift",
@@ -33,7 +34,6 @@
 								"glutes",
 								"hamstrings"
 							],
-							"restSeconds": 90,
 							"target": {
 								"sets": 3,
 								"reps": 8,
@@ -52,7 +52,6 @@
 								"back",
 								"lats"
 							],
-							"restSeconds": 90,
 							"target": {
 								"sets": 3,
 								"reps": 8,
@@ -71,7 +70,6 @@
 								"shoulders",
 								"triceps"
 							],
-							"restSeconds": 90,
 							"target": {
 								"sets": 3,
 								"reps": 8,
@@ -89,7 +87,6 @@
 							"primaryMuscles": [
 								"shoulders"
 							],
-							"restSeconds": 90,
 							"target": {
 								"sets": 3,
 								"reps": 8,
@@ -421,6 +418,7 @@
 					"id": "chest-arms",
 					"name": "Chest and arms",
 					"kind": "strength",
+					"restSeconds": 120,
 					"exercises": [
 						{
 							"id": "db-floor-press",
@@ -430,7 +428,6 @@
 								"chest",
 								"triceps"
 							],
-							"restSeconds": 90,
 							"target": {
 								"sets": 3,
 								"reps": 8,
@@ -448,7 +445,6 @@
 							"primaryMuscles": [
 								"chest"
 							],
-							"restSeconds": 90,
 							"target": {
 								"sets": 3,
 								"reps": 8,
@@ -465,7 +461,6 @@
 							"primaryMuscles": [
 								"biceps"
 							],
-							"restSeconds": 90,
 							"target": {
 								"sets": 3,
 								"reps": 8,
@@ -483,7 +478,6 @@
 							"primaryMuscles": [
 								"triceps"
 							],
-							"restSeconds": 90,
 							"target": {
 								"sets": 3,
 								"reps": 8,
@@ -815,6 +809,7 @@
 					"id": "legs-abs",
 					"name": "Legs and abs",
 					"kind": "strength",
+					"restSeconds": 120,
 					"exercises": [
 						{
 							"id": "db-goblet-squat",
@@ -824,7 +819,6 @@
 								"quads",
 								"glutes"
 							],
-							"restSeconds": 90,
 							"target": {
 								"sets": 3,
 								"reps": 8,
@@ -843,7 +837,6 @@
 								"quads",
 								"glutes"
 							],
-							"restSeconds": 90,
 							"target": {
 								"sets": 3,
 								"reps": 8,
@@ -862,7 +855,6 @@
 								"hamstrings",
 								"glutes"
 							],
-							"restSeconds": 90,
 							"target": {
 								"sets": 3,
 								"reps": 8,

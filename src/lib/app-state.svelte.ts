@@ -15,6 +15,10 @@ import {
 } from './schema';
 import { sundayOf } from './week';
 
+function asPlain<T>(value: T): T {
+	return JSON.parse(JSON.stringify(value)) as T;
+}
+
 class FitnessApp {
 	plan = $state<Plan | null>(null);
 	sessions = $state<Session[]>([]);
@@ -146,9 +150,11 @@ class FitnessApp {
 
 	async saveSession(session: Session) {
 		const current = this.sessionMap.get(session.id);
-		const toSave = current
-			? { ...current, ...session, sets: mergeLoggedSets(current.sets, session.sets) }
-			: session;
+		const toSave = asPlain(
+			current
+				? { ...current, ...session, sets: mergeLoggedSets(current.sets, session.sets) }
+				: session
+		);
 		await db.sessions.put(toSave);
 		this.sessions = [...this.sessions.filter((item) => item.id !== toSave.id), toSave];
 	}

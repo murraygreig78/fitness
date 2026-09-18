@@ -1,13 +1,12 @@
 <script lang="ts">
 	import { formatNumber, parseDraftNumber } from '$lib/format';
-	import { untrack } from 'svelte';
+	import { onDestroy, onMount, untrack } from 'svelte';
 
 	let {
 		label,
 		unit,
 		value,
-		previous,
-		target,
+		last,
 		step = 1,
 		allowDecimal = false,
 		onCommit,
@@ -16,15 +15,15 @@
 		label: string;
 		unit: string;
 		value: number | undefined;
-		previous: number | undefined;
-		target: number | undefined;
+		last: number | undefined;
 		step?: number;
 		allowDecimal?: boolean;
-		onCommit: (next: number | undefined) => void;
+		onCommit: (next: number | undefined) => void | Promise<void>;
 		onClose: () => void;
 	} = $props();
 
 	let draft = $state(untrack(() => (value == null ? '' : String(value))));
+	let saving = $state(false);
 	const keys = $derived([
 		'1',
 		'2',
@@ -69,24 +68,67 @@
 		return Number(scaled.toFixed(allowDecimal ? 2 : 0));
 	}
 
-	function usePrevious() {
-		if (previous == null) return;
-		draft = String(previous);
+	function useLast() {
+		if (last == null) return;
+		draft = String(last);
 	}
 
-	function done() {
-		onCommit(parseDraftNumber(draft));
+	async function done(event?: Event) {
+		event?.stopPropagation();
+		if (saving) return;
+		saving = true;
+		try {
+			await onCommit(parseDraftNumber(draft));
+		} finally {
+			saving = false;
+		}
 	}
+
+	function onBackdrop(event: MouseEvent) {
+		if (event.target === event.currentTarget) onClose();
+	}
+
+	function onKey(event: KeyboardEvent) {
+		if (event.key === 'Escape') {
+			onClose();
+			return;
+		}
+		if (event.key === 'Enter') {
+			event.preventDefault();
+			void done();
+			return;
+		}
+		if (event.key === 'Backspace') {
+			event.preventDefault();
+			press('⌫');
+			return;
+		}
+		if (/^[0-9]$/.test(event.key)) {
+			event.preventDefault();
+			press(event.key);
+			return;
+		}
+		if (allowDecimal && (event.key === '.' || event.key === ',')) {
+			event.preventDefault();
+			press('.');
+		}
+	}
+
+	onMount(() => {
+		window.addEventListener('keydown', onKey);
+	});
+	onDestroy(() => {
+		window.removeEventListener('keydown', onKey);
+	});
 </script>
 
 <div
-	class="fixed inset-0 z-50 flex flex-col justify-end bg-black/70"
-	onclick={onClose}
-	onkeydown={(event) => event.key === 'Escape' && onClose()}
+	class="fixed inset-0 z-[80] flex flex-col justify-end bg-black/70"
+	onclick={onBackdrop}
 	role="presentation"
 >
 	<div
-		class="rounded-t-3xl border-t border-zinc-700 bg-zinc-900 px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
+		class="max-h-[90dvh] overflow-y-auto rounded-t-3xl border-t border-zinc-700 bg-zinc-900 px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
 		role="dialog"
 		tabindex="-1"
 		aria-label={`Edit ${label}`}
@@ -95,7 +137,7 @@
 	>
 		<div class="mb-3 flex items-start justify-between gap-3">
 			<div>
-				<p class="text-xs font-semibold tracking-[0.2em] text-zinc-400 uppercase">{label}</p>
+				<p class="text-sm text-zinc-400">{label}</p>
 				<p class="font-mono text-4xl font-semibold tabular-nums text-zinc-50">
 					{draft || '0'}<span class="ml-2 text-lg text-zinc-500">{unit}</span>
 				</p>
@@ -103,25 +145,14 @@
 			<button type="button" class="text-sm text-zinc-400" onclick={onClose}>Close</button>
 		</div>
 
-		<div class="mb-3 flex flex-wrap gap-2">
-			<button
-				type="button"
-				class="rounded-full border border-lime-400/70 bg-lime-400/10 px-3 py-2 text-sm font-semibold text-lime-300 disabled:border-zinc-700 disabled:bg-transparent disabled:text-zinc-600"
-				disabled={previous == null}
-				onclick={usePrevious}
-			>
-				Prev {previous == null ? '' : formatNumber(previous)}
-			</button>
-			{#if target != null}
-				<button
-					type="button"
-					class="rounded-full border border-zinc-600 px-3 py-2 text-sm text-zinc-300"
-					onclick={() => (draft = String(target))}
-				>
-					Target {formatNumber(target)}
-				</button>
-			{/if}
-		</div>
+		<button
+			type="button"
+			class="mb-3 w-full rounded-2xl border border-zinc-600 py-3 text-sm font-semibold text-zinc-100 disabled:border-zinc-800 disabled:text-zinc-600"
+			disabled={last == null}
+			onclick={useLast}
+		>
+			Last{last == null ? '' : ` ${formatNumber(last)}`}
+		</button>
 
 		<div class="mb-3 grid grid-cols-2 gap-2">
 			<button
@@ -155,8 +186,9 @@
 
 		<button
 			type="button"
-			class="mt-3 w-full rounded-2xl bg-lime-400 py-3 text-base font-bold text-zinc-950"
-			onclick={done}
+			class="mt-3 w-full rounded-2xl bg-lime-400 py-3 text-base font-semibold text-zinc-950 disabled:opacity-60"
+			disabled={saving}
+			onclick={(event) => void done(event)}
 		>
 			Save
 		</button>

@@ -10,7 +10,6 @@
 	import { formatDuration, formatNumber } from '$lib/format';
 	import { activityPreview } from '$lib/metrics';
 	import {
-		cardioTargetValue,
 		lastCompletedSession,
 		previousCardioValue,
 		previousSessionsFor,
@@ -226,9 +225,6 @@
 			>
 				<p class="text-xs text-zinc-500">Distance</p>
 				<p class="font-mono text-3xl font-semibold">{formatNumber(session?.distanceKm)} km</p>
-				<p class="text-xs text-zinc-500">
-					Last {formatNumber(previousCardioValue(previous, 'distanceKm'))}
-				</p>
 			</button>
 			<button
 				type="button"
@@ -238,9 +234,6 @@
 				<p class="text-xs text-zinc-500">Time</p>
 				<p class="font-mono text-3xl font-semibold">
 					{session?.durationSeconds != null ? formatDuration(session.durationSeconds) : '—'}
-				</p>
-				<p class="text-xs text-zinc-500">
-					Last {formatDuration(previousCardioValue(previous, 'durationSeconds'))}
 				</p>
 			</button>
 		</div>
@@ -257,10 +250,6 @@
 					<p class="font-mono text-3xl font-semibold">
 						{logged?.value == null ? '—' : formatNumber(logged.value)}
 						<span class="text-base text-zinc-500">{stat.unit}</span>
-					</p>
-					<p class="text-xs text-zinc-500">
-						Last {formatNumber(previousStatValue(previous, stat.id, stat.unit))}
-						{stat.unit}
 					</p>
 				</button>
 			{/each}
@@ -285,6 +274,7 @@
 	{:else if session}
 		<ExerciseLogger
 			{session}
+			{activity}
 			exercises={exercisesInActivity(activity)}
 			{previous}
 			onSave={save}
@@ -319,19 +309,11 @@
 				? session.durationSeconds / 60
 				: undefined
 			: session?.distanceKm}
-		previous={usesMinutes
+		last={usesMinutes
 			? previousCardioValue(previous, 'durationSeconds') != null
 				? (previousCardioValue(previous, 'durationSeconds') ?? 0) / 60
-				: cardioTargetValue(activity, 'durationSeconds') != null
-					? (cardioTargetValue(activity, 'durationSeconds') ?? 0) / 60
-					: undefined
-			: (previousCardioValue(previous, 'distanceKm') ??
-				cardioTargetValue(activity, 'distanceKm'))}
-		target={usesMinutes
-			? cardioTargetValue(activity, 'durationSeconds') != null
-				? (cardioTargetValue(activity, 'durationSeconds') ?? 0) / 60
 				: undefined
-			: cardioTargetValue(activity, 'distanceKm')}
+			: previousCardioValue(previous, 'distanceKm')}
 		step={usesMinutes ? 1 : 0.1}
 		allowDecimal={true}
 		onCommit={async (next) => {
@@ -354,8 +336,7 @@
 		label={activity.stats.find((stat) => stat.id === currentStat.statId)?.name ?? 'Stat'}
 		unit={currentStat.unit}
 		value={logged?.value}
-		previous={previousStatValue(previous, currentStat.statId, currentStat.unit)}
-		target={undefined}
+		last={previousStatValue(previous, currentStat.statId, currentStat.unit)}
 		step={currentStat.unit === 'kg' || currentStat.unit === 'cm' ? 0.1 : 1}
 		allowDecimal={true}
 		onCommit={async (next) => {
