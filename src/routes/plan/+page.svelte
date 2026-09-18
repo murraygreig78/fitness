@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { asset } from '$app/paths';
 	import { fitness } from '$lib/app-state.svelte';
 	import { parsePlanJson, summarizeActivities } from '$lib/schema';
 
@@ -57,7 +58,7 @@
 		error = null;
 		message = null;
 		try {
-			const response = await fetch('/plans/weekly.json');
+			const response = await fetch(asset('/plans/weekly.json'));
 			if (!response.ok) throw new Error('Sample plan was not found');
 			const json: unknown = await response.json();
 			const parsed = parsePlanJson(json);

@@ -47,11 +47,15 @@ npm run build
 npm run preview
 ```
 
-## Deploy (Cloudflare Pages)
+## Deploy (GitHub Pages)
 
-- Build command: `npm run build`
-- Output directory: `build`
-- Node version: `22` or later
+The site is https://murraygreig78.github.io/fitness/. CI builds with `BASE_PATH=/fitness` so the app lives under that path.
+
+1. In the repo, open **Settings → Pages** and set **Source** to **GitHub Actions**.
+2. Merge to `main` (or run the **Deploy GitHub Pages** workflow).
+3. Open the live URL and tap **Plan → Load sample week**. Logs are per origin, so this is a fresh browser store.
+
+Local `npm run dev` still serves from `/`.
 
 ## Stack
 

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { kindIconName, kindTextClass } from '$lib/activity-style';
 	import { fitness } from '$lib/app-state.svelte';
@@ -176,10 +177,10 @@
 	<p class="text-sm text-zinc-400">Import a plan first.</p>
 {:else if !day || !activity}
 	<p class="text-sm text-zinc-400">That activity is not in the current plan.</p>
-	<button type="button" class="mt-3 text-lime-300" onclick={() => goto('/')}>Back to week</button>
+	<button type="button" class="mt-3 text-lime-300" onclick={() => goto(resolve('/'))}>Back to week</button>
 {:else}
 	<header class="mb-5">
-		<a href="/?week={weekStart}" class="inline-flex items-center text-zinc-400" aria-label="Back to week">
+		<a href={resolve(`/?week=${weekStart}`)} class="inline-flex items-center text-zinc-400" aria-label="Back to week">
 			<Icon name="back" class="h-5 w-5" />
 		</a>
 		<div class="mt-3 flex items-center gap-2 {kindTextClass(activity.kind)}">

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { kindIconName, kindTextClass, statusIconName } from '$lib/activity-style';
 	import { fitness } from '$lib/app-state.svelte';
@@ -23,13 +24,13 @@
 
 {#if !fitness.plan}
 	<p class="text-sm text-zinc-400">Import a plan first.</p>
-	<a class="mt-3 inline-block text-lime-300" href="/plan">Go to plan</a>
+	<a class="mt-3 inline-block text-lime-300" href={resolve('/plan')}>Go to plan</a>
 {:else if !day && activities.length === 0}
 	<p class="text-sm text-zinc-400">That day is not in the current plan.</p>
-	<button type="button" class="mt-3 text-lime-300" onclick={() => goto('/')}>Back to week</button>
+	<button type="button" class="mt-3 text-lime-300" onclick={() => goto(resolve('/'))}>Back to week</button>
 {:else}
 	<header class="mb-5">
-		<a href="/?week={weekStart}" class="inline-flex text-zinc-400" aria-label="Back to week">
+		<a href={resolve(`/?week=${weekStart}`)} class="inline-flex text-zinc-400" aria-label="Back to week">
 			<Icon name="back" class="h-5 w-5" />
 		</a>
 		<p class="mt-3 text-lg font-semibold">
@@ -42,7 +43,7 @@
 			{@const status = statusFor(activity)}
 			<li>
 				<a
-					href="/session/{dayId}/{activity.id}?week={weekStart}"
+					href={resolve(`/session/${dayId}/${activity.id}?week=${weekStart}`)}
 					class="flex items-center gap-3 rounded-2xl border border-zinc-800 bg-zinc-900/80 px-3 py-3"
 				>
 					<span

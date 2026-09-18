@@ -19,6 +19,9 @@ export default defineConfig({
 				precompress: false,
 				strict: true
 			}),
+			paths: {
+				base: (process.env.BASE_PATH ?? '') as '' | `/${string}`
+			},
 			prerender: {
 				handleUnseenRoutes: 'ignore'
 			}

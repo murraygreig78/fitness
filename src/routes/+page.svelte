@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { kindIconName, kindTextClass, statusIconName } from '$lib/activity-style';
 	import { fitness } from '$lib/app-state.svelte';
@@ -70,7 +71,7 @@
 	}
 
 	function activityHref(activity: Activity): string {
-		return `/session/${selectedDayId}/${activity.id}?week=${fitness.weekStart}`;
+		return resolve(`/session/${selectedDayId}/${activity.id}?week=${fitness.weekStart}`);
 	}
 
 	function statusFor(activity: Activity) {
@@ -79,13 +80,13 @@
 
 	async function startUnscheduled(kind: ActivityKind) {
 		if (!fitness.plan) {
-			await goto('/plan');
+			await goto(resolve('/plan'));
 			return;
 		}
 		const activity = createAdhocActivity(kind);
 		const record = await fitness.addCustomActivity(selectedWeekday, activity, fitness.weekStart);
 		picking = false;
-		await goto(`/session/${record.dayId}/${record.activity.id}?week=${fitness.weekStart}`);
+		await goto(resolve(`/session/${record.dayId}/${record.activity.id}?week=${fitness.weekStart}`));
 	}
 </script>
 
@@ -125,7 +126,7 @@
 			Load a weekly plan once. Scheduled work shows as colored dots; plus starts something extra.
 		</p>
 		<a
-			href="/plan"
+			href={resolve('/plan')}
 			class="mt-4 inline-flex rounded-full bg-lime-400 px-4 py-2 text-sm font-semibold text-zinc-950"
 		>
 			Open plan
