@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { fitness } from '$lib/app-state.svelte';
-	import { parsePlanJson } from '$lib/schema';
+	import { parsePlanJson, summarizeActivities } from '$lib/schema';
 
 	let paste = $state('');
 	let message = $state<string | null>(null);
@@ -116,8 +116,9 @@
 	<p class="text-xs font-semibold tracking-[0.22em] text-lime-300 uppercase">Plan</p>
 	<h1 class="text-2xl font-bold">JSON template</h1>
 	<p class="mt-1 text-sm leading-6 text-zinc-400">
-		Edit <code class="text-zinc-200">plans/weekly.json</code> in git, or import a file here. Logs stay
-		in this browser unless you export them.
+		Edit <code class="text-zinc-200">plans/weekly.json</code> in git, or import a file here. A week is
+		days of <strong>activities</strong> (cardio, strength, mobility, progress). Strength and mobility
+		nest exercises underneath. Logs stay in this browser unless you export them.
 	</p>
 </header>
 
@@ -131,7 +132,7 @@
 		{/if}
 		<ul class="mt-3 space-y-1 text-sm text-zinc-300">
 			{#each fitness.plan.days as day (day.id)}
-				<li>{day.weekday}: {day.name} · {day.exercises.length} exercises</li>
+				<li>{day.weekday}: {day.name} · {summarizeActivities(day.activities)}</li>
 			{/each}
 		</ul>
 	</section>
@@ -161,7 +162,7 @@
 		<textarea
 			class="min-h-40 w-full rounded-2xl border border-zinc-800 bg-zinc-950 p-3 font-mono text-xs"
 			bind:value={paste}
-			placeholder={'{ "version": 1, "id": "...", ... }'}
+			placeholder={'{ "version": 2, "id": "...", "days": [{ "activities": [...] }] }'}
 		></textarea>
 	</label>
 	<button

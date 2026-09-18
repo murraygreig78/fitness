@@ -14,7 +14,10 @@ export type Weekday = (typeof weekdays)[number];
 
 export const weekdaySchema = z.enum(weekdays);
 
-export const exerciseKindSchema = z.enum(['weighted', 'bodyweight', 'timed', 'cardio', 'stretch']);
+export const activityKinds = ['cardio', 'strength', 'mobility', 'progress'] as const;
+export type ActivityKind = (typeof activityKinds)[number];
+
+export const exerciseKindSchema = z.enum(['weighted', 'bodyweight', 'timed', 'stretch']);
 export type ExerciseKind = z.infer<typeof exerciseKindSchema>;
 
 const idSchema = z.string().min(1);
@@ -40,15 +43,13 @@ const timedTargetSchema = z.object({
 
 const cardioTargetSchema = z
 	.object({
-		sets: z.number().int().positive().optional(),
-		durationSeconds: z.number().positive().optional(),
 		distanceKm: z.number().positive().optional(),
 		distanceKmMin: z.number().positive().optional(),
 		distanceKmMax: z.number().positive().optional(),
-		restSeconds: z.number().nonnegative().optional()
+		durationSeconds: z.number().positive().optional()
 	})
 	.refine((target) => target.durationSeconds != null || target.distanceKm != null, {
-		message: 'Cardio targets need a duration and/or distance'
+		message: 'Cardio activities need a distance and/or time'
 	});
 
 const exerciseBase = {
@@ -66,24 +67,65 @@ export const exerciseSchema = z.discriminatedUnion('kind', [
 	z.object({ ...exerciseBase, kind: z.literal('weighted'), target: weightedTargetSchema }),
 	z.object({ ...exerciseBase, kind: z.literal('bodyweight'), target: bodyweightTargetSchema }),
 	z.object({ ...exerciseBase, kind: z.literal('timed'), target: timedTargetSchema }),
-	z.object({ ...exerciseBase, kind: z.literal('cardio'), target: cardioTargetSchema }),
 	z.object({ ...exerciseBase, kind: z.literal('stretch'), target: timedTargetSchema })
 ]);
 
 export type Exercise = z.infer<typeof exerciseSchema>;
+
+const activityBase = {
+	id: idSchema,
+	name: z.string().min(1),
+	instructions: optionalText,
+	notes: optionalText,
+	videoUrl: optionalText
+};
+
+export const statDefSchema = z.object({
+	id: idSchema,
+	name: z.string().min(1),
+	unit: z.string().min(1)
+});
+
+export type StatDef = z.infer<typeof statDefSchema>;
+
+export const activitySchema = z.discriminatedUnion('kind', [
+	z.object({
+		...activityBase,
+		kind: z.literal('cardio'),
+		target: cardioTargetSchema
+	}),
+	z.object({
+		...activityBase,
+		kind: z.literal('strength'),
+		exercises: z.array(exerciseSchema).min(1)
+	}),
+	z.object({
+		...activityBase,
+		kind: z.literal('mobility'),
+		exercises: z.array(exerciseSchema).min(1)
+	}),
+	z.object({
+		...activityBase,
+		kind: z.literal('progress'),
+		stats: z.array(statDefSchema).min(1),
+		allowPhoto: z.boolean().default(true)
+	})
+]);
+
+export type Activity = z.infer<typeof activitySchema>;
 
 export const planDaySchema = z.object({
 	id: idSchema,
 	weekday: weekdaySchema,
 	name: z.string().min(1),
 	estimatedMinutes: z.number().positive().optional(),
-	exercises: z.array(exerciseSchema).min(1)
+	activities: z.array(activitySchema).min(1)
 });
 
 export type PlanDay = z.infer<typeof planDaySchema>;
 
 export const planSchema = z.object({
-	version: z.literal(1),
+	version: z.literal(2),
 	id: idSchema,
 	name: z.string().min(1),
 	notes: optionalText,
@@ -98,28 +140,43 @@ export const loggedSetSchema = z.object({
 	reps: z.number().nonnegative().optional(),
 	kg: z.number().nonnegative().optional(),
 	durationSeconds: z.number().nonnegative().optional(),
-	distanceKm: z.number().nonnegative().optional(),
 	completed: z.boolean()
 });
 
 export type LoggedSet = z.infer<typeof loggedSetSchema>;
 
+export const loggedStatSchema = z.object({
+	statId: z.string().min(1),
+	value: z.number().optional(),
+	unit: z.string().min(1),
+	photoUrl: optionalText
+});
+
+export type LoggedStat = z.infer<typeof loggedStatSchema>;
+
 export const sessionSchema = z.object({
 	id: z.string().min(1),
 	weekStart: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
 	dayId: z.string().min(1),
+	activityId: z.string().min(1),
 	planId: z.string().min(1),
+	kind: z.enum(activityKinds),
 	startedAt: z.string().nullable(),
 	endedAt: z.string().nullable(),
 	skipped: z.boolean().default(false),
 	notes: z.string().default(''),
-	sets: z.array(loggedSetSchema)
+	sets: z.array(loggedSetSchema).default([]),
+	stats: z.array(loggedStatSchema).default([]),
+	distanceKm: z.number().nonnegative().optional(),
+	durationSeconds: z.number().nonnegative().optional(),
+	photoUrl: optionalText,
+	completed: z.boolean().default(false)
 });
 
 export type Session = z.infer<typeof sessionSchema>;
 
 export const logsBackupSchema = z.object({
-	version: z.literal(1),
+	version: z.literal(2),
 	exportedAt: z.string(),
 	plan: planSchema.nullable(),
 	sessions: z.array(sessionSchema)
@@ -153,18 +210,16 @@ export function parseLogsBackup(input: unknown): { backup: LogsBackup } | { erro
 }
 
 export function setCount(exercise: Exercise): number {
-	if (exercise.kind === 'cardio') {
-		return exercise.target.sets ?? 1;
-	}
 	return exercise.target.sets;
 }
 
-export function sessionId(weekStart: string, dayId: string): string {
-	return `${weekStart}::${dayId}`;
+export function sessionId(weekStart: string, dayId: string, activityId: string): string {
+	return `${weekStart}::${dayId}::${activityId}`;
 }
 
-export function emptySetsForDay(day: PlanDay): LoggedSet[] {
-	return day.exercises.flatMap((exercise) =>
+export function emptySetsForActivity(activity: Activity): LoggedSet[] {
+	if (activity.kind !== 'strength' && activity.kind !== 'mobility') return [];
+	return activity.exercises.flatMap((exercise) =>
 		Array.from({ length: setCount(exercise) }, (_, setIndex) => ({
 			exerciseId: exercise.id,
 			setIndex,
@@ -173,28 +228,65 @@ export function emptySetsForDay(day: PlanDay): LoggedSet[] {
 	);
 }
 
-export function createSession(plan: Plan, day: PlanDay, weekStart: string): Session {
+export function emptyStatsForActivity(activity: Activity): LoggedStat[] {
+	if (activity.kind !== 'progress') return [];
+	return activity.stats.map((stat) => ({
+		statId: stat.id,
+		unit: stat.unit
+	}));
+}
+
+export function createSession(
+	plan: Plan,
+	day: PlanDay,
+	activity: Activity,
+	weekStart: string
+): Session {
 	return {
-		id: sessionId(weekStart, day.id),
+		id: sessionId(weekStart, day.id, activity.id),
 		weekStart,
 		dayId: day.id,
+		activityId: activity.id,
 		planId: plan.id,
+		kind: activity.kind,
 		startedAt: null,
 		endedAt: null,
 		skipped: false,
 		notes: '',
-		sets: emptySetsForDay(day)
+		sets: emptySetsForActivity(activity),
+		stats: emptyStatsForActivity(activity),
+		completed: false
 	};
 }
 
 export type SessionStatus = 'rest' | 'upcoming' | 'in-progress' | 'done' | 'skipped';
 
-export function sessionStatus(session: Session | undefined, isScheduled: boolean): SessionStatus {
-	if (!isScheduled) return 'rest';
+export function sessionStatus(session: Session | undefined): SessionStatus {
 	if (!session) return 'upcoming';
 	if (session.skipped) return 'skipped';
-	if (session.endedAt) return 'done';
-	if (session.startedAt || session.sets.some((set) => set.completed)) return 'in-progress';
+	if (session.endedAt || session.completed) return 'done';
+	if (session.startedAt || session.sets.some((set) => set.completed) || hasProgressData(session)) {
+		return 'in-progress';
+	}
+	return 'upcoming';
+}
+
+export function hasProgressData(session: Session): boolean {
+	return (
+		session.distanceKm != null ||
+		session.durationSeconds != null ||
+		Boolean(session.photoUrl) ||
+		session.stats.some((stat) => stat.value != null || Boolean(stat.photoUrl))
+	);
+}
+
+export function dayStatus(day: PlanDay, sessions: Session[]): SessionStatus {
+	if (!day.activities.length) return 'rest';
+	const byActivity = new Map(sessions.map((session) => [session.activityId, session]));
+	const statuses = day.activities.map((activity) => sessionStatus(byActivity.get(activity.id)));
+	if (statuses.every((status) => status === 'done')) return 'done';
+	if (statuses.every((status) => status === 'skipped')) return 'skipped';
+	if (statuses.some((status) => status === 'in-progress' || status === 'done')) return 'in-progress';
 	return 'upcoming';
 }
 
@@ -215,4 +307,38 @@ export function groupExercises(
 		groups.push({ exercises: [exercise] });
 	}
 	return groups;
+}
+
+export function activityKindLabel(kind: ActivityKind): string {
+	switch (kind) {
+		case 'cardio':
+			return 'Cardio';
+		case 'strength':
+			return 'Strength';
+		case 'mobility':
+			return 'Mobility';
+		case 'progress':
+			return 'Progress';
+	}
+}
+
+export function summarizeActivities(activities: Activity[]): string {
+	const counts = new Map<ActivityKind, number>();
+	for (const activity of activities) {
+		counts.set(activity.kind, (counts.get(activity.kind) ?? 0) + 1);
+	}
+	const parts = activityKinds
+		.filter((kind) => counts.get(kind))
+		.map((kind) => {
+			const count = counts.get(kind) ?? 0;
+			return `${count} ${kind}`;
+		});
+	const total = activities.length;
+	const noun = total === 1 ? 'activity' : 'activities';
+	return `${total} ${noun} · ${parts.join(', ')}`;
+}
+
+export function exercisesInActivity(activity: Activity): Exercise[] {
+	if (activity.kind === 'strength' || activity.kind === 'mobility') return activity.exercises;
+	return [];
 }

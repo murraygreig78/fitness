@@ -4,6 +4,7 @@
 	const items = [
 		{ href: '/', label: 'Week' },
 		{ href: '/compare', label: 'Compare' },
+		{ href: '/progress', label: 'Progress' },
 		{ href: '/plan', label: 'Plan' }
 	];
 
@@ -19,7 +20,7 @@
 	class="fixed inset-x-0 bottom-0 z-30 border-t border-zinc-800 bg-zinc-950/95 backdrop-blur-md"
 	style="padding-bottom: env(safe-area-inset-bottom)"
 >
-	<ul class="mx-auto grid max-w-lg grid-cols-3">
+	<ul class="mx-auto grid max-w-lg grid-cols-4">
 		{#each items as item (item.href)}
 			<li>
 				<a

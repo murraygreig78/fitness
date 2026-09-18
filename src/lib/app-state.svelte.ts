@@ -4,6 +4,7 @@ import {
 	createSession,
 	parseLogsBackup,
 	parsePlanJson,
+	type Activity,
 	type LogsBackup,
 	type Plan,
 	type PlanDay,
@@ -46,8 +47,20 @@ class FitnessApp {
 		}
 	}
 
-	sessionFor(dayId: string, weekStart = this.weekStart): Session | undefined {
-		return this.sessionMap.get(`${weekStart}::${dayId}`);
+	sessionFor(dayId: string, activityId: string, weekStart = this.weekStart): Session | undefined {
+		return this.sessionMap.get(`${weekStart}::${dayId}::${activityId}`);
+	}
+
+	sessionsForDay(dayId: string, weekStart = this.weekStart): Session[] {
+		return this.sessions.filter(
+			(session) => session.dayId === dayId && session.weekStart === weekStart
+		);
+	}
+
+	progressSessions(): Session[] {
+		return this.sessions
+			.filter((session) => session.kind === 'progress' && !session.skipped)
+			.sort((a, b) => b.weekStart.localeCompare(a.weekStart) || b.id.localeCompare(a.id));
 	}
 
 	async importPlan(input: unknown): Promise<{ ok: true } | { ok: false; error: string }> {
@@ -65,13 +78,17 @@ class FitnessApp {
 		return { ok: true };
 	}
 
-	async ensureSession(day: PlanDay, weekStart = this.weekStart): Promise<Session> {
+	async ensureSession(
+		day: PlanDay,
+		activity: Activity,
+		weekStart = this.weekStart
+	): Promise<Session> {
 		if (!this.plan) {
-			throw new Error('Import a plan before logging a session');
+			throw new Error('Import a plan before logging an activity');
 		}
-		const existing = this.sessionFor(day.id, weekStart);
+		const existing = this.sessionFor(day.id, activity.id, weekStart);
 		if (existing) return existing;
-		const session = createSession(this.plan, day, weekStart);
+		const session = createSession(this.plan, day, activity, weekStart);
 		await this.saveSession(session);
 		return session;
 	}
@@ -81,15 +98,9 @@ class FitnessApp {
 		this.sessions = [...this.sessions.filter((item) => item.id !== session.id), session];
 	}
 
-	async patchSession(sessionId: string, patch: (current: Session) => Session) {
-		const current = this.sessionMap.get(sessionId);
-		if (!current) return;
-		await this.saveSession(patch(structuredClone(current)));
-	}
-
 	exportBackup(): LogsBackup {
 		return {
-			version: 1,
+			version: 2,
 			exportedAt: new Date().toISOString(),
 			plan: this.plan,
 			sessions: this.sessions

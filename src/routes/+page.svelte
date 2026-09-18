@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { fitness } from '$lib/app-state.svelte';
-	import { sessionStatus, weekdays, type PlanDay } from '$lib/schema';
+	import { dayStatus, summarizeActivities, weekdays, type PlanDay } from '$lib/schema';
 	import {
 		dateForWeekday,
 		formatDayHeading,
@@ -10,8 +10,6 @@
 		isToday,
 		shiftWeek
 	} from '$lib/week';
-	import { sessionSeconds } from '$lib/metrics';
-	import { formatDuration } from '$lib/format';
 
 	const weekFromUrl = $derived(page.url.searchParams.get('week'));
 
@@ -27,9 +25,8 @@
 
 	function statusLabel(weekday: (typeof weekdays)[number]): string {
 		const day = dayFor(weekday);
-		const session = day ? fitness.sessionFor(day.id) : undefined;
-		const status = sessionStatus(session, Boolean(day));
-		if (status === 'rest') return 'Rest';
+		if (!day) return 'Rest';
+		const status = dayStatus(day, fitness.sessionsForDay(day.id));
 		if (status === 'done') return 'Done';
 		if (status === 'skipped') return 'Skipped';
 		if (status === 'in-progress') return 'In progress';
@@ -65,8 +62,7 @@
 	<section class="rounded-3xl border border-zinc-800 bg-zinc-900 p-5">
 		<h2 class="text-lg font-semibold">Import a weekly plan</h2>
 		<p class="mt-2 text-sm leading-6 text-zinc-400">
-			Load a JSON template once. It repeats every week while you log sets, kilos, and times on your
-			phone.
+			Load a JSON template once. Days contain activities — cardio, strength, mobility, or progress.
 		</p>
 		<a
 			href="/plan"
@@ -81,8 +77,6 @@
 		{#each weekdays as weekday (weekday)}
 			{@const day = dayFor(weekday)}
 			{@const dateValue = dateForWeekday(fitness.weekStart, weekday)}
-			{@const session = day ? fitness.sessionFor(day.id) : undefined}
-			{@const duration = sessionSeconds(session)}
 			<li>
 				{#if day}
 					<a
@@ -97,12 +91,7 @@
 									{formatDayHeading(dateValue)}
 								</p>
 								<h2 class="mt-1 text-lg font-semibold">{day.name}</h2>
-								<p class="mt-1 text-sm text-zinc-400">
-									{day.exercises.length} exercises
-									{#if day.estimatedMinutes}
-										· {day.estimatedMinutes} min
-									{/if}
-								</p>
+								<p class="mt-1 text-sm text-zinc-400">{summarizeActivities(day.activities)}</p>
 							</div>
 							<span
 								class="rounded-full px-3 py-1 text-xs font-semibold {statusLabel(weekday) === 'Done'
@@ -114,9 +103,6 @@
 								{statusLabel(weekday)}
 							</span>
 						</div>
-						{#if duration}
-							<p class="mt-3 text-sm text-zinc-400">Session {formatDuration(duration)}</p>
-						{/if}
 					</a>
 				{:else}
 					<div class="rounded-3xl border border-dashed border-zinc-800 px-4 py-4 text-zinc-500">
