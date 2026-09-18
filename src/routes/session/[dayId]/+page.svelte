@@ -1,18 +1,20 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import { kindIconName, kindTextClass, statusIconName } from '$lib/activity-style';
 	import { fitness } from '$lib/app-state.svelte';
+	import Icon from '$lib/components/Icon.svelte';
 	import { activityPreview } from '$lib/metrics';
-	import {
-		activityKindLabel,
-		sessionStatus,
-		type Activity
-	} from '$lib/schema';
-	import { dateForWeekday, formatDayHeading, mondayOf } from '$lib/week';
+	import { sessionStatus, type Activity } from '$lib/schema';
+	import { dateForWeekday, formatDayLong, normalizeWeekStart, sundayOf } from '$lib/week';
 
 	const dayId = $derived(page.params.dayId ?? '');
-	const weekStart = $derived(page.url.searchParams.get('week') || fitness.weekStart || mondayOf());
+	const weekStart = $derived(
+		normalizeWeekStart(page.url.searchParams.get('week') || fitness.weekStart || sundayOf())
+	);
 	const day = $derived(fitness.plan?.days.find((item) => item.id === dayId));
+	const extras = $derived(fitness.customActivitiesForDay(dayId, weekStart));
+	const activities = $derived([...(day?.activities ?? []), ...extras]);
 
 	function statusFor(activity: Activity) {
 		return sessionStatus(fitness.sessionFor(dayId, activity.id, weekStart));
@@ -22,45 +24,41 @@
 {#if !fitness.plan}
 	<p class="text-sm text-zinc-400">Import a plan first.</p>
 	<a class="mt-3 inline-block text-lime-300" href="/plan">Go to plan</a>
-{:else if !day}
+{:else if !day && activities.length === 0}
 	<p class="text-sm text-zinc-400">That day is not in the current plan.</p>
 	<button type="button" class="mt-3 text-lime-300" onclick={() => goto('/')}>Back to week</button>
 {:else}
 	<header class="mb-5">
-		<a href="/" class="text-sm text-zinc-400">← Week</a>
-		<p class="mt-2 text-xs font-semibold tracking-[0.18em] text-zinc-500 uppercase">
-			{formatDayHeading(dateForWeekday(weekStart, day.weekday))}
+		<a href="/?week={weekStart}" class="inline-flex text-zinc-400" aria-label="Back to week">
+			<Icon name="back" class="h-5 w-5" />
+		</a>
+		<p class="mt-3 text-lg font-semibold">
+			{day ? formatDayLong(dateForWeekday(weekStart, day.weekday)) : 'Open day'}
 		</p>
-		<h1 class="text-2xl font-bold">{day.name}</h1>
-		<p class="mt-1 text-sm text-zinc-400">{day.activities.length} scheduled activities</p>
 	</header>
 
-	<ol class="space-y-3">
-		{#each day.activities as activity (activity.id)}
+	<ol class="space-y-2">
+		{#each activities as activity (activity.id)}
 			{@const status = statusFor(activity)}
 			<li>
 				<a
-					href="/session/{day.id}/{activity.id}?week={weekStart}"
-					class="block rounded-3xl border border-zinc-800 bg-zinc-900 p-4"
+					href="/session/{dayId}/{activity.id}?week={weekStart}"
+					class="flex items-center gap-3 rounded-2xl border border-zinc-800 bg-zinc-900/80 px-3 py-3"
 				>
-					<div class="flex items-start justify-between gap-3">
-						<div>
-							<p class="text-xs font-semibold tracking-[0.18em] text-lime-300 uppercase">
-								{activityKindLabel(activity.kind)}
-							</p>
-							<h2 class="mt-1 text-lg font-semibold">{activity.name}</h2>
-							<p class="mt-1 text-sm text-zinc-400">{activityPreview(activity)}</p>
-						</div>
-						<span
-							class="rounded-full px-3 py-1 text-xs font-semibold {status === 'done'
-								? 'bg-lime-400/15 text-lime-300'
-								: status === 'in-progress'
-									? 'bg-orange-400/15 text-orange-300'
-									: 'bg-zinc-800 text-zinc-300'}"
-						>
-							{status === 'upcoming' ? 'Log' : status}
-						</span>
-					</div>
+					<span
+						class="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-950 {kindTextClass(
+							activity.kind
+						)}"
+					>
+						<Icon name={kindIconName(activity.kind)} class="h-5 w-5" />
+					</span>
+					<span class="min-w-0 flex-1">
+						<span class="block truncate font-medium">{activity.name}</span>
+						<span class="block truncate text-sm text-zinc-500">{activityPreview(activity)}</span>
+					</span>
+					<span class="text-zinc-500">
+						<Icon name={statusIconName(status)} class="h-5 w-5" />
+					</span>
 				</a>
 			</li>
 		{/each}

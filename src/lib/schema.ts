@@ -361,3 +361,93 @@ export function exercisesInActivity(activity: Activity): Exercise[] {
 	if (activity.kind === 'strength' || activity.kind === 'mobility') return activity.exercises;
 	return [];
 }
+
+export function freeDayId(weekday: Weekday): string {
+	return `free-${weekday}`;
+}
+
+export function dayIdForWeekday(plan: Plan | null, weekday: Weekday): string {
+	return plan?.days.find((day) => day.weekday === weekday)?.id ?? freeDayId(weekday);
+}
+
+export function uniqueActivityKinds(activities: Activity[]): ActivityKind[] {
+	const seen = new Set<ActivityKind>();
+	const kinds: ActivityKind[] = [];
+	for (const activity of activities) {
+		if (seen.has(activity.kind)) continue;
+		seen.add(activity.kind);
+		kinds.push(activity.kind);
+	}
+	return kinds;
+}
+
+export function isAdhocActivityId(activityId: string): boolean {
+	return activityId.startsWith('adhoc-');
+}
+
+export function createAdhocActivity(kind: ActivityKind): Activity {
+	const id = `adhoc-${kind}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+	switch (kind) {
+		case 'cardio':
+			return {
+				id,
+				name: 'Cardio',
+				kind: 'cardio',
+				target: { distanceKm: 3, durationSeconds: 1800 }
+			};
+		case 'strength':
+			return {
+				id,
+				name: 'Strength',
+				kind: 'strength',
+				exercises: [
+					{
+						id: `${id}-custom`,
+						name: 'Custom',
+						kind: 'weighted',
+						primaryMuscles: [],
+						target: { sets: 3, reps: 8, kg: 0 }
+					}
+				]
+			};
+		case 'mobility':
+			return {
+				id,
+				name: 'Mobility',
+				kind: 'mobility',
+				exercises: [
+					{
+						id: `${id}-custom`,
+						name: 'Custom',
+						kind: 'stretch',
+						primaryMuscles: [],
+						target: { sets: 1, durationSeconds: 60 }
+					}
+				]
+			};
+		case 'progress':
+			return {
+				id,
+				name: 'Stats',
+				kind: 'progress',
+				stats: [{ id: `${id}-weight`, name: 'Weight', unit: 'kg' }],
+				allowPhoto: true
+			};
+	}
+}
+
+export function sessionDay(
+	plan: Plan | null,
+	weekday: Weekday,
+	dayId: string,
+	activity: Activity
+): PlanDay {
+	const existing = plan?.days.find((day) => day.id === dayId);
+	if (existing) return existing;
+	return {
+		id: dayId,
+		weekday,
+		name: activityKindLabel(activity.kind),
+		activities: [activity]
+	};
+}

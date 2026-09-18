@@ -1,4 +1,5 @@
-import type { Activity, Exercise, LoggedSet, Session } from './schema';
+import type { Activity, ActivityKind, Exercise, LoggedSet, Session } from './schema';
+import { hasProgressData } from './schema';
 
 export type ExerciseField = 'kg' | 'reps' | 'durationSeconds';
 export type LogField = ExerciseField | 'distanceKm';
@@ -80,16 +81,74 @@ export function previousSessionsFor(
 	return all
 		.filter((session) => {
 			if (session.planId !== planId || session.activityId !== activityId) return false;
-			if (session.weekStart < weekStart) return true;
-			if (session.weekStart !== weekStart || session.dayId === dayId) return false;
-			const otherIndex = dayIndexById[session.dayId];
-			return otherIndex != null && otherIndex < weekdayIndex;
+			return isEarlierSession(session, weekStart, dayId, weekdayIndex, dayIndexById);
 		})
-		.sort((a, b) => {
-			const week = b.weekStart.localeCompare(a.weekStart);
-			if (week !== 0) return week;
-			return (dayIndexById[b.dayId] ?? 0) - (dayIndexById[a.dayId] ?? 0);
-		});
+		.sort(sortSessionsNewestFirst(dayIndexById));
+}
+
+export function previousSessionsForKind(
+	all: Session[],
+	planId: string,
+	kind: ActivityKind,
+	weekStart: string,
+	dayId: string,
+	weekdayIndex = 0,
+	dayIndexById: Record<string, number> = {}
+): Session[] {
+	return all
+		.filter((session) => {
+			if (session.planId !== planId || session.kind !== kind || session.skipped) return false;
+			return isEarlierSession(session, weekStart, dayId, weekdayIndex, dayIndexById);
+		})
+		.sort(sortSessionsNewestFirst(dayIndexById));
+}
+
+export function lastCompletedSession(sessionsNewestFirst: Session[]): Session | undefined {
+	return sessionsNewestFirst.find(
+		(session) =>
+			!session.skipped &&
+			(session.completed ||
+				session.endedAt ||
+				session.sets.some((set) => set.completed) ||
+				hasProgressData(session))
+	);
+}
+
+export function previousStatValue(
+	sessionsNewestFirst: Session[],
+	statId: string,
+	unit?: string
+): number | undefined {
+	for (const session of sessionsNewestFirst) {
+		const match =
+			session.stats.find((stat) => stat.statId === statId && stat.value != null) ??
+			(unit
+				? session.stats.find((stat) => stat.unit === unit && stat.value != null)
+				: undefined);
+		if (match?.value != null) return match.value;
+	}
+	return undefined;
+}
+
+function isEarlierSession(
+	session: Session,
+	weekStart: string,
+	dayId: string,
+	weekdayIndex: number,
+	dayIndexById: Record<string, number>
+): boolean {
+	if (session.weekStart < weekStart) return true;
+	if (session.weekStart !== weekStart || session.dayId === dayId) return false;
+	const otherIndex = dayIndexById[session.dayId];
+	return otherIndex != null && otherIndex < weekdayIndex;
+}
+
+function sortSessionsNewestFirst(dayIndexById: Record<string, number>) {
+	return (a: Session, b: Session) => {
+		const week = b.weekStart.localeCompare(a.weekStart);
+		if (week !== 0) return week;
+		return (dayIndexById[b.dayId] ?? 0) - (dayIndexById[a.dayId] ?? 0);
+	};
 }
 
 export function stepForField(field: LogField): number {
