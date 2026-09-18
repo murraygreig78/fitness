@@ -13,7 +13,9 @@
 		| 'skip'
 		| 'play'
 		| 'circle'
-		| 'back';
+		| 'back'
+		| 'timer'
+		| 'admin';
 
 	let {
 		name,
@@ -70,5 +72,13 @@
 		<circle cx="12" cy="12" r="9" />
 	{:else if name === 'back'}
 		<path d="M15 5 8 12l7 7" />
+	{:else if name === 'timer'}
+		<circle cx="12" cy="13" r="8" />
+		<path d="M12 9v4l2.5 1.5M9 3.5h6" />
+	{:else if name === 'admin'}
+		<circle cx="12" cy="12" r="3" />
+		<path
+			d="M12 3.5v2.2M12 18.3V20.5M5.6 5.6l1.6 1.6M16.8 16.8l1.6 1.6M3.5 12h2.2M18.3 12H20.5M5.6 18.4l1.6-1.6M16.8 7.2l1.6-1.6"
+		/>
 	{/if}
 </svg>

@@ -301,55 +301,61 @@
 {/if}
 
 {#if cardioField && activity?.kind === 'cardio'}
-	{@const usesMinutes = cardioField === 'durationSeconds'}
-	<Keypad
-		label={cardioField === 'distanceKm' ? activity.name : `${activity.name} time`}
-		unit={usesMinutes ? 'min' : 'km'}
-		value={usesMinutes
-			? session?.durationSeconds != null
-				? session.durationSeconds / 60
-				: undefined
-			: session?.distanceKm}
-		last={usesMinutes
-			? previousCardioValue(previous, 'durationSeconds') != null
-				? (previousCardioValue(previous, 'durationSeconds') ?? 0) / 60
-				: undefined
-			: previousCardioValue(previous, 'distanceKm')}
-		step={usesMinutes ? 1 : 0.1}
-		allowDecimal={true}
-		onCommit={async (next) => {
-			const converted = usesMinutes && next != null ? next * 60 : next;
-			await startAnd((current) => ({
-				...current,
-				[cardioField!]: converted,
-				completed: true
-			}));
-			cardioField = null;
-		}}
-		onClose={() => (cardioField = null)}
-	/>
+	{@const field = cardioField}
+	{@const usesMinutes = field === 'durationSeconds'}
+	{#key field}
+		<Keypad
+			label={field === 'distanceKm' ? activity.name : `${activity.name} time`}
+			unit={usesMinutes ? 'min' : 'km'}
+			value={usesMinutes
+				? session?.durationSeconds != null
+					? session.durationSeconds / 60
+					: undefined
+				: session?.distanceKm}
+			last={usesMinutes
+				? previousCardioValue(previous, 'durationSeconds') != null
+					? (previousCardioValue(previous, 'durationSeconds') ?? 0) / 60
+					: undefined
+				: previousCardioValue(previous, 'distanceKm')}
+			allowDecimal={true}
+			onCommit={async (next) => {
+				const converted = usesMinutes && next != null ? next * 60 : next;
+				await startAnd((current) => ({
+					...current,
+					[field]: converted,
+					completed: true
+				}));
+				cardioField = field === 'distanceKm' ? 'durationSeconds' : null;
+			}}
+			onClose={() => (cardioField = null)}
+		/>
+	{/key}
 {/if}
 
 {#if statEditor && activity?.kind === 'progress'}
 	{@const currentStat = statEditor}
 	{@const logged = session?.stats.find((item) => item.statId === currentStat.statId)}
-	<Keypad
-		label={activity.stats.find((stat) => stat.id === currentStat.statId)?.name ?? 'Stat'}
-		unit={currentStat.unit}
-		value={logged?.value}
-		last={previousStatValue(previous, currentStat.statId, currentStat.unit)}
-		step={currentStat.unit === 'kg' || currentStat.unit === 'cm' ? 0.1 : 1}
-		allowDecimal={true}
-		onCommit={async (next) => {
-			await startAnd((current) => ({
-				...current,
-				stats: current.stats.map((stat) =>
-					stat.statId === currentStat.statId ? { ...stat, value: next } : stat
-				),
-				completed: true
-			}));
-			statEditor = null;
-		}}
-		onClose={() => (statEditor = null)}
-	/>
+	{#key currentStat.statId}
+		<Keypad
+			label={activity.stats.find((stat) => stat.id === currentStat.statId)?.name ?? 'Stat'}
+			unit={currentStat.unit}
+			value={logged?.value}
+			last={previousStatValue(previous, currentStat.statId, currentStat.unit)}
+			allowDecimal={true}
+			onCommit={async (next) => {
+				await startAnd((current) => ({
+					...current,
+					stats: current.stats.map((stat) =>
+						stat.statId === currentStat.statId ? { ...stat, value: next } : stat
+					),
+					completed: true
+				}));
+				const stats = activity.stats;
+				const index = stats.findIndex((stat) => stat.id === currentStat.statId);
+				const following = index >= 0 ? stats[index + 1] : undefined;
+				statEditor = following ? { statId: following.id, unit: following.unit } : null;
+			}}
+			onClose={() => (statEditor = null)}
+		/>
+	{/key}
 {/if}
