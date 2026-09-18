@@ -26,7 +26,7 @@
 				error = result.error;
 				return;
 			}
-			message = `Loaded ${fitness.plan?.name ?? 'plan'}. It will repeat each week.`;
+			message = `Loaded ${fitness.plan?.name ?? 'weekly plan'}. It will repeat each week.`;
 		} finally {
 			busy = false;
 		}
@@ -84,10 +84,21 @@
 		URL.revokeObjectURL(url);
 	}
 
+	function exportPlan() {
+		if (!fitness.plan) {
+			error = 'Import a weekly fitness plan before exporting it.';
+			return;
+		}
+		download(`${fitness.plan.id}.json`, fitness.plan);
+		message =
+			'Downloaded your weekly fitness plan. Send this JSON to a trainer or AI for an updated week.';
+	}
+
 	function exportLogs() {
 		const backup = fitness.exportBackup();
-		download(`fitness-logs-${backup.exportedAt.slice(0, 10)}.json`, backup);
-		message = 'Downloaded a private backup of your sessions. Do not commit this file.';
+		download(`fitness-activity-log-${backup.exportedAt.slice(0, 10)}.json`, backup);
+		message =
+			'Downloaded your activity log. Send this to a trainer or AI so they can recommend the next plan.';
 	}
 
 	async function importLogs(event: Event) {
@@ -103,9 +114,9 @@
 				error = result.error;
 				return;
 			}
-			message = `Restored ${fitness.sessions.length} sessions.`;
+			message = `Imported ${fitness.sessions.length} logged activities.`;
 		} catch (caught) {
-			error = caught instanceof Error ? caught.message : 'Could not restore logs';
+			error = caught instanceof Error ? caught.message : 'Could not import activity log';
 		} finally {
 			busy = false;
 			input.value = '';
@@ -114,18 +125,17 @@
 </script>
 
 <header class="mb-6">
-	<p class="text-xs font-semibold tracking-[0.22em] text-lime-300 uppercase">Plan</p>
-	<h1 class="text-2xl font-bold">JSON template</h1>
+	<p class="text-xs font-semibold tracking-[0.22em] text-lime-300 uppercase">Admin</p>
+	<h1 class="text-2xl font-bold">Weekly fitness plan</h1>
 	<p class="mt-1 text-sm leading-6 text-zinc-400">
-		Edit <code class="text-zinc-200">plans/weekly.json</code> in git, or import a file here. A week is
-		days of <strong>activities</strong> (cardio, strength, mobility, progress). Strength and mobility
-		nest exercises underneath. Logs stay in this browser unless you export them.
+		Your week lives in a JSON fitness plan. Export it, send it to a trainer or AI, then import the
+		updated plan they send back.
 	</p>
 </header>
 
 {#if fitness.plan}
 	<section class="mb-5 rounded-3xl border border-zinc-800 bg-zinc-900 p-4">
-		<p class="text-xs tracking-[0.16em] text-zinc-500 uppercase">Active plan</p>
+		<p class="text-xs tracking-[0.16em] text-zinc-500 uppercase">This week’s plan</p>
 		<h2 class="mt-1 text-lg font-semibold">{fitness.plan.name}</h2>
 		<p class="mt-1 text-sm text-zinc-400">{fitness.plan.days.length} training days each week</p>
 		{#if fitness.plan.notes}
@@ -136,11 +146,18 @@
 				<li>{day.weekday}: {day.name} · {summarizeActivities(day.activities)}</li>
 			{/each}
 		</ul>
+		<button
+			type="button"
+			class="mt-4 w-full rounded-2xl border border-zinc-600 py-3 text-sm font-semibold"
+			onclick={exportPlan}
+		>
+			Export weekly plan
+		</button>
 	</section>
 {/if}
 
 <section class="space-y-3 rounded-3xl border border-zinc-800 bg-zinc-900 p-4">
-	<h2 class="font-semibold">Import plan</h2>
+	<h2 class="font-semibold">Import weekly plan</h2>
 	<button
 		type="button"
 		class="w-full rounded-2xl bg-lime-400 py-3 text-sm font-bold text-zinc-950 disabled:opacity-50"
@@ -177,20 +194,20 @@
 </section>
 
 <section class="mt-5 space-y-3 rounded-3xl border border-zinc-800 bg-zinc-900 p-4">
-	<h2 class="font-semibold">Private log backup</h2>
+	<h2 class="font-semibold">Activity log</h2>
 	<p class="text-sm leading-6 text-zinc-400">
-		Session history lives in IndexedDB on this device. Export a JSON backup if you change browsers.
-		Keep that file off the public site.
+		Export a JSON log of the activities you have done. Send it to your personal trainer or an AI
+		agent so they can review the work and recommend the next weekly plan.
 	</p>
 	<button
 		type="button"
 		class="w-full rounded-2xl border border-zinc-600 py-3 text-sm font-semibold"
 		onclick={exportLogs}
 	>
-		Export logs
+		Export activity log
 	</button>
 	<label class="block">
-		<span class="mb-2 block text-sm text-zinc-400">Restore logs JSON</span>
+		<span class="mb-2 block text-sm text-zinc-400">Import activity log</span>
 		<input
 			type="file"
 			accept="application/json,.json"

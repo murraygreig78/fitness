@@ -4,16 +4,19 @@
 	import Icon from '$lib/components/Icon.svelte';
 	import type { IconName } from '$lib/components/Icon.svelte';
 
-	const items: { href: '/' | '/progress' | '/plan'; label: string; icon: IconName }[] = [
+	const items: { href: '/' | '/activities' | '/plan'; label: string; icon: IconName }[] = [
 		{ href: '/', label: 'Week', icon: 'calendar' },
-		{ href: '/progress', label: 'Progress', icon: 'stats' },
-		{ href: '/plan', label: 'Plan', icon: 'plan' }
+		{ href: '/activities', label: 'Activities', icon: 'stats' },
+		{ href: '/plan', label: 'Admin', icon: 'admin' }
 	];
 
 	function active(href: string): boolean {
 		const id = page.route.id ?? '';
 		if (href === '/') {
 			return id === '/' || id.startsWith('/session/');
+		}
+		if (href === '/activities') {
+			return id === '/activities' || id === '/progress';
 		}
 		return id === href || id.startsWith(`${href}/`);
 	}

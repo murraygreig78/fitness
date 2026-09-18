@@ -129,7 +129,7 @@
 			href={resolve('/plan')}
 			class="mt-4 inline-flex rounded-full bg-lime-400 px-4 py-2 text-sm font-semibold text-zinc-950"
 		>
-			Open plan
+			Open admin
 		</a>
 	</section>
 {:else}
