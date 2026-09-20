@@ -7,6 +7,7 @@
 	import Icon from '$lib/components/Icon.svelte';
 	import KindSheet from '$lib/components/KindSheet.svelte';
 	import WeekCalendar from '$lib/components/WeekCalendar.svelte';
+	import Welcome from '$lib/components/Welcome.svelte';
 	import { activityPreview } from '$lib/metrics';
 	import {
 		createAdhocActivity,
@@ -59,9 +60,7 @@
 	const kindsByWeekday = $derived.by(() => {
 		const map = {} as Record<Weekday, ActivityKind[]>;
 		for (const weekday of calendarDays) {
-			map[weekday] = uniqueActivityKinds(
-				fitness.activitiesForWeekday(weekday, fitness.weekStart)
-			);
+			map[weekday] = uniqueActivityKinds(fitness.activitiesForWeekday(weekday, fitness.weekStart));
 		}
 		return map;
 	});
@@ -90,49 +89,39 @@
 	}
 </script>
 
-<header class="mb-5 flex items-center justify-between gap-3">
-	<p class="text-lg font-semibold">{formatMonthYear(fitness.weekStart)}</p>
-	<div class="flex items-center gap-1">
-		<button
-			type="button"
-			class="rounded-full p-2 text-zinc-300"
-			aria-label="Previous week"
-			onclick={() => (fitness.weekStart = shiftWeek(fitness.weekStart, -1))}
-		>
-			<Icon name="chevronLeft" class="h-5 w-5" />
-		</button>
-		<button
-			type="button"
-			class="rounded-full p-2 text-zinc-300 disabled:opacity-30"
-			aria-label="Next week"
-			disabled={isSameWeek(fitness.weekStart)}
-			onclick={() => (fitness.weekStart = shiftWeek(fitness.weekStart, 1))}
-		>
-			<Icon name="chevronRight" class="h-5 w-5" />
-		</button>
-	</div>
-</header>
-
-<WeekCalendar
-	weekStart={fitness.weekStart}
-	selected={selectedWeekday}
-	{kindsByWeekday}
-	onSelect={selectDay}
-/>
-
 {#if !fitness.plan}
-	<section class="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
-		<p class="text-sm leading-6 text-zinc-400">
-			Load a weekly plan once. Scheduled work shows as colored dots; plus starts something extra.
-		</p>
-		<a
-			href={resolve('/plan')}
-			class="mt-4 inline-flex rounded-full bg-lime-400 px-4 py-2 text-sm font-semibold text-zinc-950"
-		>
-			Open admin
-		</a>
-	</section>
+	<Welcome />
 {:else}
+	<header class="mb-5 flex items-center justify-between gap-3">
+		<p class="text-lg font-semibold">{formatMonthYear(fitness.weekStart)}</p>
+		<div class="flex items-center gap-1">
+			<button
+				type="button"
+				class="rounded-full p-2 text-zinc-300"
+				aria-label="Previous week"
+				onclick={() => (fitness.weekStart = shiftWeek(fitness.weekStart, -1))}
+			>
+				<Icon name="chevronLeft" class="h-5 w-5" />
+			</button>
+			<button
+				type="button"
+				class="rounded-full p-2 text-zinc-300 disabled:opacity-30"
+				aria-label="Next week"
+				disabled={isSameWeek(fitness.weekStart)}
+				onclick={() => (fitness.weekStart = shiftWeek(fitness.weekStart, 1))}
+			>
+				<Icon name="chevronRight" class="h-5 w-5" />
+			</button>
+		</div>
+	</header>
+
+	<WeekCalendar
+		weekStart={fitness.weekStart}
+		selected={selectedWeekday}
+		{kindsByWeekday}
+		onSelect={selectDay}
+	/>
+
 	<div class="mt-6 mb-4 flex items-center justify-between gap-3">
 		<div>
 			<p class="text-lg font-semibold">{formatDayLong(selectedDate)}</p>
@@ -161,7 +150,11 @@
 						href={activityHref(activity)}
 						class="flex items-center gap-3 rounded-2xl border border-zinc-800 bg-zinc-900/80 px-3 py-3"
 					>
-						<span class="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-950 {kindTextClass(activity.kind)}">
+						<span
+							class="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-950 {kindTextClass(
+								activity.kind
+							)}"
+						>
 							<Icon name={kindIconName(activity.kind)} class="h-5 w-5" />
 						</span>
 						<span class="min-w-0 flex-1">

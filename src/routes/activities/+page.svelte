@@ -30,7 +30,9 @@
 </header>
 
 {#if !fitness.plan}
-	<p class="text-sm text-zinc-400">Import a plan from Admin, then log a week.</p>
+	<p class="text-sm leading-6 text-zinc-400">
+		Load a weekly plan from the home screen or Admin, then log a week.
+	</p>
 {:else if empty}
 	<p class="text-sm leading-6 text-zinc-400">
 		Nothing logged yet. Finish a set, a walk, or Sunday stats and they will show up here.
@@ -46,7 +48,11 @@
 						<p class="mt-1 font-mono text-2xl">{row.latestLabel}</p>
 						<p class="mt-1 text-sm text-lime-300">{row.bestLabel}</p>
 						{#if row.points.length > 1}
-							<svg class="mt-3 h-8 w-full text-lime-400" viewBox="0 0 100 32" preserveAspectRatio="none">
+							<svg
+								class="mt-3 h-8 w-full text-lime-400"
+								viewBox="0 0 100 32"
+								preserveAspectRatio="none"
+							>
 								<polyline
 									fill="none"
 									stroke="currentColor"
@@ -71,7 +77,11 @@
 						<p class="mt-1 font-mono text-2xl">{row.latestLabel}</p>
 						<p class="mt-1 text-sm text-lime-300">{row.bestLabel}</p>
 						{#if row.points.length > 1}
-							<svg class="mt-3 h-8 w-full text-lime-400" viewBox="0 0 100 32" preserveAspectRatio="none">
+							<svg
+								class="mt-3 h-8 w-full text-lime-400"
+								viewBox="0 0 100 32"
+								preserveAspectRatio="none"
+							>
 								<polyline
 									fill="none"
 									stroke="currentColor"
@@ -88,7 +98,9 @@
 
 	{#if stats.length}
 		<section>
-			<h2 class="mb-3 text-sm font-semibold tracking-[0.16em] text-zinc-500 uppercase">Body stats</h2>
+			<h2 class="mb-3 text-sm font-semibold tracking-[0.16em] text-zinc-500 uppercase">
+				Body stats
+			</h2>
 			<ol class="space-y-3">
 				{#each stats as row (row.id)}
 					<li class="rounded-3xl border border-zinc-800 bg-zinc-900 p-4">
@@ -96,7 +108,11 @@
 						<p class="mt-1 font-mono text-2xl">{row.latestLabel}</p>
 						<p class="mt-1 text-sm text-lime-300">{row.bestLabel}</p>
 						{#if row.points.length > 1}
-							<svg class="mt-3 h-8 w-full text-lime-400" viewBox="0 0 100 32" preserveAspectRatio="none">
+							<svg
+								class="mt-3 h-8 w-full text-lime-400"
+								viewBox="0 0 100 32"
+								preserveAspectRatio="none"
+							>
 								<polyline
 									fill="none"
 									stroke="currentColor"

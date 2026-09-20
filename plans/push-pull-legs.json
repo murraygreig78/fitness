@@ -1,0 +1,402 @@
+{
+	"version": 2,
+	"id": "push-pull-legs-6-day",
+	"name": "Push / pull / legs",
+	"notes": "This advanced plan groups muscles by how they move. Push works chest, shoulders, and triceps. Pull works back and biceps. Legs works quads, hamstrings, and calves. The 3-day cycle repeats so you train 6 days, then rest on Sunday. Weights are starting placeholders.",
+	"days": [
+		{
+			"id": "mon-push-day",
+			"weekday": "monday",
+			"name": "Push",
+			"estimatedMinutes": 55,
+			"activities": [
+				{
+					"id": "mon-push",
+					"name": "Push",
+					"kind": "strength",
+					"restSeconds": 120,
+					"instructions": "Chest, shoulders, and triceps. Rest about 2 minutes between sets.",
+					"exercises": [
+						{
+							"id": "chest-press",
+							"name": "Chest press",
+							"kind": "weighted",
+							"primaryMuscles": [
+								"chest",
+								"triceps"
+							],
+							"instructions": "Lower with control, then press without locking the elbows hard.",
+							"target": {
+								"sets": 3,
+								"reps": 8,
+								"repsMin": 6,
+								"kg": 20
+							},
+							"notes": "Dumbbell floor press is fine at home."
+						},
+						{
+							"id": "shoulder-press",
+							"name": "Shoulder press",
+							"kind": "weighted",
+							"primaryMuscles": [
+								"shoulders",
+								"triceps"
+							],
+							"instructions": "Brace, press up, and do not over-arch the lower back.",
+							"target": {
+								"sets": 3,
+								"reps": 8,
+								"repsMin": 6,
+								"kg": 12
+							}
+						},
+						{
+							"id": "tricep-extension",
+							"name": "Tricep extension",
+							"kind": "weighted",
+							"primaryMuscles": [
+								"triceps"
+							],
+							"instructions": "Keep the elbows still. Lower, then extend without locking hard.",
+							"target": {
+								"sets": 3,
+								"reps": 10,
+								"repsMin": 8,
+								"kg": 10
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "tue-pull-day",
+			"weekday": "tuesday",
+			"name": "Pull",
+			"estimatedMinutes": 55,
+			"activities": [
+				{
+					"id": "tue-pull",
+					"name": "Pull",
+					"kind": "strength",
+					"restSeconds": 120,
+					"instructions": "Back and biceps. Rest about 2 minutes between sets.",
+					"exercises": [
+						{
+							"id": "bent-over-row",
+							"name": "Bent-over row",
+							"kind": "weighted",
+							"primaryMuscles": [
+								"back",
+								"lats"
+							],
+							"instructions": "Hinge, keep the torso still, and pull the elbows toward the hips.",
+							"target": {
+								"sets": 3,
+								"reps": 8,
+								"repsMin": 6,
+								"kg": 16
+							}
+						},
+						{
+							"id": "lat-pulldown",
+							"name": "Lat pulldown",
+							"kind": "weighted",
+							"primaryMuscles": [
+								"lats",
+								"back"
+							],
+							"instructions": "Pull the bar to the upper chest. Do not lean too far back.",
+							"target": {
+								"sets": 3,
+								"reps": 8,
+								"repsMin": 6,
+								"kg": 25
+							},
+							"notes": "One-arm dumbbell rows if you have no cable."
+						},
+						{
+							"id": "bicep-curl",
+							"name": "Bicep curl",
+							"kind": "weighted",
+							"primaryMuscles": [
+								"biceps"
+							],
+							"instructions": "Elbows by the ribs. Lower under control.",
+							"target": {
+								"sets": 3,
+								"reps": 10,
+								"repsMin": 8,
+								"kg": 10
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "wed-legs-day",
+			"weekday": "wednesday",
+			"name": "Legs",
+			"estimatedMinutes": 55,
+			"activities": [
+				{
+					"id": "wed-legs",
+					"name": "Legs",
+					"kind": "strength",
+					"restSeconds": 120,
+					"instructions": "Quads, hamstrings, and calves. Rest about 2 minutes between sets.",
+					"exercises": [
+						{
+							"id": "squat",
+							"name": "Squat",
+							"kind": "weighted",
+							"primaryMuscles": [
+								"quads",
+								"glutes"
+							],
+							"instructions": "Sit between the hips, keep the chest up, then stand tall.",
+							"target": {
+								"sets": 3,
+								"reps": 8,
+								"repsMin": 6,
+								"kg": 20
+							},
+							"notes": "Goblet squat if you train with dumbbells."
+						},
+						{
+							"id": "deadlift",
+							"name": "Deadlift",
+							"kind": "weighted",
+							"primaryMuscles": [
+								"hamstrings",
+								"glutes",
+								"back"
+							],
+							"instructions": "Hinge, keep the weight close, and stand tall without shrugging.",
+							"target": {
+								"sets": 3,
+								"reps": 8,
+								"repsMin": 6,
+								"kg": 30
+							},
+							"notes": "Romanian deadlift with dumbbells is a good home option."
+						},
+						{
+							"id": "calf-raise",
+							"name": "Calf raise",
+							"kind": "weighted",
+							"primaryMuscles": [
+								"calves"
+							],
+							"instructions": "Rise onto the toes, pause, then lower through a full stretch.",
+							"target": {
+								"sets": 3,
+								"reps": 12,
+								"repsMin": 10,
+								"kg": 12
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "thu-push-day",
+			"weekday": "thursday",
+			"name": "Push",
+			"estimatedMinutes": 55,
+			"activities": [
+				{
+					"id": "thu-push",
+					"name": "Push",
+					"kind": "strength",
+					"restSeconds": 120,
+					"instructions": "Chest, shoulders, and triceps. Rest about 2 minutes between sets.",
+					"exercises": [
+						{
+							"id": "chest-press-2",
+							"name": "Chest press",
+							"kind": "weighted",
+							"primaryMuscles": [
+								"chest",
+								"triceps"
+							],
+							"instructions": "Lower with control, then press without locking the elbows hard.",
+							"target": {
+								"sets": 3,
+								"reps": 8,
+								"repsMin": 6,
+								"kg": 20
+							},
+							"notes": "Dumbbell floor press is fine at home."
+						},
+						{
+							"id": "shoulder-press-2",
+							"name": "Shoulder press",
+							"kind": "weighted",
+							"primaryMuscles": [
+								"shoulders",
+								"triceps"
+							],
+							"instructions": "Brace, press up, and do not over-arch the lower back.",
+							"target": {
+								"sets": 3,
+								"reps": 8,
+								"repsMin": 6,
+								"kg": 12
+							}
+						},
+						{
+							"id": "tricep-extension-2",
+							"name": "Tricep extension",
+							"kind": "weighted",
+							"primaryMuscles": [
+								"triceps"
+							],
+							"instructions": "Keep the elbows still. Lower, then extend without locking hard.",
+							"target": {
+								"sets": 3,
+								"reps": 10,
+								"repsMin": 8,
+								"kg": 10
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "fri-pull-day",
+			"weekday": "friday",
+			"name": "Pull",
+			"estimatedMinutes": 55,
+			"activities": [
+				{
+					"id": "fri-pull",
+					"name": "Pull",
+					"kind": "strength",
+					"restSeconds": 120,
+					"instructions": "Back and biceps. Rest about 2 minutes between sets.",
+					"exercises": [
+						{
+							"id": "bent-over-row-2",
+							"name": "Bent-over row",
+							"kind": "weighted",
+							"primaryMuscles": [
+								"back",
+								"lats"
+							],
+							"instructions": "Hinge, keep the torso still, and pull the elbows toward the hips.",
+							"target": {
+								"sets": 3,
+								"reps": 8,
+								"repsMin": 6,
+								"kg": 16
+							}
+						},
+						{
+							"id": "lat-pulldown-2",
+							"name": "Lat pulldown",
+							"kind": "weighted",
+							"primaryMuscles": [
+								"lats",
+								"back"
+							],
+							"instructions": "Pull the bar to the upper chest. Do not lean too far back.",
+							"target": {
+								"sets": 3,
+								"reps": 8,
+								"repsMin": 6,
+								"kg": 25
+							},
+							"notes": "One-arm dumbbell rows if you have no cable."
+						},
+						{
+							"id": "bicep-curl-2",
+							"name": "Bicep curl",
+							"kind": "weighted",
+							"primaryMuscles": [
+								"biceps"
+							],
+							"instructions": "Elbows by the ribs. Lower under control.",
+							"target": {
+								"sets": 3,
+								"reps": 10,
+								"repsMin": 8,
+								"kg": 10
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "sat-legs-day",
+			"weekday": "saturday",
+			"name": "Legs",
+			"estimatedMinutes": 55,
+			"activities": [
+				{
+					"id": "sat-legs",
+					"name": "Legs",
+					"kind": "strength",
+					"restSeconds": 120,
+					"instructions": "Quads, hamstrings, and calves. Rest about 2 minutes between sets.",
+					"exercises": [
+						{
+							"id": "squat-2",
+							"name": "Squat",
+							"kind": "weighted",
+							"primaryMuscles": [
+								"quads",
+								"glutes"
+							],
+							"instructions": "Sit between the hips, keep the chest up, then stand tall.",
+							"target": {
+								"sets": 3,
+								"reps": 8,
+								"repsMin": 6,
+								"kg": 20
+							},
+							"notes": "Goblet squat if you train with dumbbells."
+						},
+						{
+							"id": "deadlift-2",
+							"name": "Deadlift",
+							"kind": "weighted",
+							"primaryMuscles": [
+								"hamstrings",
+								"glutes",
+								"back"
+							],
+							"instructions": "Hinge, keep the weight close, and stand tall without shrugging.",
+							"target": {
+								"sets": 3,
+								"reps": 8,
+								"repsMin": 6,
+								"kg": 30
+							},
+							"notes": "Romanian deadlift with dumbbells is a good home option."
+						},
+						{
+							"id": "calf-raise-2",
+							"name": "Calf raise",
+							"kind": "weighted",
+							"primaryMuscles": [
+								"calves"
+							],
+							"instructions": "Rise onto the toes, pause, then lower through a full stretch.",
+							"target": {
+								"sets": 3,
+								"reps": 12,
+								"repsMin": 10,
+								"kg": 12
+							}
+						}
+					]
+				}
+			]
+		}
+	]
+}

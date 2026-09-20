@@ -1,0 +1,173 @@
+{
+	"version": 2,
+	"id": "full-body-3-day",
+	"name": "Full-body routine",
+	"notes": "This plan works your whole body in each session. Rest a day between workouts. Great for beginners. Weights are starting placeholders — use what you can finish with 1–2 reps in reserve.",
+	"days": [
+		{
+			"id": "mon-full-body",
+			"weekday": "monday",
+			"name": "Full-body strength",
+			"estimatedMinutes": 45,
+			"activities": [
+				{
+					"id": "mon-strength",
+					"name": "Full-body strength",
+					"kind": "strength",
+					"restSeconds": 120,
+					"instructions": "Squats, push-ups, and rows. Rest about 2 minutes between sets.",
+					"exercises": [
+						{
+							"id": "goblet-squat",
+							"name": "Goblet squat",
+							"kind": "weighted",
+							"primaryMuscles": ["quads", "glutes"],
+							"instructions": "Hold a dumbbell at the chest. Sit between the hips, then stand tall.",
+							"notes": "Bodyweight squats are fine if you are new to this.",
+							"target": {
+								"sets": 3,
+								"reps": 8,
+								"repsMin": 6,
+								"kg": 12
+							}
+						},
+						{
+							"id": "push-up",
+							"name": "Push-up",
+							"kind": "bodyweight",
+							"primaryMuscles": ["chest", "triceps"],
+							"instructions": "Hands under the shoulders. Lower the chest, then press up. Drop to the knees if you need to.",
+							"target": {
+								"sets": 3,
+								"reps": 8,
+								"repsMin": 6
+							}
+						},
+						{
+							"id": "db-row",
+							"name": "Dumbbell row",
+							"kind": "weighted",
+							"primaryMuscles": ["back", "lats"],
+							"instructions": "Hinge, keep the torso still, and pull the elbow toward the hip.",
+							"target": {
+								"sets": 3,
+								"reps": 8,
+								"repsMin": 6,
+								"kg": 12
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "wed-full-body",
+			"weekday": "wednesday",
+			"name": "Full-body strength",
+			"estimatedMinutes": 45,
+			"activities": [
+				{
+					"id": "wed-strength",
+					"name": "Full-body strength",
+					"kind": "strength",
+					"restSeconds": 120,
+					"instructions": "Deadlifts and overhead press. Rest about 2 minutes between sets.",
+					"exercises": [
+						{
+							"id": "db-rdl",
+							"name": "Dumbbell Romanian deadlift",
+							"kind": "weighted",
+							"primaryMuscles": ["hamstrings", "glutes"],
+							"instructions": "Soft knees, hinge at the hips, keep the dumbbells close to the legs.",
+							"target": {
+								"sets": 3,
+								"reps": 8,
+								"repsMin": 6,
+								"kg": 12
+							}
+						},
+						{
+							"id": "db-ohp",
+							"name": "Dumbbell overhead press",
+							"kind": "weighted",
+							"primaryMuscles": ["shoulders", "triceps"],
+							"instructions": "Brace, press up, and do not over-arch the lower back.",
+							"target": {
+								"sets": 3,
+								"reps": 8,
+								"repsMin": 6,
+								"kg": 10
+							}
+						},
+						{
+							"id": "glute-bridge",
+							"name": "Glute bridge",
+							"kind": "bodyweight",
+							"primaryMuscles": ["glutes", "hamstrings"],
+							"instructions": "Lie on your back, feet flat. Squeeze the glutes and lift the hips.",
+							"target": {
+								"sets": 3,
+								"reps": 10,
+								"repsMin": 8
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "fri-full-body",
+			"weekday": "friday",
+			"name": "Full-body strength",
+			"estimatedMinutes": 45,
+			"activities": [
+				{
+					"id": "fri-strength",
+					"name": "Full-body strength",
+					"kind": "strength",
+					"restSeconds": 120,
+					"instructions": "Lunges and core. Rest about 2 minutes between sets.",
+					"exercises": [
+						{
+							"id": "db-lunge",
+							"name": "Dumbbell lunge",
+							"kind": "weighted",
+							"primaryMuscles": ["quads", "glutes"],
+							"instructions": "Long step, back knee close to the floor, torso tall. Count reps per leg.",
+							"notes": "Bodyweight lunges are fine if you are new to this.",
+							"target": {
+								"sets": 3,
+								"reps": 8,
+								"repsMin": 6,
+								"kg": 10
+							}
+						},
+						{
+							"id": "lying-leg-raise",
+							"name": "Lying leg raise",
+							"kind": "bodyweight",
+							"primaryMuscles": ["core"],
+							"instructions": "Lower the legs without the lower back peeling off the floor.",
+							"target": {
+								"sets": 3,
+								"reps": 8,
+								"repsMin": 6
+							}
+						},
+						{
+							"id": "front-plank",
+							"name": "Front plank",
+							"kind": "timed",
+							"primaryMuscles": ["core"],
+							"instructions": "Ribs down, glutes on. Hold still.",
+							"target": {
+								"sets": 3,
+								"durationSeconds": 30
+							}
+						}
+					]
+				}
+			]
+		}
+	]
+}

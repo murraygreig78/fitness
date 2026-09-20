@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import { fitness } from '$lib/app-state.svelte';
 	import Nav from '$lib/components/Nav.svelte';
+	import { APP_NAME } from '$lib/samples';
 
 	let { children } = $props();
 
@@ -12,7 +13,7 @@
 </script>
 
 <svelte:head>
-	<title>Fitness</title>
+	<title>{APP_NAME}</title>
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
 	<link
