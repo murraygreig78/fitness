@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { asset } from '$app/paths';
 	import { fitness } from '$lib/app-state.svelte';
-	import { parsePlanJson, summarizeActivities } from '$lib/schema';
+	import SamplePlanList from '$lib/components/SamplePlanList.svelte';
+	import { starterPlans } from '$lib/samples';
+	import { summarizeActivities } from '$lib/schema';
 
 	let paste = $state('');
 	let message = $state<string | null>(null);
@@ -53,25 +54,9 @@
 		}
 	}
 
-	async function loadSample() {
-		busy = true;
+	function loadedSample() {
 		error = null;
-		message = null;
-		try {
-			const response = await fetch(asset('/plans/weekly.json'));
-			if (!response.ok) throw new Error('Sample plan was not found');
-			const json: unknown = await response.json();
-			const parsed = parsePlanJson(json);
-			if ('error' in parsed) {
-				error = parsed.error;
-				return;
-			}
-			await importObject(parsed.plan);
-		} catch (caught) {
-			error = caught instanceof Error ? caught.message : 'Could not load sample';
-		} finally {
-			busy = false;
-		}
+		message = `Loaded ${fitness.plan?.name ?? 'weekly plan'}. It will repeat each week.`;
 	}
 
 	function download(filename: string, payload: unknown) {
@@ -156,16 +141,17 @@
 	</section>
 {/if}
 
+<section class="mb-5 space-y-3">
+	<h2 class="font-semibold">Starter weeks</h2>
+	<p class="text-sm leading-6 text-zinc-400">
+		Load one of these, then your schedule shows on the home screen.
+	</p>
+	<SamplePlanList plans={starterPlans} bind:busy bind:error onLoaded={loadedSample} />
+</section>
+
 <section class="space-y-3 rounded-3xl border border-zinc-800 bg-zinc-900 p-4">
 	<h2 class="font-semibold">Import weekly plan</h2>
-	<button
-		type="button"
-		class="w-full rounded-2xl bg-lime-400 py-3 text-sm font-bold text-zinc-950 disabled:opacity-50"
-		disabled={busy}
-		onclick={loadSample}
-	>
-		Load sample week
-	</button>
+	<p class="text-sm leading-6 text-zinc-400">Bring your own JSON from a trainer or an AI.</p>
 	<label class="block">
 		<span class="mb-2 block text-sm text-zinc-400">Upload JSON</span>
 		<input
@@ -180,8 +166,7 @@
 		<textarea
 			class="min-h-40 w-full rounded-2xl border border-zinc-800 bg-zinc-950 p-3 font-mono text-xs"
 			bind:value={paste}
-			placeholder={'{ "version": 2, "id": "...", "days": [{ "activities": [...] }] }'}
-		></textarea>
+			placeholder={'{ "version": 2, "id": "...", "days": [{ "activities": [...] }] }'}></textarea>
 	</label>
 	<button
 		type="button"

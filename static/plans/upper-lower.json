@@ -1,0 +1,238 @@
+{
+	"version": 2,
+	"id": "upper-lower-4-day",
+	"name": "Upper / lower split",
+	"notes": "This plan divides your body into top and bottom halves. Train upper on some days and lower on others so you can do more volume. Weights are starting placeholders — use what you can finish with 1–2 reps in reserve.",
+	"days": [
+		{
+			"id": "mon-upper",
+			"weekday": "monday",
+			"name": "Upper body",
+			"estimatedMinutes": 50,
+			"activities": [
+				{
+					"id": "mon-upper-strength",
+					"name": "Upper body",
+					"kind": "strength",
+					"restSeconds": 120,
+					"instructions": "Chest press, rows, and shoulder press. Rest about 2 minutes between sets.",
+					"exercises": [
+						{
+							"id": "chest-press",
+							"name": "Chest press",
+							"kind": "weighted",
+							"primaryMuscles": ["chest", "triceps"],
+							"instructions": "Lower with control, then press without locking the elbows hard.",
+							"notes": "Dumbbell floor press is fine if you train at home.",
+							"target": {
+								"sets": 3,
+								"reps": 8,
+								"repsMin": 6,
+								"kg": 20
+							}
+						},
+						{
+							"id": "bent-over-row",
+							"name": "Bent-over row",
+							"kind": "weighted",
+							"primaryMuscles": ["back", "lats"],
+							"instructions": "Hinge, keep the torso still, and pull the elbows toward the hips.",
+							"target": {
+								"sets": 3,
+								"reps": 8,
+								"repsMin": 6,
+								"kg": 16
+							}
+						},
+						{
+							"id": "shoulder-press",
+							"name": "Shoulder press",
+							"kind": "weighted",
+							"primaryMuscles": ["shoulders", "triceps"],
+							"instructions": "Brace, press up, and do not over-arch the lower back.",
+							"target": {
+								"sets": 3,
+								"reps": 8,
+								"repsMin": 6,
+								"kg": 12
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "tue-lower",
+			"weekday": "tuesday",
+			"name": "Lower body",
+			"estimatedMinutes": 50,
+			"activities": [
+				{
+					"id": "tue-lower-strength",
+					"name": "Lower body",
+					"kind": "strength",
+					"restSeconds": 120,
+					"instructions": "Squats, leg extensions, and calves. Rest about 2 minutes between sets.",
+					"exercises": [
+						{
+							"id": "squat",
+							"name": "Squat",
+							"kind": "weighted",
+							"primaryMuscles": ["quads", "glutes"],
+							"instructions": "Sit between the hips, keep the chest up, then stand tall.",
+							"notes": "Goblet squat if you train with dumbbells.",
+							"target": {
+								"sets": 3,
+								"reps": 8,
+								"repsMin": 6,
+								"kg": 20
+							}
+						},
+						{
+							"id": "leg-extension",
+							"name": "Leg extension",
+							"kind": "weighted",
+							"primaryMuscles": ["quads"],
+							"instructions": "Extend the knees without snapping them straight. Lower slowly.",
+							"notes": "Swap for split squats or goblet squats at home.",
+							"target": {
+								"sets": 3,
+								"reps": 10,
+								"repsMin": 8,
+								"kg": 20
+							}
+						},
+						{
+							"id": "calf-raise",
+							"name": "Calf raise",
+							"kind": "weighted",
+							"primaryMuscles": ["calves"],
+							"instructions": "Rise onto the toes, pause, then lower through a full stretch.",
+							"target": {
+								"sets": 3,
+								"reps": 12,
+								"repsMin": 10,
+								"kg": 12
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "thu-upper",
+			"weekday": "thursday",
+			"name": "Upper body",
+			"estimatedMinutes": 50,
+			"activities": [
+				{
+					"id": "thu-upper-strength",
+					"name": "Upper body",
+					"kind": "strength",
+					"restSeconds": 120,
+					"instructions": "Pull-downs, curls, and triceps. Rest about 2 minutes between sets.",
+					"exercises": [
+						{
+							"id": "lat-pulldown",
+							"name": "Lat pulldown",
+							"kind": "weighted",
+							"primaryMuscles": ["lats", "back"],
+							"instructions": "Pull the bar to the upper chest. Do not lean too far back.",
+							"notes": "One-arm dumbbell rows if you have no cable.",
+							"target": {
+								"sets": 3,
+								"reps": 8,
+								"repsMin": 6,
+								"kg": 25
+							}
+						},
+						{
+							"id": "bicep-curl",
+							"name": "Bicep curl",
+							"kind": "weighted",
+							"primaryMuscles": ["biceps"],
+							"instructions": "Elbows by the ribs. Lower under control.",
+							"target": {
+								"sets": 3,
+								"reps": 10,
+								"repsMin": 8,
+								"kg": 10
+							}
+						},
+						{
+							"id": "tricep-extension",
+							"name": "Tricep extension",
+							"kind": "weighted",
+							"primaryMuscles": ["triceps"],
+							"instructions": "Keep the elbows still. Lower, then extend without locking hard.",
+							"target": {
+								"sets": 3,
+								"reps": 10,
+								"repsMin": 8,
+								"kg": 10
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "fri-lower",
+			"weekday": "friday",
+			"name": "Lower body",
+			"estimatedMinutes": 50,
+			"activities": [
+				{
+					"id": "fri-lower-strength",
+					"name": "Lower body",
+					"kind": "strength",
+					"restSeconds": 120,
+					"instructions": "Deadlifts and lunges. Rest about 2 minutes between sets.",
+					"exercises": [
+						{
+							"id": "deadlift",
+							"name": "Deadlift",
+							"kind": "weighted",
+							"primaryMuscles": ["hamstrings", "glutes", "back"],
+							"instructions": "Hinge, keep the weight close, and stand tall without shrugging.",
+							"notes": "Romanian deadlift with dumbbells is a good home option.",
+							"target": {
+								"sets": 3,
+								"reps": 8,
+								"repsMin": 6,
+								"kg": 30
+							}
+						},
+						{
+							"id": "lunge",
+							"name": "Lunge",
+							"kind": "weighted",
+							"primaryMuscles": ["quads", "glutes"],
+							"instructions": "Long step, back knee close to the floor, torso tall. Count reps per leg.",
+							"target": {
+								"sets": 3,
+								"reps": 8,
+								"repsMin": 6,
+								"kg": 12
+							}
+						},
+						{
+							"id": "leg-curl",
+							"name": "Leg curl",
+							"kind": "weighted",
+							"primaryMuscles": ["hamstrings"],
+							"instructions": "Curl the heels toward the glutes. Lower slowly.",
+							"notes": "Swap for extra Romanian deadlifts at home.",
+							"target": {
+								"sets": 3,
+								"reps": 10,
+								"repsMin": 8,
+								"kg": 20
+							}
+						}
+					]
+				}
+			]
+		}
+	]
+}
