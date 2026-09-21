@@ -23,6 +23,7 @@
 		applyExerciseTarget,
 		displayedSetCount,
 		isWarmupSet,
+		restSecondsFor,
 		restSecondsForSet,
 		setCount,
 		type Activity,
@@ -339,6 +340,12 @@
 				allowDecimal: false
 			});
 		}
+		fields.push({
+			field: 'restSeconds',
+			label: 'rest min',
+			value: Number((restSecondsFor(exercise, activity) / 60).toFixed(2)),
+			allowDecimal: true
+		});
 		return fields;
 	}
 
@@ -346,7 +353,8 @@
 		const exercise = focusedExercise();
 		const field = targetField;
 		if (!exercise || !field || !onUpdateExercise) return;
-		const updated = applyExerciseTarget(exercise, field, next);
+		const value = field === 'restSeconds' ? (next == null ? undefined : next * 60) : next;
+		const updated = applyExerciseTarget(exercise, field, value);
 		if ('error' in updated) return;
 		await onUpdateExercise(updated);
 		targetField = null;
@@ -597,11 +605,13 @@
 								<span class="font-mono text-xl font-semibold">
 									{row.field === 'durationSeconds'
 										? displayField(exercise, 'durationSeconds', row.value)
-										: row.value == null
-											? '—'
-											: row.field === 'kg'
-												? formatKg(row.value)
-												: String(row.value)}
+										: row.field === 'restSeconds'
+											? formatDuration(restSecondsFor(exercise, activity))
+											: row.value == null
+												? '—'
+												: row.field === 'kg'
+													? formatKg(row.value)
+													: String(row.value)}
 								</span>
 							</button>
 						</li>

@@ -73,13 +73,27 @@ export const exerciseSchema = z.discriminatedUnion('kind', [
 
 export type Exercise = z.infer<typeof exerciseSchema>;
 
-export type ExerciseTargetField = 'sets' | 'reps' | 'repsMin' | 'kg' | 'durationSeconds';
+export type ExerciseTargetField =
+	| 'sets'
+	| 'reps'
+	| 'repsMin'
+	| 'kg'
+	| 'durationSeconds'
+	| 'restSeconds';
 
 export function applyExerciseTarget(
 	exercise: Exercise,
 	field: ExerciseTargetField,
 	next: number | undefined
 ): Exercise | { error: string } {
+	if (field === 'restSeconds') {
+		const nextExercise: Record<string, unknown> = { ...exercise };
+		if (next == null) delete nextExercise.restSeconds;
+		else nextExercise.restSeconds = Math.max(0, Math.round(next));
+		const parsed = exerciseSchema.safeParse(nextExercise);
+		if (!parsed.success) return { error: formatZodError(parsed.error) };
+		return parsed.data;
+	}
 	const target: Record<string, unknown> = { ...exercise.target };
 	if (field === 'sets') {
 		target.sets = Math.max(1, Math.round(next ?? exercise.target.sets));
