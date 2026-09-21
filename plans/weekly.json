@@ -29,6 +29,7 @@
 							"id": "db-deadlift",
 							"name": "Dumbbell deadlift",
 							"kind": "weighted",
+							"warmup": true,
 							"primaryMuscles": [
 								"back",
 								"glutes",
@@ -48,6 +49,7 @@
 							"id": "db-bent-over-row",
 							"name": "Dumbbell bent-over row",
 							"kind": "weighted",
+							"warmup": true,
 							"primaryMuscles": [
 								"back",
 								"lats"
@@ -66,6 +68,7 @@
 							"id": "db-shoulder-press",
 							"name": "Dumbbell standing shoulder press",
 							"kind": "weighted",
+							"warmup": true,
 							"primaryMuscles": [
 								"shoulders",
 								"triceps"
@@ -84,6 +87,7 @@
 							"id": "db-lateral-raise",
 							"name": "Dumbbell lateral raise",
 							"kind": "weighted",
+							"warmup": true,
 							"primaryMuscles": [
 								"shoulders"
 							],
@@ -424,6 +428,7 @@
 							"id": "db-floor-press",
 							"name": "Dumbbell floor press",
 							"kind": "weighted",
+							"warmup": true,
 							"primaryMuscles": [
 								"chest",
 								"triceps"
@@ -442,6 +447,7 @@
 							"id": "db-floor-fly",
 							"name": "Dumbbell floor fly",
 							"kind": "weighted",
+							"warmup": true,
 							"primaryMuscles": [
 								"chest"
 							],
@@ -458,6 +464,7 @@
 							"id": "db-curl",
 							"name": "Dumbbell curl",
 							"kind": "weighted",
+							"warmup": true,
 							"primaryMuscles": [
 								"biceps"
 							],
@@ -475,6 +482,7 @@
 							"id": "db-tricep-extension",
 							"name": "Dumbbell standing tricep extension",
 							"kind": "weighted",
+							"warmup": true,
 							"primaryMuscles": [
 								"triceps"
 							],
@@ -815,6 +823,7 @@
 							"id": "db-goblet-squat",
 							"name": "Dumbbell goblet squat",
 							"kind": "weighted",
+							"warmup": true,
 							"primaryMuscles": [
 								"quads",
 								"glutes"
@@ -833,6 +842,7 @@
 							"id": "db-lunge",
 							"name": "Dumbbell lunge",
 							"kind": "weighted",
+							"warmup": true,
 							"primaryMuscles": [
 								"quads",
 								"glutes"
@@ -851,6 +861,7 @@
 							"id": "db-rdl",
 							"name": "Dumbbell Romanian deadlift",
 							"kind": "weighted",
+							"warmup": true,
 							"primaryMuscles": [
 								"hamstrings",
 								"glutes"

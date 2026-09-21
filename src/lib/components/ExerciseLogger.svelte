@@ -15,13 +15,15 @@
 	} from '$lib/previous';
 	import {
 		displayedSetCount,
-		restSecondsFor,
+		isWarmupSet,
+		restSecondsForSet,
 		setCount,
 		type Activity,
 		type Exercise,
 		type LoggedSet,
 		type Session
 	} from '$lib/schema';
+	import { hasWarmupSets, lastWorkingKg, warmupAllowed, warmupSetsFor } from '$lib/warmup';
 	import { onDestroy } from 'svelte';
 
 	let {
@@ -47,6 +49,7 @@
 		exercise: Exercise;
 		setIndex: number;
 		field: LogField;
+		warmup: boolean;
 	} | null>(null);
 	let extraByExercise = $state<Record<string, number>>({});
 	let focusedId = $state<string | null>(null);
@@ -76,8 +79,8 @@
 		return String(raw);
 	}
 
-	async function openEditor(exercise: Exercise, setIndex: number, field: LogField) {
-		editor = { exercise, setIndex, field };
+	async function openEditor(exercise: Exercise, setIndex: number, field: LogField, warmup = false) {
+		editor = { exercise, setIndex, field, warmup };
 		if (session.startedAt) return;
 		await onSave({
 			...session,
@@ -87,8 +90,8 @@
 		});
 	}
 
-	function startRest(exercise: Exercise) {
-		const seconds = restSecondsFor(exercise, activity);
+	function startRest(exercise: Exercise, warmup = false) {
+		const seconds = restSecondsForSet(exercise, activity, warmup);
 		if (seconds > 0) restUntil = Date.now() + seconds * 1000;
 	}
 
@@ -100,49 +103,61 @@
 	function nextEditor(
 		exercise: Exercise,
 		setIndex: number,
-		field: LogField
-	): { exercise: Exercise; setIndex: number; field: LogField } | null {
+		field: LogField,
+		warmup: boolean
+	): { exercise: Exercise; setIndex: number; field: LogField; warmup: boolean } | null {
 		const fields = fieldsForExercise(exercise);
 		const fieldIndex = fields.indexOf(field);
 		if (fieldIndex >= 0 && fieldIndex < fields.length - 1) {
-			return { exercise, setIndex, field: fields[fieldIndex + 1] };
+			return { exercise, setIndex, field: fields[fieldIndex + 1], warmup };
 		}
 		return null;
 	}
 
 	function plannedSetsDone(exercise: Exercise, sets: LoggedSet[]): boolean {
 		return Array.from({ length: setCount(exercise) }, (_, index) =>
-			Boolean(findSet(sets, exercise.id, index)?.completed)
+			Boolean(findSet(sets, exercise.id, index, false)?.completed)
 		).every(Boolean);
 	}
 
 	function completedSetCount(exercise: Exercise): number {
-		return session.sets.filter((set) => set.exerciseId === exercise.id && set.completed).length;
+		return session.sets.filter(
+			(set) => set.exerciseId === exercise.id && set.completed && !isWarmupSet(set)
+		).length;
+	}
+
+	function upsertSet(sets: LoggedSet[], patch: LoggedSet): LoggedSet[] {
+		const existing = findSet(sets, patch.exerciseId, patch.setIndex, Boolean(patch.warmup));
+		if (!existing) return [...sets, patch];
+		return sets.map((set) =>
+			set.exerciseId === patch.exerciseId &&
+			set.setIndex === patch.setIndex &&
+			Boolean(set.warmup) === Boolean(patch.warmup)
+				? { ...set, ...patch }
+				: set
+		);
 	}
 
 	async function saveField(next: number | undefined) {
 		const current = editor;
 		if (!current) return;
-		const { exercise, setIndex, field } = current;
-		const existing = findSet(session.sets, exercise.id, setIndex);
+		const { exercise, setIndex, field, warmup } = current;
+		const existing = findSet(session.sets, exercise.id, setIndex, warmup);
 		const completing = next != null && isCompletingField(exercise, field);
 		const patch: LoggedSet = {
 			exerciseId: exercise.id,
 			setIndex,
+			warmup,
 			completed: completing ? true : (existing?.completed ?? false),
 			kg: existing?.kg ?? targetFieldValue(exercise, 'kg'),
 			reps: existing?.reps ?? targetFieldValue(exercise, 'reps'),
 			durationSeconds: existing?.durationSeconds ?? targetFieldValue(exercise, 'durationSeconds'),
 			[field]: next
 		};
-		const sets = existing
-			? session.sets.map((set) =>
-					set.exerciseId === exercise.id && set.setIndex === setIndex ? { ...set, ...patch } : set
-				)
-			: [...session.sets, patch];
-		const resting = completing && restSecondsFor(exercise, activity) > 0;
-		editor = resting ? null : nextEditor(exercise, setIndex, field);
-		if (completing) startRest(exercise);
+		const sets = upsertSet(session.sets, patch);
+		const resting = completing && restSecondsForSet(exercise, activity, warmup) > 0;
+		editor = resting ? null : nextEditor(exercise, setIndex, field, warmup);
+		if (completing) startRest(exercise, warmup);
 		await onSave({
 			...session,
 			startedAt: session.startedAt ?? new Date().toISOString(),
@@ -150,26 +165,23 @@
 			endedAt: null,
 			sets
 		});
-		if (plannedSetsDone(exercise, sets)) focusedId = null;
+		if (!warmup && plannedSetsDone(exercise, sets)) focusedId = null;
 	}
 
-	async function toggleComplete(exercise: Exercise, setIndex: number) {
-		const existing = findSet(session.sets, exercise.id, setIndex);
+	async function toggleComplete(exercise: Exercise, setIndex: number, warmup = false) {
+		const existing = findSet(session.sets, exercise.id, setIndex, warmup);
 		const completed = !existing?.completed;
 		const patch: LoggedSet = {
 			exerciseId: exercise.id,
 			setIndex,
+			warmup,
 			completed,
 			kg: existing?.kg ?? targetFieldValue(exercise, 'kg'),
 			reps: existing?.reps ?? targetFieldValue(exercise, 'reps'),
 			durationSeconds: existing?.durationSeconds ?? targetFieldValue(exercise, 'durationSeconds')
 		};
-		const sets = existing
-			? session.sets.map((set) =>
-					set.exerciseId === exercise.id && set.setIndex === setIndex ? patch : set
-				)
-			: [...session.sets, patch];
-		if (completed) startRest(exercise);
+		const sets = upsertSet(session.sets, patch);
+		if (completed) startRest(exercise, warmup);
 		else restUntil = null;
 		await onSave({
 			...session,
@@ -178,16 +190,16 @@
 			endedAt: null,
 			sets
 		});
-		if (completed && plannedSetsDone(exercise, sets)) focusedId = null;
+		if (completed && !warmup && plannedSetsDone(exercise, sets)) focusedId = null;
 	}
 
-	function lastFor(exercise: Exercise, setIndex: number, field: LogField) {
-		return lastUsedFieldValue(session.sets, previous, exercise.id, setIndex, field);
+	function lastFor(exercise: Exercise, setIndex: number, field: LogField, warmup = false) {
+		return lastUsedFieldValue(session.sets, previous, exercise.id, setIndex, field, warmup);
 	}
 
 	function lastSet(exercise: Exercise): LoggedSet | undefined {
 		return session.sets
-			.filter((set) => set.exerciseId === exercise.id)
+			.filter((set) => set.exerciseId === exercise.id && !isWarmupSet(set))
 			.sort((a, b) => a.setIndex - b.setIndex)
 			.at(-1);
 	}
@@ -203,6 +215,27 @@
 		return Array.from({ length: rowCount(exercise) }, (_, index) => index);
 	}
 
+	function visibleRows(exercise: Exercise): { setIndex: number; warmup: boolean }[] {
+		const warmupRows = session.sets
+			.filter((set) => set.exerciseId === exercise.id && isWarmupSet(set))
+			.sort((a, b) => a.setIndex - b.setIndex)
+			.map((set) => ({ setIndex: set.setIndex, warmup: true }));
+		const workRows = setIndexes(exercise).map((setIndex) => ({ setIndex, warmup: false }));
+		return [...warmupRows, ...workRows];
+	}
+
+	function addWarmup(exercise: Exercise) {
+		if (!warmupAllowed(exercise) || hasWarmupSets(session.sets, exercise.id)) return;
+		const baseKg = lastWorkingKg(session.sets, previous, exercise);
+		void onSave({
+			...session,
+			startedAt: session.startedAt ?? new Date().toISOString(),
+			skipped: false,
+			endedAt: null,
+			sets: [...session.sets, ...warmupSetsFor(exercise, baseKg)]
+		});
+	}
+
 	function addSet(exercise: Exercise) {
 		const nextIndex = rowCount(exercise);
 		extraByExercise = {
@@ -213,6 +246,7 @@
 		const extra: LoggedSet = {
 			exerciseId: exercise.id,
 			setIndex: nextIndex,
+			warmup: false,
 			completed: false,
 			kg: prior?.kg ?? targetFieldValue(exercise, 'kg'),
 			reps: prior?.reps ?? targetFieldValue(exercise, 'reps'),
@@ -223,7 +257,7 @@
 			startedAt: session.startedAt ?? new Date().toISOString(),
 			skipped: false,
 			endedAt: null,
-			sets: findSet(session.sets, exercise.id, nextIndex)
+			sets: findSet(session.sets, exercise.id, nextIndex, false)
 				? session.sets
 				: [...session.sets, extra]
 		});
@@ -312,14 +346,27 @@
 					Superset · alternate, then rest
 				</p>
 			{/if}
+			{#if warmupAllowed(exercise) && !hasWarmupSets(session.sets, exercise.id)}
+				<button
+					type="button"
+					class="mt-3 w-full rounded-2xl border border-lime-400/40 py-3 text-sm font-semibold text-lime-300"
+					onclick={() => addWarmup(exercise)}
+				>
+					Warm up
+				</button>
+			{/if}
 			<ol class="mt-3 space-y-2">
-				{#each setIndexes(exercise) as setIndex (setIndex)}
-					{@const logged = findSet(session.sets, exercise.id, setIndex)}
-					{@const extra = setIndex >= setCount(exercise)}
+				{#each visibleRows(exercise) as row (`${row.warmup ? 'w' : 's'}:${row.setIndex}`)}
+					{@const logged = findSet(session.sets, exercise.id, row.setIndex, row.warmup)}
+					{@const extra = !row.warmup && row.setIndex >= setCount(exercise)}
 					<li class="rounded-2xl bg-zinc-950/70 p-3">
 						<div class="mb-2 flex items-center justify-between">
 							<p class="text-xs font-semibold tracking-[0.16em] text-zinc-500 uppercase">
-								Set {setIndex + 1}{extra ? ' · extra' : ''}
+								{#if row.warmup}
+									Warm-up {row.setIndex + 1}
+								{:else}
+									Set {row.setIndex + 1}{extra ? ' · extra' : ''}
+								{/if}
 							</p>
 							<button
 								type="button"
@@ -327,7 +374,7 @@
 									? 'bg-lime-400 text-zinc-950'
 									: 'bg-zinc-800 text-zinc-400'}"
 								aria-label={logged?.completed ? 'Set complete' : 'Mark set complete'}
-								onclick={() => toggleComplete(exercise, setIndex)}
+								onclick={() => toggleComplete(exercise, row.setIndex, row.warmup)}
 							>
 								<Icon name={logged?.completed ? 'check' : 'circle'} class="h-5 w-5" />
 							</button>
@@ -337,7 +384,7 @@
 								<button
 									type="button"
 									class="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-3 text-left"
-									onclick={() => openEditor(exercise, setIndex, field)}
+									onclick={() => openEditor(exercise, row.setIndex, field, row.warmup)}
 								>
 									<p class="text-[11px] tracking-[0.16em] text-zinc-500 uppercase">
 										{fieldLabel(field)}
@@ -369,13 +416,13 @@
 {/if}
 
 {#if editor}
-	{@const currentSet = findSet(session.sets, editor.exercise.id, editor.setIndex)}
-	{#key `${editor.exercise.id}:${editor.setIndex}:${editor.field}`}
+	{@const currentSet = findSet(session.sets, editor.exercise.id, editor.setIndex, editor.warmup)}
+	{#key `${editor.exercise.id}:${editor.warmup ? 'w' : 's'}:${editor.setIndex}:${editor.field}`}
 		<Keypad
-			label={`${editor.exercise.name} · set ${editor.setIndex + 1}`}
+			label={`${editor.exercise.name} · ${editor.warmup ? 'warm-up' : 'set'} ${editor.setIndex + 1}`}
 			unit={fieldLabel(editor.field)}
 			value={currentSet ? setFieldValue(currentSet, editor.field) : undefined}
-			last={lastFor(editor.exercise, editor.setIndex, editor.field)}
+			last={lastFor(editor.exercise, editor.setIndex, editor.field, editor.warmup)}
 			allowDecimal={editor.field === 'kg'}
 			showTimer={true}
 			onCommit={saveField}
@@ -383,10 +430,9 @@
 			onTimer={() => {
 				const current = editor;
 				if (!current) return;
-				startRest(current.exercise);
+				startRest(current.exercise, current.warmup);
 				editor = null;
 			}}
 		/>
 	{/key}
 {/if}
-

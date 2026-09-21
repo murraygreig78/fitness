@@ -60,7 +60,8 @@ const exerciseBase = {
 	instructions: optionalText,
 	notes: optionalText,
 	restSeconds: z.number().nonnegative().optional(),
-	supersetId: optionalText
+	supersetId: optionalText,
+	warmup: z.boolean().default(false)
 };
 
 export const exerciseSchema = z.discriminatedUnion('kind', [
@@ -143,7 +144,8 @@ export const loggedSetSchema = z.object({
 	reps: z.number().nonnegative().optional(),
 	kg: z.number().nonnegative().optional(),
 	durationSeconds: z.number().nonnegative().optional(),
-	completed: z.boolean()
+	completed: z.boolean(),
+	warmup: z.boolean().default(false)
 });
 
 export type LoggedSet = z.infer<typeof loggedSetSchema>;
@@ -216,8 +218,14 @@ export function setCount(exercise: Exercise): number {
 	return exercise.target.sets;
 }
 
+export function isWarmupSet(set: LoggedSet): boolean {
+	return Boolean(set.warmup);
+}
+
 export function loggedSetCount(sets: LoggedSet[], exerciseId: string): number {
-	const indexes = sets.filter((set) => set.exerciseId === exerciseId).map((set) => set.setIndex);
+	const indexes = sets
+		.filter((set) => set.exerciseId === exerciseId && !isWarmupSet(set))
+		.map((set) => set.setIndex);
 	if (!indexes.length) return 0;
 	return Math.max(...indexes) + 1;
 }
@@ -228,10 +236,17 @@ export function displayedSetCount(exercise: Exercise, sets: LoggedSet[]): number
 
 export function mergeLoggedSets(current: LoggedSet[], incoming: LoggedSet[]): LoggedSet[] {
 	const map = new Map<string, LoggedSet>();
-	for (const set of current) map.set(`${set.exerciseId}:${set.setIndex}`, set);
-	for (const set of incoming) map.set(`${set.exerciseId}:${set.setIndex}`, set);
+	for (const set of current) {
+		map.set(`${set.exerciseId}:${set.setIndex}:${isWarmupSet(set) ? 'w' : 's'}`, set);
+	}
+	for (const set of incoming) {
+		map.set(`${set.exerciseId}:${set.setIndex}:${isWarmupSet(set) ? 'w' : 's'}`, set);
+	}
 	return [...map.values()].sort(
-		(a, b) => a.exerciseId.localeCompare(b.exerciseId) || a.setIndex - b.setIndex
+		(a, b) =>
+			a.exerciseId.localeCompare(b.exerciseId) ||
+			Number(isWarmupSet(b)) - Number(isWarmupSet(a)) ||
+			a.setIndex - b.setIndex
 	);
 }
 
@@ -245,6 +260,7 @@ export function emptySetsForActivity(activity: Activity): LoggedSet[] {
 		Array.from({ length: setCount(exercise) }, (_, setIndex) => ({
 			exerciseId: exercise.id,
 			setIndex,
+			warmup: false,
 			completed: false
 		}))
 	);
@@ -256,6 +272,12 @@ export function restSecondsFor(exercise: Exercise, activity: Activity): number {
 		return activity.restSeconds ?? DEFAULT_STRENGTH_REST_SECONDS;
 	}
 	return 0;
+}
+
+export function restSecondsForSet(exercise: Exercise, activity: Activity, warmup: boolean): number {
+	const full = restSecondsFor(exercise, activity);
+	if (!warmup) return full;
+	return Math.round(full / 2);
 }
 
 export function emptyStatsForActivity(activity: Activity): LoggedStat[] {
@@ -316,7 +338,8 @@ export function dayStatus(day: PlanDay, sessions: Session[]): SessionStatus {
 	const statuses = day.activities.map((activity) => sessionStatus(byActivity.get(activity.id)));
 	if (statuses.every((status) => status === 'done')) return 'done';
 	if (statuses.every((status) => status === 'skipped')) return 'skipped';
-	if (statuses.some((status) => status === 'in-progress' || status === 'done')) return 'in-progress';
+	if (statuses.some((status) => status === 'in-progress' || status === 'done'))
+		return 'in-progress';
 	return 'upcoming';
 }
 
@@ -418,6 +441,7 @@ export function createAdhocActivity(kind: ActivityKind): Activity {
 						name: 'Custom',
 						kind: 'weighted',
 						primaryMuscles: [],
+						warmup: false,
 						target: { sets: 3, reps: 8, kg: 0 }
 					}
 				]
@@ -433,6 +457,7 @@ export function createAdhocActivity(kind: ActivityKind): Activity {
 						name: 'Custom',
 						kind: 'stretch',
 						primaryMuscles: [],
+						warmup: false,
 						target: { sets: 1, durationSeconds: 60 }
 					}
 				]
