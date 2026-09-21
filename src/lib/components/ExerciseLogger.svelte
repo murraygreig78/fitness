@@ -2,7 +2,13 @@
 	import Keypad from '$lib/components/Keypad.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import RestTimer from '$lib/components/RestTimer.svelte';
-	import { formatClock, formatDuration, formatKg, formatMuscle } from '$lib/format';
+	import {
+		formatClock,
+		formatDuration,
+		formatKg,
+		formatMuscle,
+		formVideoSearchUrl
+	} from '$lib/format';
 	import { sessionSeconds, targetPreview } from '$lib/metrics';
 	import {
 		fieldsForExercise,
@@ -14,12 +20,14 @@
 		type LogField
 	} from '$lib/previous';
 	import {
+		applyExerciseTarget,
 		displayedSetCount,
 		isWarmupSet,
 		restSecondsForSet,
 		setCount,
 		type Activity,
 		type Exercise,
+		type ExerciseTargetField,
 		type LoggedSet,
 		type Session
 	} from '$lib/schema';
@@ -32,6 +40,7 @@
 		exercises,
 		previous,
 		onSave,
+		onUpdateExercise,
 		allowExtraSets = false
 	}: {
 		session: Session;
@@ -39,6 +48,7 @@
 		exercises: Exercise[];
 		previous: Session[];
 		onSave: (session: Session) => Promise<void>;
+		onUpdateExercise?: (exercise: Exercise) => Promise<void>;
 		allowExtraSets?: boolean;
 	} = $props();
 
@@ -53,6 +63,8 @@
 	} | null>(null);
 	let extraByExercise = $state<Record<string, number>>({});
 	let focusedId = $state<string | null>(null);
+	let editingTarget = $state(false);
+	let targetField = $state<ExerciseTargetField | null>(null);
 
 	const interval = setInterval(() => {
 		tick = Date.now();
@@ -145,13 +157,8 @@
 		const existing = findSet(session.sets, exercise.id, setIndex, warmup);
 		const completing = next != null && isCompletingField(exercise, field);
 		const patch: LoggedSet = {
-			exerciseId: exercise.id,
-			setIndex,
-			warmup,
+			...suggestedSet(exercise, setIndex, warmup),
 			completed: completing ? true : (existing?.completed ?? false),
-			kg: existing?.kg ?? targetFieldValue(exercise, 'kg'),
-			reps: existing?.reps ?? targetFieldValue(exercise, 'reps'),
-			durationSeconds: existing?.durationSeconds ?? targetFieldValue(exercise, 'durationSeconds'),
 			[field]: next
 		};
 		const sets = upsertSet(session.sets, patch);
@@ -171,15 +178,7 @@
 	async function toggleComplete(exercise: Exercise, setIndex: number, warmup = false) {
 		const existing = findSet(session.sets, exercise.id, setIndex, warmup);
 		const completed = !existing?.completed;
-		const patch: LoggedSet = {
-			exerciseId: exercise.id,
-			setIndex,
-			warmup,
-			completed,
-			kg: existing?.kg ?? targetFieldValue(exercise, 'kg'),
-			reps: existing?.reps ?? targetFieldValue(exercise, 'reps'),
-			durationSeconds: existing?.durationSeconds ?? targetFieldValue(exercise, 'durationSeconds')
-		};
+		const patch: LoggedSet = suggestedSet(exercise, setIndex, warmup, completed);
 		const sets = upsertSet(session.sets, patch);
 		if (completed) startRest(exercise, warmup);
 		else restUntil = null;
@@ -195,6 +194,36 @@
 
 	function lastFor(exercise: Exercise, setIndex: number, field: LogField, warmup = false) {
 		return lastUsedFieldValue(session.sets, previous, exercise.id, setIndex, field, warmup);
+	}
+
+	function suggestedField(
+		exercise: Exercise,
+		setIndex: number,
+		field: LogField,
+		warmup = false
+	): number | undefined {
+		const logged = findSet(session.sets, exercise.id, setIndex, warmup);
+		const current = logged ? setFieldValue(logged, field) : undefined;
+		if (current != null) return current;
+		return lastFor(exercise, setIndex, field, warmup) ?? targetFieldValue(exercise, field);
+	}
+
+	function suggestedSet(
+		exercise: Exercise,
+		setIndex: number,
+		warmup: boolean,
+		completed?: boolean
+	): LoggedSet {
+		const existing = findSet(session.sets, exercise.id, setIndex, warmup);
+		return {
+			exerciseId: exercise.id,
+			setIndex,
+			warmup,
+			completed: completed ?? existing?.completed ?? false,
+			kg: suggestedField(exercise, setIndex, 'kg', warmup),
+			reps: suggestedField(exercise, setIndex, 'reps', warmup),
+			durationSeconds: suggestedField(exercise, setIndex, 'durationSeconds', warmup)
+		};
 	}
 
 	function lastSet(exercise: Exercise): LoggedSet | undefined {
@@ -265,6 +294,88 @@
 	function focusedExercise(): Exercise | undefined {
 		return exercises.find((exercise) => exercise.id === focusedId);
 	}
+
+	function targetFields(
+		exercise: Exercise
+	): {
+		field: ExerciseTargetField;
+		label: string;
+		value: number | undefined;
+		allowDecimal: boolean;
+	}[] {
+		const fields: {
+			field: ExerciseTargetField;
+			label: string;
+			value: number | undefined;
+			allowDecimal: boolean;
+		}[] = [{ field: 'sets', label: 'sets', value: exercise.target.sets, allowDecimal: false }];
+		if (exercise.kind === 'weighted' || exercise.kind === 'bodyweight') {
+			fields.push({
+				field: 'repsMin',
+				label: 'reps min',
+				value: exercise.target.repsMin,
+				allowDecimal: false
+			});
+			fields.push({
+				field: 'reps',
+				label: 'reps',
+				value: exercise.target.reps,
+				allowDecimal: false
+			});
+		}
+		if (exercise.kind === 'weighted') {
+			fields.push({
+				field: 'kg',
+				label: 'kg',
+				value: exercise.target.kg,
+				allowDecimal: true
+			});
+		}
+		if (exercise.kind === 'timed' || exercise.kind === 'stretch') {
+			fields.push({
+				field: 'durationSeconds',
+				label: 'seconds',
+				value: exercise.target.durationSeconds,
+				allowDecimal: false
+			});
+		}
+		return fields;
+	}
+
+	async function saveTarget(next: number | undefined) {
+		const exercise = focusedExercise();
+		const field = targetField;
+		if (!exercise || !field || !onUpdateExercise) return;
+		const updated = applyExerciseTarget(exercise, field, next);
+		if ('error' in updated) return;
+		await onUpdateExercise(updated);
+		targetField = null;
+	}
+
+	async function hydrateWorkingSets(exercise: Exercise) {
+		let sets = session.sets;
+		let changed = false;
+		for (const setIndex of setIndexes(exercise)) {
+			const existing = findSet(sets, exercise.id, setIndex, false);
+			const next = suggestedSet(exercise, setIndex, false);
+			const missing = fieldsForExercise(exercise).some((field) => {
+				const current = existing ? setFieldValue(existing, field) : undefined;
+				const suggested = suggestedField(exercise, setIndex, field, false);
+				return current == null && suggested != null;
+			});
+			if (!missing) continue;
+			sets = upsertSet(sets, next);
+			changed = true;
+		}
+		if (!changed) return;
+		await onSave({ ...session, sets });
+	}
+
+	$effect(() => {
+		const exercise = exercises.find((item) => item.id === focusedId);
+		if (!exercise) return;
+		void hydrateWorkingSets(exercise);
+	});
 </script>
 
 {#if restRemaining > 0}
@@ -307,7 +418,11 @@
 		<button
 			type="button"
 			class="mb-3 inline-flex items-center gap-1 text-sm text-zinc-400"
-			onclick={() => (focusedId = null)}
+			onclick={() => {
+				focusedId = null;
+				editingTarget = false;
+				targetField = null;
+			}}
 		>
 			<Icon name="back" class="h-4 w-4" />
 			All exercises
@@ -316,18 +431,29 @@
 			<div class="flex items-start justify-between gap-3">
 				<div>
 					<h2 class="text-lg font-semibold">{exercise.name}</h2>
-					<p class="text-sm text-zinc-400">{targetPreview(exercise)}</p>
+					{#if onUpdateExercise}
+						<button
+							type="button"
+							class="text-sm text-zinc-400 underline decoration-zinc-600 underline-offset-4"
+							onclick={() => {
+								editor = null;
+								editingTarget = true;
+							}}
+						>
+							{targetPreview(exercise)}
+						</button>
+					{:else}
+						<p class="text-sm text-zinc-400">{targetPreview(exercise)}</p>
+					{/if}
 				</div>
-				{#if exercise.videoUrl}
-					<a
-						class="shrink-0 text-sm font-semibold text-lime-300"
-						href={exercise.videoUrl}
-						target="_blank"
-						rel="noreferrer"
-					>
-						Video
-					</a>
-				{/if}
+				<a
+					class="shrink-0 text-sm font-semibold text-lime-300"
+					href={formVideoSearchUrl(exercise.name)}
+					target="_blank"
+					rel="noreferrer"
+				>
+					Video
+				</a>
 			</div>
 			{#if exercise.primaryMuscles.length}
 				<p class="mt-2 flex flex-wrap gap-1">
@@ -393,7 +519,7 @@
 										{displayField(
 											exercise,
 											field,
-											logged ? setFieldValue(logged, field) : undefined
+											suggestedField(exercise, row.setIndex, field, row.warmup)
 										)}
 									</p>
 								</button>
@@ -416,12 +542,11 @@
 {/if}
 
 {#if editor}
-	{@const currentSet = findSet(session.sets, editor.exercise.id, editor.setIndex, editor.warmup)}
 	{#key `${editor.exercise.id}:${editor.warmup ? 'w' : 's'}:${editor.setIndex}:${editor.field}`}
 		<Keypad
 			label={`${editor.exercise.name} · ${editor.warmup ? 'warm-up' : 'set'} ${editor.setIndex + 1}`}
 			unit={fieldLabel(editor.field)}
-			value={currentSet ? setFieldValue(currentSet, editor.field) : undefined}
+			value={suggestedField(editor.exercise, editor.setIndex, editor.field, editor.warmup)}
 			last={lastFor(editor.exercise, editor.setIndex, editor.field, editor.warmup)}
 			allowDecimal={editor.field === 'kg'}
 			showTimer={true}
@@ -435,4 +560,70 @@
 			}}
 		/>
 	{/key}
+{/if}
+
+{#if editingTarget}
+	{@const exercise = focusedExercise()}
+	{#if exercise}
+		<div class="fixed inset-0 z-40 flex items-end justify-center bg-zinc-950/70 p-4 pb-28">
+			<button
+				type="button"
+				class="absolute inset-0 cursor-default"
+				aria-label="Close"
+				onclick={() => {
+					editingTarget = false;
+					targetField = null;
+				}}
+			></button>
+			<div class="relative w-full max-w-lg rounded-3xl border border-zinc-800 bg-zinc-950 p-4">
+				<p class="text-xs font-semibold tracking-[0.16em] text-zinc-500 uppercase">Prescription</p>
+				<p class="mt-1 text-lg font-semibold">{exercise.name}</p>
+				<p class="mt-1 text-sm text-zinc-400">{targetPreview(exercise)}</p>
+				<p class="mt-2 text-xs leading-5 text-zinc-500">
+					Saved into your weekly plan JSON. Export it from Admin when you want a copy.
+				</p>
+				<ul class="mt-4 space-y-2">
+					{#each targetFields(exercise) as row (row.field)}
+						<li>
+							<button
+								type="button"
+								class="flex w-full items-center justify-between rounded-2xl bg-zinc-900 px-4 py-3 text-left"
+								onclick={() => {
+									editor = null;
+									targetField = row.field;
+								}}
+							>
+								<span class="text-xs tracking-[0.16em] text-zinc-500 uppercase">{row.label}</span>
+								<span class="font-mono text-xl font-semibold">
+									{row.field === 'durationSeconds'
+										? displayField(exercise, 'durationSeconds', row.value)
+										: row.value == null
+											? '—'
+											: row.field === 'kg'
+												? formatKg(row.value)
+												: String(row.value)}
+								</span>
+							</button>
+						</li>
+					{/each}
+				</ul>
+			</div>
+		</div>
+		{#if targetField}
+			{@const row = targetFields(exercise).find((item) => item.field === targetField)}
+			{#if row}
+				{#key `${exercise.id}:${row.field}:${row.value ?? 'empty'}`}
+					<Keypad
+						label={`${exercise.name} · ${row.label}`}
+						unit={row.label}
+						value={row.value}
+						last={row.field === 'kg' ? lastWorkingKg(session.sets, previous, exercise) : undefined}
+						allowDecimal={row.allowDecimal}
+						onCommit={saveTarget}
+						onClose={() => (targetField = null)}
+					/>
+				{/key}
+			{/if}
+		{/if}
+	{/if}
 {/if}

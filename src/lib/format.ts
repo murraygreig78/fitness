@@ -48,3 +48,8 @@ export function parseDraftNumber(draft: string): number | undefined {
 	const value = Number(normalised);
 	return Number.isFinite(value) ? value : undefined;
 }
+
+export function formVideoSearchUrl(exerciseName: string): string {
+	const query = `short explainer video how to do ${exerciseName} in good form`;
+	return `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+}

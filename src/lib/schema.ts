@@ -73,6 +73,39 @@ export const exerciseSchema = z.discriminatedUnion('kind', [
 
 export type Exercise = z.infer<typeof exerciseSchema>;
 
+export type ExerciseTargetField = 'sets' | 'reps' | 'repsMin' | 'kg' | 'durationSeconds';
+
+export function applyExerciseTarget(
+	exercise: Exercise,
+	field: ExerciseTargetField,
+	next: number | undefined
+): Exercise | { error: string } {
+	const target: Record<string, unknown> = { ...exercise.target };
+	if (field === 'sets') {
+		target.sets = Math.max(1, Math.round(next ?? exercise.target.sets));
+	} else if (exercise.kind === 'weighted' && field === 'kg') {
+		target.kg = Math.max(0, next ?? 0);
+	} else if ((exercise.kind === 'weighted' || exercise.kind === 'bodyweight') && field === 'reps') {
+		target.reps = Math.max(1, next ?? exercise.target.reps);
+	} else if (
+		(exercise.kind === 'weighted' || exercise.kind === 'bodyweight') &&
+		field === 'repsMin'
+	) {
+		if (next == null || next <= 0) delete target.repsMin;
+		else target.repsMin = next;
+	} else if (
+		(exercise.kind === 'timed' || exercise.kind === 'stretch') &&
+		field === 'durationSeconds'
+	) {
+		target.durationSeconds = Math.max(1, next ?? exercise.target.durationSeconds);
+	} else {
+		return { error: 'That field is not on this exercise' };
+	}
+	const parsed = exerciseSchema.safeParse({ ...exercise, target });
+	if (!parsed.success) return { error: formatZodError(parsed.error) };
+	return parsed.data;
+}
+
 export const DEFAULT_STRENGTH_REST_SECONDS = 120;
 
 const activityBase = {
