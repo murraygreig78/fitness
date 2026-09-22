@@ -32,6 +32,7 @@
 		type LoggedSet,
 		type Session
 	} from '$lib/schema';
+	import { playRestBeep, unlockBeep } from '$lib/beep';
 	import { hasWarmupSets, lastWorkingKg, warmupAllowed, warmupSetsFor } from '$lib/warmup';
 	import { onDestroy } from 'svelte';
 
@@ -66,12 +67,16 @@
 	let focusedId = $state<string | null>(null);
 	let editingTarget = $state(false);
 	let targetField = $state<ExerciseTargetField | null>(null);
+	let restBeepTimer: ReturnType<typeof setTimeout> | undefined;
 
 	const interval = setInterval(() => {
 		tick = Date.now();
 		now = Date.now();
 	}, 1000);
-	onDestroy(() => clearInterval(interval));
+	onDestroy(() => {
+		clearInterval(interval);
+		clearRest(false);
+	});
 
 	const liveSeconds = $derived.by(() => {
 		if (!session.startedAt || session.endedAt) return sessionSeconds(session);
@@ -81,9 +86,14 @@
 		restUntil == null ? 0 : Math.max(0, Math.round((restUntil - now) / 1000))
 	);
 
-	$effect(() => {
-		if (restUntil != null && restRemaining <= 0) restUntil = null;
-	});
+	function clearRest(playBeep: boolean) {
+		if (restBeepTimer != null) {
+			clearTimeout(restBeepTimer);
+			restBeepTimer = undefined;
+		}
+		if (playBeep && restUntil != null) playRestBeep();
+		restUntil = null;
+	}
 
 	function displayField(exercise: Exercise, field: LogField, raw: number | undefined): string {
 		if (raw == null) return '—';
@@ -105,7 +115,14 @@
 
 	function startRest(exercise: Exercise, warmup = false) {
 		const seconds = restSecondsForSet(exercise, activity, warmup);
-		if (seconds > 0) restUntil = Date.now() + seconds * 1000;
+		if (seconds <= 0) return;
+		void unlockBeep();
+		clearRest(false);
+		restUntil = Date.now() + seconds * 1000;
+		restBeepTimer = setTimeout(() => {
+			restBeepTimer = undefined;
+			clearRest(true);
+		}, seconds * 1000);
 	}
 
 	function isCompletingField(exercise: Exercise, field: LogField) {
@@ -182,7 +199,7 @@
 		const patch: LoggedSet = suggestedSet(exercise, setIndex, warmup, completed);
 		const sets = upsertSet(session.sets, patch);
 		if (completed) startRest(exercise, warmup);
-		else restUntil = null;
+		else clearRest(false);
 		await onSave({
 			...session,
 			startedAt: session.startedAt ?? new Date().toISOString(),
@@ -387,7 +404,7 @@
 </script>
 
 {#if restRemaining > 0}
-	<RestTimer secondsRemaining={restRemaining} onSkip={() => (restUntil = null)} />
+	<RestTimer secondsRemaining={restRemaining} onSkip={() => clearRest(false)} />
 {/if}
 
 {#if liveSeconds != null}
