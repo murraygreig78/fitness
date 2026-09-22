@@ -1,6 +1,12 @@
 <script lang="ts">
 	import { fitness } from '$lib/app-state.svelte';
 	import SamplePlanList from '$lib/components/SamplePlanList.svelte';
+	import {
+		notificationTimeFromInput,
+		reminderPermission,
+		requestReminderPermission,
+		startPlanReminder
+	} from '$lib/plan-reminder';
 	import { starterPlans } from '$lib/samples';
 	import { summarizeActivities } from '$lib/schema';
 
@@ -8,6 +14,7 @@
 	let message = $state<string | null>(null);
 	let error = $state<string | null>(null);
 	let busy = $state(false);
+	let permission = $state(reminderPermission());
 
 	async function readJson(text: string): Promise<unknown> {
 		try {
@@ -57,6 +64,23 @@
 	function loadedSample() {
 		error = null;
 		message = `Loaded ${fitness.plan?.name ?? 'weekly plan'}. It will repeat each week.`;
+		startPlanReminder(() => fitness.plan);
+	}
+
+	async function saveNotificationTime(value: string) {
+		if (!fitness.plan) return;
+		const notificationTime = notificationTimeFromInput(value);
+		const result = await fitness.persistPlan({ ...fitness.plan, notificationTime });
+		if (!result.ok) {
+			error = result.error;
+			return;
+		}
+		startPlanReminder(() => fitness.plan);
+	}
+
+	async function enableReminders() {
+		permission = await requestReminderPermission();
+		if (permission === 'granted') startPlanReminder(() => fitness.plan);
 	}
 
 	function download(filename: string, payload: unknown) {
@@ -131,6 +155,33 @@
 				<li>{day.weekday}: {day.name} · {summarizeActivities(day.activities)}</li>
 			{/each}
 		</ul>
+		<label class="mt-4 block">
+			<span class="mb-2 block text-sm text-zinc-400">Morning reminder</span>
+			<input
+				type="time"
+				class="w-full rounded-2xl border border-zinc-800 bg-zinc-950 p-3 text-sm"
+				value={fitness.plan.notificationTime}
+				onchange={(event) => {
+					void saveNotificationTime((event.currentTarget as HTMLInputElement).value);
+				}}
+			/>
+			<p class="mt-2 text-xs leading-5 text-zinc-500">
+				Notifies you of today’s planned activities. Rest days stay silent. The app needs to be open
+				on this device at that time.
+			</p>
+		</label>
+		{#if permission !== 'granted'}
+			<button
+				type="button"
+				class="mt-3 w-full rounded-2xl border border-zinc-600 py-3 text-sm font-semibold disabled:opacity-50"
+				disabled={permission === 'denied' || permission === 'unsupported'}
+				onclick={() => void enableReminders()}
+			>
+				{permission === 'denied' || permission === 'unsupported'
+					? 'Notifications are blocked on this device'
+					: 'Allow notifications'}
+			</button>
+		{/if}
 		<button
 			type="button"
 			class="mt-4 w-full rounded-2xl border border-zinc-600 py-3 text-sm font-semibold"

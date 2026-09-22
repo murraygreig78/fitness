@@ -3,12 +3,27 @@
 	import { onMount } from 'svelte';
 	import { fitness } from '$lib/app-state.svelte';
 	import Nav from '$lib/components/Nav.svelte';
+	import { startPlanReminder, stopPlanReminder } from '$lib/plan-reminder';
 	import { APP_NAME } from '$lib/samples';
 
 	let { children } = $props();
 
 	onMount(() => {
 		void fitness.init();
+		return () => stopPlanReminder();
+	});
+
+	$effect(() => {
+		if (!fitness.ready) {
+			stopPlanReminder();
+			return;
+		}
+		fitness.plan?.notificationTime;
+		if (!fitness.plan) {
+			stopPlanReminder();
+			return;
+		}
+		startPlanReminder(() => fitness.plan);
 	});
 </script>
 

@@ -175,11 +175,18 @@ export const planDaySchema = z.object({
 
 export type PlanDay = z.infer<typeof planDaySchema>;
 
+export const DEFAULT_NOTIFICATION_TIME = '07:00';
+
+export const notificationTimeSchema = z
+	.string()
+	.regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Use 24-hour time such as 07:00');
+
 export const planSchema = z.object({
 	version: z.literal(2),
 	id: idSchema,
 	name: z.string().min(1),
 	notes: optionalText,
+	notificationTime: notificationTimeSchema.default(DEFAULT_NOTIFICATION_TIME),
 	days: z.array(planDaySchema).min(1)
 });
 
