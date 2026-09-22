@@ -2,14 +2,8 @@
 	import Keypad from '$lib/components/Keypad.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import RestTimer from '$lib/components/RestTimer.svelte';
-	import {
-		formatClock,
-		formatDuration,
-		formatKg,
-		formatMuscle,
-		formVideoSearchUrl
-	} from '$lib/format';
-	import { sessionSeconds, targetPreview } from '$lib/metrics';
+	import { formatDuration, formatKg, formatMuscle, formVideoSearchUrl } from '$lib/format';
+	import { targetPreview } from '$lib/metrics';
 	import {
 		fieldsForExercise,
 		fieldLabel,
@@ -54,7 +48,6 @@
 		allowExtraSets?: boolean;
 	} = $props();
 
-	let tick = $state(Date.now());
 	let restUntil = $state<number | null>(null);
 	let now = $state(Date.now());
 	let editor = $state<{
@@ -70,7 +63,6 @@
 	let restBeepTimer: ReturnType<typeof setTimeout> | undefined;
 
 	const interval = setInterval(() => {
-		tick = Date.now();
 		now = Date.now();
 	}, 1000);
 	onDestroy(() => {
@@ -78,10 +70,6 @@
 		clearRest(false);
 	});
 
-	const liveSeconds = $derived.by(() => {
-		if (!session.startedAt || session.endedAt) return sessionSeconds(session);
-		return Math.round((tick - Date.parse(session.startedAt)) / 1000);
-	});
 	const restRemaining = $derived(
 		restUntil == null ? 0 : Math.max(0, Math.round((restUntil - now) / 1000))
 	);
@@ -405,10 +393,6 @@
 
 {#if restRemaining > 0}
 	<RestTimer secondsRemaining={restRemaining} onSkip={() => clearRest(false)} />
-{/if}
-
-{#if liveSeconds != null}
-	<p class="mb-3 font-mono text-sm text-zinc-400">{formatClock(liveSeconds)}</p>
 {/if}
 
 {#if !focusedId}

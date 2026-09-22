@@ -8,8 +8,8 @@
 	import Icon from '$lib/components/Icon.svelte';
 	import Keypad from '$lib/components/Keypad.svelte';
 	import LastTime from '$lib/components/LastTime.svelte';
-	import { formatDuration, formatNumber } from '$lib/format';
-	import { activityPreview } from '$lib/metrics';
+	import { formatClock, formatDuration, formatNumber } from '$lib/format';
+	import { activityPreview, sessionSeconds } from '$lib/metrics';
 	import {
 		lastCompletedSession,
 		previousCardioValue,
@@ -18,7 +18,6 @@
 		previousStatValue
 	} from '$lib/previous';
 	import {
-		createSession,
 		dayIdForWeekday,
 		exercisesInActivity,
 		freeDayId,
@@ -37,7 +36,7 @@
 		normalizeWeekStart,
 		sundayOf
 	} from '$lib/week';
-	import { untrack } from 'svelte';
+	import { onDestroy, untrack } from 'svelte';
 
 	const dayId = $derived(page.params.dayId ?? '');
 	const activityId = $derived(page.params.activityId ?? '');
@@ -119,6 +118,11 @@
 
 	let cardioField = $state<'distanceKm' | 'durationSeconds' | null>(null);
 	let statEditor = $state<{ statId: string; unit: string } | null>(null);
+	let tick = $state(Date.now());
+	const clock = setInterval(() => {
+		tick = Date.now();
+	}, 1000);
+	onDestroy(() => clearInterval(clock));
 
 	async function ensure(): Promise<Session | null> {
 		if (!fitness.plan || !day || !activity) return null;
@@ -138,7 +142,11 @@
 		await save(patch(started));
 	}
 
-	async function finish() {
+	async function start() {
+		await startAnd((current) => current);
+	}
+
+	async function complete() {
 		await startAnd((current) => ({
 			...current,
 			endedAt: new Date().toISOString(),
@@ -147,18 +155,12 @@
 		}));
 	}
 
-	async function skip() {
-		if (!fitness.plan || !day || !activity) return;
-		const current = session ?? createSession(fitness.plan, day, activity, weekStart);
-		await save({
-			...current,
-			skipped: true,
-			startedAt: current.startedAt ?? new Date().toISOString(),
-			endedAt: current.endedAt ?? new Date().toISOString()
-		});
-	}
-
 	const status = $derived(sessionStatus(session));
+	const liveSeconds = $derived.by(() => {
+		tick;
+		if (!session?.startedAt || session.endedAt) return sessionSeconds(session);
+		return Math.round((Date.now() - Date.parse(session.startedAt)) / 1000);
+	});
 
 	$effect(() => {
 		if (!fitness.ready || !day || !activity) return;
@@ -206,24 +208,21 @@
 
 	<LastTime {activity} {last} weekdayLabel={lastLabel} />
 
-	<div class="mb-5 flex flex-wrap gap-2">
-		{#if status !== 'done'}
+	<div class="mb-5">
+		{#if status !== 'done' && !session?.startedAt}
 			<button
 				type="button"
-				class="rounded-full bg-lime-400 px-4 py-2 text-sm font-semibold text-zinc-950"
-				onclick={finish}
+				class="inline-flex items-center gap-2 rounded-full bg-lime-400 px-4 py-2 text-sm font-semibold text-zinc-950"
+				onclick={() => void start()}
 			>
-				Finish
+				<Icon name="timer" class="h-5 w-5" />
+				Start
 			</button>
-		{/if}
-		{#if status !== 'skipped'}
-			<button
-				type="button"
-				class="rounded-full border border-zinc-700 px-4 py-2 text-sm"
-				onclick={skip}
-			>
-				Skip
-			</button>
+		{:else if liveSeconds != null}
+			<p class="inline-flex items-center gap-2 font-mono text-2xl font-semibold tabular-nums">
+				<Icon name="timer" class="h-5 w-5 text-lime-300" />
+				{formatClock(liveSeconds)}
+			</p>
 		{/if}
 	</div>
 
@@ -310,6 +309,16 @@
 				});
 			}}></textarea>
 	</label>
+
+	{#if status !== 'done'}
+		<button
+			type="button"
+			class="mt-6 w-full rounded-2xl bg-lime-400 py-4 text-base font-semibold text-zinc-950"
+			onclick={() => void complete()}
+		>
+			Completed
+		</button>
+	{/if}
 {/if}
 
 {#if cardioField && activity?.kind === 'cardio'}
@@ -334,8 +343,7 @@
 				const converted = usesMinutes && next != null ? next * 60 : next;
 				await startAnd((current) => ({
 					...current,
-					[field]: converted,
-					completed: true
+					[field]: converted
 				}));
 				cardioField = field === 'distanceKm' ? 'durationSeconds' : null;
 			}}
@@ -359,8 +367,7 @@
 					...current,
 					stats: current.stats.map((stat) =>
 						stat.statId === currentStat.statId ? { ...stat, value: next } : stat
-					),
-					completed: true
+					)
 				}));
 				const stats = activity.stats;
 				const index = stats.findIndex((stat) => stat.id === currentStat.statId);
