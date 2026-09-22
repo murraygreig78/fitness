@@ -208,7 +208,7 @@
 
 	<LastTime {activity} {last} weekdayLabel={lastLabel} />
 
-	<div class="mb-5">
+	<div class="mb-5 flex items-center gap-3">
 		{#if status !== 'done' && !session?.startedAt}
 			<button
 				type="button"
@@ -223,6 +223,16 @@
 				<Icon name="timer" class="h-5 w-5 text-lime-300" />
 				{formatClock(liveSeconds)}
 			</p>
+			{#if status !== 'done'}
+				<button
+					type="button"
+					class="flex h-11 w-11 items-center justify-center rounded-full bg-zinc-800 text-lime-300"
+					aria-label="Stop timer"
+					onclick={() => void complete()}
+				>
+					<Icon name="stop" class="h-6 w-6" />
+				</button>
+			{/if}
 		{/if}
 	</div>
 
@@ -309,16 +319,6 @@
 				});
 			}}></textarea>
 	</label>
-
-	{#if status !== 'done'}
-		<button
-			type="button"
-			class="mt-6 w-full rounded-2xl bg-lime-400 py-4 text-base font-semibold text-zinc-950"
-			onclick={() => void complete()}
-		>
-			Completed
-		</button>
-	{/if}
 {/if}
 
 {#if cardioField && activity?.kind === 'cardio'}
