@@ -162,7 +162,11 @@
 
 	$effect(() => {
 		if (!fitness.ready || !day || !activity) return;
-		if (activity.kind === 'strength' || activity.kind === 'mobility' || activity.kind === 'progress') {
+		if (
+			activity.kind === 'strength' ||
+			activity.kind === 'mobility' ||
+			activity.kind === 'progress'
+		) {
 			const currentDay = day;
 			const currentActivity = activity;
 			const currentWeek = weekStart;
@@ -177,10 +181,16 @@
 	<p class="text-sm text-zinc-400">Import a plan first.</p>
 {:else if !day || !activity}
 	<p class="text-sm text-zinc-400">That activity is not in the current plan.</p>
-	<button type="button" class="mt-3 text-lime-300" onclick={() => goto(resolve('/'))}>Back to week</button>
+	<button type="button" class="mt-3 text-lime-300" onclick={() => goto(resolve('/'))}
+		>Back to week</button
+	>
 {:else}
 	<header class="mb-5">
-		<a href={resolve(`/?week=${weekStart}`)} class="inline-flex items-center text-zinc-400" aria-label="Back to week">
+		<a
+			href={resolve(`/?week=${weekStart}`)}
+			class="inline-flex items-center text-zinc-400"
+			aria-label="Back to week"
+		>
 			<Icon name="back" class="h-5 w-5" />
 		</a>
 		<div class="mt-3 flex items-center gap-2 {kindTextClass(activity.kind)}">
@@ -279,6 +289,9 @@
 			exercises={exercisesInActivity(activity)}
 			{previous}
 			onSave={save}
+			onUpdateExercise={async (exercise) => {
+				await fitness.updateExercise(activity.id, exercise);
+			}}
 			allowExtraSets={activity.kind === 'strength'}
 		/>
 	{/if}
@@ -295,8 +308,7 @@
 					...current,
 					notes: (event.currentTarget as HTMLTextAreaElement).value
 				});
-			}}
-		></textarea>
+			}}></textarea>
 	</label>
 {/if}
 

@@ -60,7 +60,8 @@ const exerciseBase = {
 	instructions: optionalText,
 	notes: optionalText,
 	restSeconds: z.number().nonnegative().optional(),
-	supersetId: optionalText
+	supersetId: optionalText,
+	warmup: z.boolean().default(false)
 };
 
 export const exerciseSchema = z.discriminatedUnion('kind', [
@@ -71,6 +72,53 @@ export const exerciseSchema = z.discriminatedUnion('kind', [
 ]);
 
 export type Exercise = z.infer<typeof exerciseSchema>;
+
+export type ExerciseTargetField =
+	| 'sets'
+	| 'reps'
+	| 'repsMin'
+	| 'kg'
+	| 'durationSeconds'
+	| 'restSeconds';
+
+export function applyExerciseTarget(
+	exercise: Exercise,
+	field: ExerciseTargetField,
+	next: number | undefined
+): Exercise | { error: string } {
+	if (field === 'restSeconds') {
+		const nextExercise: Record<string, unknown> = { ...exercise };
+		if (next == null) delete nextExercise.restSeconds;
+		else nextExercise.restSeconds = Math.max(0, Math.round(next));
+		const parsed = exerciseSchema.safeParse(nextExercise);
+		if (!parsed.success) return { error: formatZodError(parsed.error) };
+		return parsed.data;
+	}
+	const target: Record<string, unknown> = { ...exercise.target };
+	if (field === 'sets') {
+		target.sets = Math.max(1, Math.round(next ?? exercise.target.sets));
+	} else if (exercise.kind === 'weighted' && field === 'kg') {
+		target.kg = Math.max(0, next ?? 0);
+	} else if ((exercise.kind === 'weighted' || exercise.kind === 'bodyweight') && field === 'reps') {
+		target.reps = Math.max(1, next ?? exercise.target.reps);
+	} else if (
+		(exercise.kind === 'weighted' || exercise.kind === 'bodyweight') &&
+		field === 'repsMin'
+	) {
+		if (next == null || next <= 0) delete target.repsMin;
+		else target.repsMin = next;
+	} else if (
+		(exercise.kind === 'timed' || exercise.kind === 'stretch') &&
+		field === 'durationSeconds'
+	) {
+		target.durationSeconds = Math.max(1, next ?? exercise.target.durationSeconds);
+	} else {
+		return { error: 'That field is not on this exercise' };
+	}
+	const parsed = exerciseSchema.safeParse({ ...exercise, target });
+	if (!parsed.success) return { error: formatZodError(parsed.error) };
+	return parsed.data;
+}
 
 export const DEFAULT_STRENGTH_REST_SECONDS = 120;
 
@@ -143,7 +191,8 @@ export const loggedSetSchema = z.object({
 	reps: z.number().nonnegative().optional(),
 	kg: z.number().nonnegative().optional(),
 	durationSeconds: z.number().nonnegative().optional(),
-	completed: z.boolean()
+	completed: z.boolean(),
+	warmup: z.boolean().default(false)
 });
 
 export type LoggedSet = z.infer<typeof loggedSetSchema>;
@@ -216,8 +265,14 @@ export function setCount(exercise: Exercise): number {
 	return exercise.target.sets;
 }
 
+export function isWarmupSet(set: LoggedSet): boolean {
+	return Boolean(set.warmup);
+}
+
 export function loggedSetCount(sets: LoggedSet[], exerciseId: string): number {
-	const indexes = sets.filter((set) => set.exerciseId === exerciseId).map((set) => set.setIndex);
+	const indexes = sets
+		.filter((set) => set.exerciseId === exerciseId && !isWarmupSet(set))
+		.map((set) => set.setIndex);
 	if (!indexes.length) return 0;
 	return Math.max(...indexes) + 1;
 }
@@ -228,10 +283,17 @@ export function displayedSetCount(exercise: Exercise, sets: LoggedSet[]): number
 
 export function mergeLoggedSets(current: LoggedSet[], incoming: LoggedSet[]): LoggedSet[] {
 	const map = new Map<string, LoggedSet>();
-	for (const set of current) map.set(`${set.exerciseId}:${set.setIndex}`, set);
-	for (const set of incoming) map.set(`${set.exerciseId}:${set.setIndex}`, set);
+	for (const set of current) {
+		map.set(`${set.exerciseId}:${set.setIndex}:${isWarmupSet(set) ? 'w' : 's'}`, set);
+	}
+	for (const set of incoming) {
+		map.set(`${set.exerciseId}:${set.setIndex}:${isWarmupSet(set) ? 'w' : 's'}`, set);
+	}
 	return [...map.values()].sort(
-		(a, b) => a.exerciseId.localeCompare(b.exerciseId) || a.setIndex - b.setIndex
+		(a, b) =>
+			a.exerciseId.localeCompare(b.exerciseId) ||
+			Number(isWarmupSet(b)) - Number(isWarmupSet(a)) ||
+			a.setIndex - b.setIndex
 	);
 }
 
@@ -245,6 +307,7 @@ export function emptySetsForActivity(activity: Activity): LoggedSet[] {
 		Array.from({ length: setCount(exercise) }, (_, setIndex) => ({
 			exerciseId: exercise.id,
 			setIndex,
+			warmup: false,
 			completed: false
 		}))
 	);
@@ -256,6 +319,12 @@ export function restSecondsFor(exercise: Exercise, activity: Activity): number {
 		return activity.restSeconds ?? DEFAULT_STRENGTH_REST_SECONDS;
 	}
 	return 0;
+}
+
+export function restSecondsForSet(exercise: Exercise, activity: Activity, warmup: boolean): number {
+	const full = restSecondsFor(exercise, activity);
+	if (!warmup) return full;
+	return Math.round(full / 2);
 }
 
 export function emptyStatsForActivity(activity: Activity): LoggedStat[] {
@@ -316,7 +385,8 @@ export function dayStatus(day: PlanDay, sessions: Session[]): SessionStatus {
 	const statuses = day.activities.map((activity) => sessionStatus(byActivity.get(activity.id)));
 	if (statuses.every((status) => status === 'done')) return 'done';
 	if (statuses.every((status) => status === 'skipped')) return 'skipped';
-	if (statuses.some((status) => status === 'in-progress' || status === 'done')) return 'in-progress';
+	if (statuses.some((status) => status === 'in-progress' || status === 'done'))
+		return 'in-progress';
 	return 'upcoming';
 }
 
@@ -418,6 +488,7 @@ export function createAdhocActivity(kind: ActivityKind): Activity {
 						name: 'Custom',
 						kind: 'weighted',
 						primaryMuscles: [],
+						warmup: false,
 						target: { sets: 3, reps: 8, kg: 0 }
 					}
 				]
@@ -433,6 +504,7 @@ export function createAdhocActivity(kind: ActivityKind): Activity {
 						name: 'Custom',
 						kind: 'stretch',
 						primaryMuscles: [],
+						warmup: false,
 						target: { sets: 1, durationSeconds: 60 }
 					}
 				]

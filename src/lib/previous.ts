@@ -38,19 +38,24 @@ export function fieldsForExercise(exercise: Exercise): LogField[] {
 export function findSet(
 	sets: LoggedSet[],
 	exerciseId: string,
-	setIndex: number
+	setIndex: number,
+	warmup = false
 ): LoggedSet | undefined {
-	return sets.find((set) => set.exerciseId === exerciseId && set.setIndex === setIndex);
+	return sets.find(
+		(set) =>
+			set.exerciseId === exerciseId && set.setIndex === setIndex && Boolean(set.warmup) === warmup
+	);
 }
 
 export function previousSetValue(
 	sessionsNewestFirst: Session[],
 	exerciseId: string,
 	setIndex: number,
-	field: LogField
+	field: LogField,
+	warmup = false
 ): number | undefined {
 	for (const session of sessionsNewestFirst) {
-		const match = findSet(session.sets, exerciseId, setIndex);
+		const match = findSet(session.sets, exerciseId, setIndex, warmup);
 		const value = match ? setFieldValue(match, field) : undefined;
 		if (value != null) return value;
 	}
@@ -62,16 +67,26 @@ export function lastUsedFieldValue(
 	previousSessions: Session[],
 	exerciseId: string,
 	setIndex: number,
-	field: LogField
+	field: LogField,
+	warmup = false
 ): number | undefined {
-	const fromThisSet = previousSetValue(previousSessions, exerciseId, setIndex, field);
+	const fromThisSet = previousSetValue(previousSessions, exerciseId, setIndex, field, warmup);
 	if (fromThisSet != null) return fromThisSet;
 	if (setIndex > 0) {
-		const fromPriorSet = previousSetValue(previousSessions, exerciseId, setIndex - 1, field);
+		const fromPriorSet = previousSetValue(
+			previousSessions,
+			exerciseId,
+			setIndex - 1,
+			field,
+			warmup
+		);
 		if (fromPriorSet != null) return fromPriorSet;
 	}
 	const earlier = currentSets
-		.filter((set) => set.exerciseId === exerciseId && set.setIndex < setIndex)
+		.filter(
+			(set) =>
+				set.exerciseId === exerciseId && set.setIndex < setIndex && Boolean(set.warmup) === warmup
+		)
 		.sort((a, b) => b.setIndex - a.setIndex);
 	for (const set of earlier) {
 		const value = setFieldValue(set, field);
@@ -143,9 +158,7 @@ export function previousStatValue(
 	for (const session of sessionsNewestFirst) {
 		const match =
 			session.stats.find((stat) => stat.statId === statId && stat.value != null) ??
-			(unit
-				? session.stats.find((stat) => stat.unit === unit && stat.value != null)
-				: undefined);
+			(unit ? session.stats.find((stat) => stat.unit === unit && stat.value != null) : undefined);
 		if (match?.value != null) return match.value;
 	}
 	return undefined;

@@ -7,6 +7,7 @@ import {
 	parseLogsBackup,
 	parsePlanJson,
 	type Activity,
+	type Exercise,
 	type LogsBackup,
 	type Plan,
 	type PlanDay,
@@ -73,10 +74,7 @@ class FitnessApp {
 			.map((item) => item.activity);
 	}
 
-	customActivity(
-		activityId: string,
-		weekStart = this.weekStart
-	): StoredCustomActivity | undefined {
+	customActivity(activityId: string, weekStart = this.weekStart): StoredCustomActivity | undefined {
 		return this.customActivities.find(
 			(item) => item.id === activityId && item.weekStart === weekStart
 		);
@@ -97,16 +95,66 @@ class FitnessApp {
 	async importPlan(input: unknown): Promise<{ ok: true } | { ok: false; error: string }> {
 		const result = parsePlanJson(input);
 		if ('error' in result) return { ok: false, error: result.error };
-		const plan = result.plan;
+		return this.persistPlan(result.plan);
+	}
+
+	async persistPlan(plan: Plan): Promise<{ ok: true } | { ok: false; error: string }> {
+		const result = parsePlanJson(asPlain(plan));
+		if ('error' in result) return { ok: false, error: result.error };
+		const next = result.plan;
+		const existing = await db.plans.get(next.id);
 		await db.plans.put({
-			id: plan.id,
-			plan,
-			importedAt: new Date().toISOString()
+			id: next.id,
+			plan: next,
+			importedAt: existing?.importedAt ?? new Date().toISOString()
 		});
-		await db.meta.put({ id: 'app', activePlanId: plan.id });
-		this.plan = plan;
+		await db.meta.put({ id: 'app', activePlanId: next.id });
+		this.plan = next;
 		this.error = null;
 		return { ok: true };
+	}
+
+	async updateExercise(
+		activityId: string,
+		exercise: Exercise
+	): Promise<{ ok: true } | { ok: false; error: string }> {
+		const custom = this.customActivities.find((item) => item.activity.id === activityId);
+		if (custom) {
+			const activity = custom.activity;
+			if (activity.kind !== 'strength' && activity.kind !== 'mobility') {
+				return { ok: false, error: 'That activity has no exercises' };
+			}
+			const nextActivity = {
+				...activity,
+				exercises: activity.exercises.map((item) => (item.id === exercise.id ? exercise : item))
+			};
+			const record = { ...custom, activity: nextActivity };
+			await db.customActivities.put(asPlain(record));
+			this.customActivities = [
+				...this.customActivities.filter((item) => item.id !== record.id),
+				record
+			];
+			return { ok: true };
+		}
+		if (!this.plan) return { ok: false, error: 'Import a plan first' };
+		let found = false;
+		const plan: Plan = {
+			...this.plan,
+			days: this.plan.days.map((day) => ({
+				...day,
+				activities: day.activities.map((activity) => {
+					if (activity.id !== activityId) return activity;
+					if (activity.kind !== 'strength' && activity.kind !== 'mobility') return activity;
+					found = activity.exercises.some((item) => item.id === exercise.id);
+					return {
+						...activity,
+						exercises: activity.exercises.map((item) => (item.id === exercise.id ? exercise : item))
+					};
+				})
+			}))
+		};
+		if (!found) return { ok: false, error: 'That exercise is not in the weekly plan' };
+		return this.persistPlan(plan);
 	}
 
 	async addCustomActivity(

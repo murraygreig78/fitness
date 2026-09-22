@@ -35,7 +35,9 @@ export function metricsForDay(day: PlanDay, sessions: Session[]): DayMetrics {
 				sum + activity.exercises.reduce((inner, exercise) => inner + setCount(exercise), 0),
 			0
 		);
-	const completed = sessions.flatMap((session) => session.sets.filter((set) => set.completed));
+	const completed = sessions.flatMap((session) =>
+		session.sets.filter((set) => set.completed && !set.warmup)
+	);
 	const cardio = sessions.filter((session) => session.kind === 'cardio');
 	const durations = sessions
 		.map((session) => sessionSeconds(session))

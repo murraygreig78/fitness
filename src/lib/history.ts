@@ -36,7 +36,9 @@ function formatKg(value: number): string {
 	return `${Number(value.toFixed(2))} kg`;
 }
 
-export function catalogExercises(plan: Plan | null): Map<string, { name: string; kind: Exercise['kind'] }> {
+export function catalogExercises(
+	plan: Plan | null
+): Map<string, { name: string; kind: Exercise['kind'] }> {
 	const map = new Map<string, { name: string; kind: Exercise['kind'] }>();
 	for (const day of plan?.days ?? []) {
 		for (const activity of day.activities) {
@@ -59,7 +61,7 @@ export function exerciseTrends(plan: Plan | null, sessions: Session[]): Exercise
 
 	for (const session of ordered) {
 		const grouped = new Map<string, typeof session.sets>();
-		for (const set of session.sets.filter((item) => item.completed)) {
+		for (const set of session.sets.filter((item) => item.completed && !item.warmup)) {
 			const list = grouped.get(set.exerciseId) ?? [];
 			list.push(set);
 			grouped.set(set.exerciseId, list);

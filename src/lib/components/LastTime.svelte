@@ -16,7 +16,7 @@
 	function lastSetLine(exercise: Exercise): string {
 		if (!last) return '—';
 		const completed = last.sets
-			.filter((set) => set.exerciseId === exercise.id && set.completed)
+			.filter((set) => set.exerciseId === exercise.id && set.completed && !set.warmup)
 			.sort((a, b) => b.setIndex - a.setIndex)[0];
 		const logged = completed ?? findSet(last.sets, exercise.id, 0);
 		if (!logged) return '—';
