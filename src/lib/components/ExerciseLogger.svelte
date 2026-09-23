@@ -427,7 +427,7 @@
 	}
 
 	function addWarmup(exercise: Exercise) {
-		if (!warmupAllowed(exercise) || hasWarmupSets(session.sets, exercise.id)) return;
+		if (!warmupAllowed(exercise, activity) || hasWarmupSets(session.sets, exercise.id)) return;
 		const baseKg = lastWorkingKg(session.sets, previous, exercise);
 		void onSave({
 			...session,
@@ -702,7 +702,7 @@
 					Superset · alternate, then rest
 				</p>
 			{/if}
-			{#if warmupAllowed(exercise) && !hasWarmupSets(session.sets, exercise.id)}
+			{#if warmupAllowed(exercise, activity) && !hasWarmupSets(session.sets, exercise.id)}
 				<button
 					type="button"
 					class="mt-3 w-full rounded-2xl border border-lime-400/40 py-3 text-sm font-semibold text-lime-300"

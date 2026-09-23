@@ -1,5 +1,5 @@
 import { targetFieldValue } from './previous';
-import { isWarmupSet, type Exercise, type LoggedSet, type Session } from './schema';
+import { isWarmupSet, type Activity, type Exercise, type LoggedSet, type Session } from './schema';
 
 export const DEFAULT_WARMUP_STEPS = [
 	{ reps: 12, percent: 0.3 },
@@ -7,8 +7,10 @@ export const DEFAULT_WARMUP_STEPS = [
 	{ reps: 4, percent: 0.7 }
 ] as const;
 
-export function warmupAllowed(exercise: Exercise): boolean {
-	return exercise.kind === 'weighted' && exercise.warmup;
+export function warmupAllowed(exercise: Exercise, activity?: Activity): boolean {
+	if (exercise.kind !== 'weighted') return false;
+	if (activity && activity.kind !== 'strength') return false;
+	return true;
 }
 
 export function roundWarmupKg(kg: number): number {
