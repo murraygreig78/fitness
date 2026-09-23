@@ -129,8 +129,8 @@
 		return fitness.ensureSession(day, activity, weekStart);
 	}
 
-	async function save(next: Session) {
-		await fitness.saveSession(next);
+	async function save(next: Session, options?: { replaceSets?: boolean }) {
+		await fitness.saveSession(next, options);
 	}
 
 	async function startAnd(patch: (current: Session) => Session) {

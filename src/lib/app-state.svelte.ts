@@ -196,11 +196,17 @@ class FitnessApp {
 		return session;
 	}
 
-	async saveSession(session: Session) {
+	async saveSession(session: Session, options?: { replaceSets?: boolean }) {
 		const current = this.sessionMap.get(session.id);
 		const toSave = asPlain(
 			current
-				? { ...current, ...session, sets: mergeLoggedSets(current.sets, session.sets) }
+				? {
+						...current,
+						...session,
+						sets: options?.replaceSets
+							? session.sets
+							: mergeLoggedSets(current.sets, session.sets)
+					}
 				: session
 		);
 		await db.sessions.put(toSave);

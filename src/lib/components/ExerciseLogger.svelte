@@ -44,7 +44,7 @@
 		activity: Activity;
 		exercises: Exercise[];
 		previous: Session[];
-		onSave: (session: Session) => Promise<void>;
+		onSave: (session: Session, options?: { replaceSets?: boolean }) => Promise<void>;
 		onUpdateExercise?: (exercise: Exercise) => Promise<void>;
 		allowExtraSets?: boolean;
 	} = $props();
@@ -464,6 +464,40 @@
 				: [...session.sets, extra]
 		});
 	}
+
+	function canRemoveSet(exercise: Exercise): boolean {
+		return rowCount(exercise) > setCount(exercise);
+	}
+
+	function removeSet(exercise: Exercise) {
+		if (!canRemoveSet(exercise)) return;
+		const lastIndex = rowCount(exercise) - 1;
+		extraByExercise = {
+			...extraByExercise,
+			[exercise.id]: Math.max(0, (extraByExercise[exercise.id] ?? 0) - 1)
+		};
+		if (
+			editor?.exercise.id === exercise.id &&
+			editor.setIndex === lastIndex &&
+			!editor.warmup
+		) {
+			editor = null;
+		}
+		void onSave(
+			{
+				...session,
+				sets: session.sets.filter(
+					(set) =>
+						!(
+							set.exerciseId === exercise.id &&
+							!isWarmupSet(set) &&
+							set.setIndex === lastIndex
+						)
+				)
+			},
+			{ replaceSets: true }
+		);
+	}
 	function focusedExercise(): Exercise | undefined {
 		return exercises.find((exercise) => exercise.id === focusedId);
 	}
@@ -725,13 +759,24 @@
 				{/each}
 			</ol>
 			{#if allowExtraSets}
-				<button
-					type="button"
-					class="mt-3 w-full rounded-2xl border border-dashed border-zinc-600 py-3 text-sm font-semibold text-zinc-200"
-					onclick={() => addSet(exercise)}
-				>
-					Add set
-				</button>
+				<div class="mt-3 flex items-stretch gap-2">
+					{#if canRemoveSet(exercise)}
+						<button
+							type="button"
+							class="shrink-0 rounded-2xl border border-dashed border-zinc-600 px-3 py-2 text-xs font-semibold text-zinc-400"
+							onclick={() => removeSet(exercise)}
+						>
+							Remove
+						</button>
+					{/if}
+					<button
+						type="button"
+						class="min-w-0 flex-1 rounded-2xl border border-dashed border-zinc-600 py-3 text-sm font-semibold text-zinc-200"
+						onclick={() => addSet(exercise)}
+					>
+						Add set
+					</button>
+				</div>
 			{/if}
 		</article>
 	{/if}
