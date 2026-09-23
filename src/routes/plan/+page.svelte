@@ -1,6 +1,9 @@
 <script lang="ts">
+	import { base } from '$app/paths';
 	import { fitness } from '$lib/app-state.svelte';
 	import SamplePlanList from '$lib/components/SamplePlanList.svelte';
+	import { downloadJson } from '$lib/download';
+	import { downloadSkillPack } from '$lib/skill-pack';
 	import {
 		notificationTimeFromInput,
 		reminderPermission,
@@ -83,14 +86,17 @@
 		if (permission === 'granted') startPlanReminder(() => fitness.plan);
 	}
 
-	function download(filename: string, payload: unknown) {
-		const blob = new Blob([JSON.stringify(payload, null, '\t')], { type: 'application/json' });
-		const url = URL.createObjectURL(blob);
-		const link = document.createElement('a');
-		link.href = url;
-		link.download = filename;
-		link.click();
-		URL.revokeObjectURL(url);
+	async function exportSkills() {
+		error = null;
+		try {
+			await downloadSkillPack(
+				(name) => `${base}/skills/json-activity-tracker/${name}`
+			);
+			message =
+				'Downloaded the AI skills. Add the zip to Claude, or unzip and upload the files to ChatGPT.';
+		} catch (caught) {
+			error = caught instanceof Error ? caught.message : 'Could not download the AI skills';
+		}
 	}
 
 	function exportPlan() {
@@ -98,14 +104,14 @@
 			error = 'Import a weekly fitness plan before exporting it.';
 			return;
 		}
-		download(`${fitness.plan.id}.json`, fitness.plan);
+		downloadJson(`${fitness.plan.id}.json`, fitness.plan);
 		message =
 			'Downloaded your weekly fitness plan. Send this JSON to a trainer or AI for an updated week.';
 	}
 
 	function exportLogs() {
 		const backup = fitness.exportBackup();
-		download(`fitness-activity-log-${backup.exportedAt.slice(0, 10)}.json`, backup);
+		downloadJson(`fitness-activity-log-${backup.exportedAt.slice(0, 10)}.json`, backup);
 		message =
 			'Downloaded your activity log. Send this to a trainer or AI so they can recommend the next plan.';
 	}
@@ -137,10 +143,42 @@
 	<p class="text-xs font-semibold tracking-[0.22em] text-lime-300 uppercase">Admin</p>
 	<h1 class="text-2xl font-bold">Weekly fitness plan</h1>
 	<p class="mt-1 text-sm leading-6 text-zinc-400">
-		Your week lives in a JSON fitness plan. Export it, send it to a trainer or AI, then import the
-		updated plan they send back.
+		Your week lives in a JSON fitness plan. Download the AI skills, add them to Claude or ChatGPT,
+		then send your current plan and import the JSON they send back.
 	</p>
 </header>
+
+<section class="mb-5 space-y-3 rounded-3xl border border-zinc-800 bg-zinc-900 p-4">
+	<h2 class="font-semibold">Ask an AI to update your week</h2>
+	<ol class="list-decimal space-y-2 pl-5 text-sm leading-6 text-zinc-400">
+		<li>Download the AI skills and add the zip to Claude, or unzip and upload the files to ChatGPT.</li>
+		<li>Download your current weekly plan.</li>
+		<li>Optionally download your activity log so the agent can see what you actually did.</li>
+		<li>Ask it to suggest or add exercises. Import the JSON it returns below.</li>
+	</ol>
+	<button
+		type="button"
+		class="w-full rounded-2xl bg-lime-400 py-3 text-sm font-semibold text-zinc-950"
+		onclick={() => void exportSkills()}
+	>
+		Download AI skills
+	</button>
+	<button
+		type="button"
+		class="w-full rounded-2xl border border-zinc-600 py-3 text-sm font-semibold disabled:opacity-50"
+		disabled={!fitness.plan}
+		onclick={exportPlan}
+	>
+		Download weekly plan
+	</button>
+	<button
+		type="button"
+		class="w-full rounded-2xl border border-zinc-600 py-3 text-sm font-semibold"
+		onclick={exportLogs}
+	>
+		Download activity log
+	</button>
+</section>
 
 {#if fitness.plan}
 	<section class="mb-5 rounded-3xl border border-zinc-800 bg-zinc-900 p-4">
@@ -182,13 +220,6 @@
 					: 'Allow notifications'}
 			</button>
 		{/if}
-		<button
-			type="button"
-			class="mt-4 w-full rounded-2xl border border-zinc-600 py-3 text-sm font-semibold"
-			onclick={exportPlan}
-		>
-			Export weekly plan
-		</button>
 	</section>
 {/if}
 
@@ -232,16 +263,8 @@
 <section class="mt-5 space-y-3 rounded-3xl border border-zinc-800 bg-zinc-900 p-4">
 	<h2 class="font-semibold">Activity log</h2>
 	<p class="text-sm leading-6 text-zinc-400">
-		Export a JSON log of the activities you have done. Send it to your personal trainer or an AI
-		agent so they can review the work and recommend the next weekly plan.
+		Import a JSON log of activities from another browser. Download a copy from the AI section above.
 	</p>
-	<button
-		type="button"
-		class="w-full rounded-2xl border border-zinc-600 py-3 text-sm font-semibold"
-		onclick={exportLogs}
-	>
-		Export activity log
-	</button>
 	<label class="block">
 		<span class="mb-2 block text-sm text-zinc-400">Import activity log</span>
 		<input
