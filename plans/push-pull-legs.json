@@ -21,6 +21,7 @@
 							"id": "chest-press",
 							"name": "Chest press",
 							"kind": "weighted",
+							"warmup": true,
 							"primaryMuscles": [
 								"chest",
 								"triceps"
@@ -38,6 +39,7 @@
 							"id": "shoulder-press",
 							"name": "Shoulder press",
 							"kind": "weighted",
+							"warmup": true,
 							"primaryMuscles": [
 								"shoulders",
 								"triceps"
@@ -54,6 +56,7 @@
 							"id": "tricep-extension",
 							"name": "Tricep extension",
 							"kind": "weighted",
+							"warmup": true,
 							"primaryMuscles": [
 								"triceps"
 							],
@@ -86,6 +89,7 @@
 							"id": "bent-over-row",
 							"name": "Bent-over row",
 							"kind": "weighted",
+							"warmup": true,
 							"primaryMuscles": [
 								"back",
 								"lats"
@@ -102,6 +106,7 @@
 							"id": "lat-pulldown",
 							"name": "Lat pulldown",
 							"kind": "weighted",
+							"warmup": true,
 							"primaryMuscles": [
 								"lats",
 								"back"
@@ -119,6 +124,7 @@
 							"id": "bicep-curl",
 							"name": "Bicep curl",
 							"kind": "weighted",
+							"warmup": true,
 							"primaryMuscles": [
 								"biceps"
 							],
@@ -151,6 +157,7 @@
 							"id": "squat",
 							"name": "Squat",
 							"kind": "weighted",
+							"warmup": true,
 							"primaryMuscles": [
 								"quads",
 								"glutes"
@@ -168,6 +175,7 @@
 							"id": "deadlift",
 							"name": "Deadlift",
 							"kind": "weighted",
+							"warmup": true,
 							"primaryMuscles": [
 								"hamstrings",
 								"glutes",
@@ -186,6 +194,7 @@
 							"id": "calf-raise",
 							"name": "Calf raise",
 							"kind": "weighted",
+							"warmup": true,
 							"primaryMuscles": [
 								"calves"
 							],
@@ -218,6 +227,7 @@
 							"id": "chest-press-2",
 							"name": "Chest press",
 							"kind": "weighted",
+							"warmup": true,
 							"primaryMuscles": [
 								"chest",
 								"triceps"
@@ -235,6 +245,7 @@
 							"id": "shoulder-press-2",
 							"name": "Shoulder press",
 							"kind": "weighted",
+							"warmup": true,
 							"primaryMuscles": [
 								"shoulders",
 								"triceps"
@@ -251,6 +262,7 @@
 							"id": "tricep-extension-2",
 							"name": "Tricep extension",
 							"kind": "weighted",
+							"warmup": true,
 							"primaryMuscles": [
 								"triceps"
 							],
@@ -283,6 +295,7 @@
 							"id": "bent-over-row-2",
 							"name": "Bent-over row",
 							"kind": "weighted",
+							"warmup": true,
 							"primaryMuscles": [
 								"back",
 								"lats"
@@ -299,6 +312,7 @@
 							"id": "lat-pulldown-2",
 							"name": "Lat pulldown",
 							"kind": "weighted",
+							"warmup": true,
 							"primaryMuscles": [
 								"lats",
 								"back"
@@ -316,6 +330,7 @@
 							"id": "bicep-curl-2",
 							"name": "Bicep curl",
 							"kind": "weighted",
+							"warmup": true,
 							"primaryMuscles": [
 								"biceps"
 							],
@@ -348,6 +363,7 @@
 							"id": "squat-2",
 							"name": "Squat",
 							"kind": "weighted",
+							"warmup": true,
 							"primaryMuscles": [
 								"quads",
 								"glutes"
@@ -365,6 +381,7 @@
 							"id": "deadlift-2",
 							"name": "Deadlift",
 							"kind": "weighted",
+							"warmup": true,
 							"primaryMuscles": [
 								"hamstrings",
 								"glutes",
@@ -383,6 +400,7 @@
 							"id": "calf-raise-2",
 							"name": "Calf raise",
 							"kind": "weighted",
+							"warmup": true,
 							"primaryMuscles": [
 								"calves"
 							],
