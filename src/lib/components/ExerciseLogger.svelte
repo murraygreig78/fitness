@@ -9,6 +9,7 @@
 		fieldsForExercise,
 		fieldLabel,
 		findSet,
+		lastExerciseFieldValue,
 		lastUsedFieldValue,
 		setFieldValue,
 		targetFieldValue,
@@ -367,6 +368,13 @@
 
 	function lastFor(exercise: Exercise, setIndex: number, field: LogField, warmup = false) {
 		return lastUsedFieldValue(session.sets, previous, exercise.id, setIndex, field, warmup);
+	}
+
+	function lastHint(exercise: Exercise, field: LogField) {
+		const last = lastExerciseFieldValue(session.sets, previous, exercise.id, field);
+		if (last == null) return undefined;
+		if (field === 'durationSeconds') return `Last ${displayField(exercise, field, last)}`;
+		return `Last ${displayField(exercise, field, last)} ${fieldLabel(field)}`;
 	}
 
 	function suggestedField(
@@ -737,6 +745,7 @@
 						</div>
 						<div class="grid grid-cols-2 gap-2">
 							{#each fieldsForExercise(exercise) as field (field)}
+								{@const lastLabel = lastHint(exercise, field)}
 								<button
 									type="button"
 									class="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-3 text-left"
@@ -752,6 +761,9 @@
 											suggestedField(exercise, row.setIndex, field, row.warmup)
 										)}
 									</p>
+									{#if lastLabel}
+										<p class="mt-1 text-[11px] text-zinc-500">{lastLabel}</p>
+									{/if}
 								</button>
 							{/each}
 						</div>

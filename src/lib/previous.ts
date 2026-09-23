@@ -1,5 +1,5 @@
 import type { Activity, ActivityKind, Exercise, LoggedSet, Session } from './schema';
-import { hasProgressData } from './schema';
+import { hasProgressData, isWarmupSet } from './schema';
 
 export type ExerciseField = 'kg' | 'reps' | 'durationSeconds';
 export type LogField = ExerciseField | 'distanceKm';
@@ -89,6 +89,41 @@ export function lastUsedFieldValue(
 		)
 		.sort((a, b) => b.setIndex - a.setIndex);
 	for (const set of earlier) {
+		const value = setFieldValue(set, field);
+		if (value != null) return value;
+	}
+	return undefined;
+}
+
+export function lastExerciseFieldValue(
+	currentSets: LoggedSet[],
+	previousSessions: Session[],
+	exerciseId: string,
+	field: LogField
+): number | undefined {
+	const fromSessions = (sessions: Session[], completedOnly: boolean) => {
+		for (const session of sessions) {
+			const values = session.sets
+				.filter(
+					(set) =>
+						set.exerciseId === exerciseId &&
+						!isWarmupSet(set) &&
+						(!completedOnly || set.completed)
+				)
+				.sort((a, b) => b.setIndex - a.setIndex)
+				.map((set) => setFieldValue(set, field))
+				.filter((value): value is number => value != null);
+			if (values.length) return values[0];
+		}
+		return undefined;
+	};
+	const fromPrevious =
+		fromSessions(previousSessions, true) ?? fromSessions(previousSessions, false);
+	if (fromPrevious != null) return fromPrevious;
+	const current = currentSets
+		.filter((set) => set.exerciseId === exerciseId && !isWarmupSet(set))
+		.sort((a, b) => b.setIndex - a.setIndex);
+	for (const set of current) {
 		const value = setFieldValue(set, field);
 		if (value != null) return value;
 	}
