@@ -8,8 +8,8 @@
 	import Icon from '$lib/components/Icon.svelte';
 	import Keypad from '$lib/components/Keypad.svelte';
 	import LastTime from '$lib/components/LastTime.svelte';
-	import { formatClock, formatDuration, formatNumber } from '$lib/format';
-	import { activityPreview, sessionSeconds } from '$lib/metrics';
+	import { formatDuration, formatNumber } from '$lib/format';
+	import { activityPreview } from '$lib/metrics';
 	import {
 		lastCompletedSession,
 		previousCardioValue,
@@ -36,7 +36,7 @@
 		normalizeWeekStart,
 		sundayOf
 	} from '$lib/week';
-	import { onDestroy, untrack } from 'svelte';
+	import { untrack } from 'svelte';
 
 	const dayId = $derived(page.params.dayId ?? '');
 	const activityId = $derived(page.params.activityId ?? '');
@@ -118,11 +118,6 @@
 
 	let cardioField = $state<'distanceKm' | 'durationSeconds' | null>(null);
 	let statEditor = $state<{ statId: string; unit: string } | null>(null);
-	let tick = $state(Date.now());
-	const clock = setInterval(() => {
-		tick = Date.now();
-	}, 1000);
-	onDestroy(() => clearInterval(clock));
 
 	async function ensure(): Promise<Session | null> {
 		if (!fitness.plan || !day || !activity) return null;
@@ -142,10 +137,6 @@
 		await save(patch(started));
 	}
 
-	async function start() {
-		await startAnd((current) => current);
-	}
-
 	async function complete() {
 		await startAnd((current) => ({
 			...current,
@@ -156,11 +147,6 @@
 	}
 
 	const status = $derived(sessionStatus(session));
-	const liveSeconds = $derived.by(() => {
-		tick;
-		if (!session?.startedAt || session.endedAt) return sessionSeconds(session);
-		return Math.round((Date.now() - Date.parse(session.startedAt)) / 1000);
-	});
 
 	$effect(() => {
 		if (!fitness.ready || !day || !activity) return;
@@ -207,34 +193,6 @@
 	</header>
 
 	<LastTime {activity} {last} weekdayLabel={lastLabel} />
-
-	<div class="mb-5 flex items-center gap-3">
-		{#if status !== 'done' && !session?.startedAt}
-			<button
-				type="button"
-				class="inline-flex items-center gap-2 rounded-full bg-lime-400 px-4 py-2 text-sm font-semibold text-zinc-950"
-				onclick={() => void start()}
-			>
-				<Icon name="timer" class="h-5 w-5" />
-				Start
-			</button>
-		{:else if liveSeconds != null}
-			<p class="inline-flex items-center gap-2 font-mono text-2xl font-semibold tabular-nums">
-				<Icon name="timer" class="h-5 w-5 text-lime-300" />
-				{formatClock(liveSeconds)}
-			</p>
-			{#if status !== 'done'}
-				<button
-					type="button"
-					class="flex h-11 w-11 items-center justify-center rounded-full bg-zinc-800 text-lime-300"
-					aria-label="Stop timer"
-					onclick={() => void complete()}
-				>
-					<Icon name="stop" class="h-6 w-6" />
-				</button>
-			{/if}
-		{/if}
-	</div>
 
 	{#if activity.kind === 'cardio'}
 		<div class="grid grid-cols-2 gap-3">
@@ -319,6 +277,16 @@
 				});
 			}}></textarea>
 	</label>
+
+	{#if status !== 'done'}
+		<button
+			type="button"
+			class="mt-5 w-full rounded-2xl bg-lime-400 py-3 text-sm font-semibold text-zinc-950"
+			onclick={() => void complete()}
+		>
+			Completed
+		</button>
+	{/if}
 {/if}
 
 {#if cardioField && activity?.kind === 'cardio'}

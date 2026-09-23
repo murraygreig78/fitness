@@ -9,15 +9,6 @@ export interface DayMetrics {
 	volumeKg: number;
 	cardioSeconds: number;
 	cardioKm: number;
-	sessionSeconds: number | null;
-}
-
-export function sessionSeconds(session: Session | undefined): number | null {
-	if (!session?.startedAt) return null;
-	const end = session.endedAt ? Date.parse(session.endedAt) : Date.now();
-	const start = Date.parse(session.startedAt);
-	if (!Number.isFinite(start) || !Number.isFinite(end) || end < start) return null;
-	return Math.round((end - start) / 1000);
 }
 
 export function volumeForSet(set: LoggedSet): number {
@@ -39,9 +30,6 @@ export function metricsForDay(day: PlanDay, sessions: Session[]): DayMetrics {
 		session.sets.filter((set) => set.completed && !set.warmup)
 	);
 	const cardio = sessions.filter((session) => session.kind === 'cardio');
-	const durations = sessions
-		.map((session) => sessionSeconds(session))
-		.filter((value): value is number => value != null);
 
 	return {
 		dayId: day.id,
@@ -49,8 +37,7 @@ export function metricsForDay(day: PlanDay, sessions: Session[]): DayMetrics {
 		setsPlanned: planned,
 		volumeKg: completed.reduce((sum, set) => sum + volumeForSet(set), 0),
 		cardioSeconds: cardio.reduce((sum, session) => sum + (session.durationSeconds ?? 0), 0),
-		cardioKm: cardio.reduce((sum, session) => sum + (session.distanceKm ?? 0), 0),
-		sessionSeconds: durations.length ? durations.reduce((sum, value) => sum + value, 0) : null
+		cardioKm: cardio.reduce((sum, session) => sum + (session.distanceKm ?? 0), 0)
 	};
 }
 
@@ -61,16 +48,14 @@ export function sumMetrics(days: DayMetrics[]): Omit<DayMetrics, 'dayId'> {
 			setsPlanned: acc.setsPlanned + day.setsPlanned,
 			volumeKg: acc.volumeKg + day.volumeKg,
 			cardioSeconds: acc.cardioSeconds + day.cardioSeconds,
-			cardioKm: acc.cardioKm + day.cardioKm,
-			sessionSeconds: (acc.sessionSeconds ?? 0) + (day.sessionSeconds ?? 0)
+			cardioKm: acc.cardioKm + day.cardioKm
 		}),
 		{
 			setsCompleted: 0,
 			setsPlanned: 0,
 			volumeKg: 0,
 			cardioSeconds: 0,
-			cardioKm: 0,
-			sessionSeconds: 0
+			cardioKm: 0
 		}
 	);
 }
