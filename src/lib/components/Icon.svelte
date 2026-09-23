@@ -16,6 +16,7 @@
 		| 'back'
 		| 'timer'
 		| 'stop'
+		| 'pause'
 		| 'admin';
 
 	let {
@@ -79,6 +80,10 @@
 	{:else if name === 'stop'}
 		<circle cx="12" cy="12" r="9" />
 		<rect x="8" y="8" width="8" height="8" rx="1.2" fill="currentColor" stroke="none" />
+	{:else if name === 'pause'}
+		<circle cx="12" cy="12" r="9" />
+		<rect x="8.5" y="8" width="2.6" height="8" rx="0.6" fill="currentColor" stroke="none" />
+		<rect x="12.9" y="8" width="2.6" height="8" rx="0.6" fill="currentColor" stroke="none" />
 	{:else if name === 'admin'}
 		<circle cx="12" cy="12" r="3" />
 		<path

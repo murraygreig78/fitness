@@ -1,4 +1,5 @@
 <script lang="ts">
+	import AutoTimer from '$lib/components/AutoTimer.svelte';
 	import Keypad from '$lib/components/Keypad.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import RestTimer from '$lib/components/RestTimer.svelte';
@@ -61,17 +62,46 @@
 	let editingTarget = $state(false);
 	let targetField = $state<ExerciseTargetField | null>(null);
 	let restBeepTimer: ReturnType<typeof setTimeout> | undefined;
+	let autoStep = $state(0);
+	let autoPhase = $state<'hold' | 'rest' | null>(null);
+	let autoUntil = $state<number | null>(null);
+	let autoTimer: ReturnType<typeof setTimeout> | undefined;
+	let autoPaused = $state(false);
+	let autoRemainingMs = $state(0);
+	let autoResume: (() => void) | null = null;
 
 	const interval = setInterval(() => {
 		now = Date.now();
-	}, 1000);
+	}, 200);
 	onDestroy(() => {
 		clearInterval(interval);
 		clearRest(false);
+		stopAuto();
 	});
 
 	const restRemaining = $derived(
 		restUntil == null ? 0 : Math.max(0, Math.round((restUntil - now) / 1000))
+	);
+	const autoRemaining = $derived(
+		autoPaused
+			? Math.max(0, Math.ceil(autoRemainingMs / 1000))
+			: autoUntil == null
+				? 0
+				: Math.max(0, Math.ceil((autoUntil - now) / 1000))
+	);
+	const autoQueue = $derived.by(() => {
+		const steps: { exerciseIndex: number; setIndex: number }[] = [];
+		if (activity.kind !== 'mobility') return steps;
+		exercises.forEach((exercise, exerciseIndex) => {
+			for (let setIndex = 0; setIndex < setCount(exercise); setIndex++) {
+				steps.push({ exerciseIndex, setIndex });
+			}
+		});
+		return steps;
+	});
+	const autoCurrent = $derived(autoQueue[autoStep]);
+	const autoExercise = $derived(
+		autoCurrent ? exercises[autoCurrent.exerciseIndex] : undefined
 	);
 
 	function clearRest(playBeep: boolean) {
@@ -102,6 +132,7 @@
 	}
 
 	function startRest(exercise: Exercise, warmup = false) {
+		if (autoPhase) return;
 		const seconds = restSecondsForSet(exercise, activity, warmup);
 		if (seconds <= 0) return;
 		void unlockBeep();
@@ -111,6 +142,142 @@
 			restBeepTimer = undefined;
 			clearRest(true);
 		}, seconds * 1000);
+	}
+
+	function holdSeconds(exercise: Exercise): number {
+		if (exercise.kind === 'timed' || exercise.kind === 'stretch') {
+			return Math.max(1, Math.round(exercise.target.durationSeconds));
+		}
+		return 30;
+	}
+
+	function gapSeconds(exercise: Exercise): number {
+		return exercise.restSeconds != null ? Math.max(0, Math.round(exercise.restSeconds)) : 5;
+	}
+
+	function stopAuto() {
+		if (autoTimer != null) {
+			clearTimeout(autoTimer);
+			autoTimer = undefined;
+		}
+		autoResume = null;
+		autoPaused = false;
+		autoRemainingMs = 0;
+		autoPhase = null;
+		autoUntil = null;
+		autoStep = 0;
+	}
+
+	function armAuto(ms: number, next: () => void) {
+		if (autoTimer != null) clearTimeout(autoTimer);
+		autoPaused = false;
+		autoResume = next;
+		autoRemainingMs = ms;
+		autoUntil = Date.now() + ms;
+		autoTimer = setTimeout(() => {
+			autoTimer = undefined;
+			const run = autoResume;
+			autoResume = null;
+			run?.();
+		}, ms);
+	}
+
+	function scheduleAuto(seconds: number, next: () => void) {
+		armAuto(seconds * 1000, next);
+	}
+
+	function toggleAutoPause() {
+		if (autoPhase == null) return;
+		if (autoPaused) {
+			if (!autoResume) return;
+			armAuto(Math.max(0, autoRemainingMs), autoResume);
+			return;
+		}
+		if (autoUntil == null) return;
+		autoRemainingMs = Math.max(0, autoUntil - Date.now());
+		if (autoTimer != null) {
+			clearTimeout(autoTimer);
+			autoTimer = undefined;
+		}
+		autoPaused = true;
+	}
+
+	function beginReady() {
+		const step = autoQueue[autoStep];
+		const exercise = step ? exercises[step.exerciseIndex] : undefined;
+		if (!step || !exercise) {
+			stopAuto();
+			focusedId = null;
+			return;
+		}
+		focusedId = exercise.id;
+		autoPhase = 'rest';
+		const seconds = Math.max(1, gapSeconds(exercise) || 5);
+		scheduleAuto(seconds, () => beginHold());
+	}
+
+	function beginHold() {
+		const step = autoQueue[autoStep];
+		const exercise = step ? exercises[step.exerciseIndex] : undefined;
+		if (!step || !exercise) {
+			stopAuto();
+			focusedId = null;
+			return;
+		}
+		focusedId = exercise.id;
+		autoPhase = 'hold';
+		playRestBeep();
+		scheduleAuto(holdSeconds(exercise), () => void finishHold());
+	}
+
+	async function finishHold() {
+		const step = autoQueue[autoStep];
+		const exercise = step ? exercises[step.exerciseIndex] : undefined;
+		if (!step || !exercise) {
+			stopAuto();
+			return;
+		}
+		playRestBeep();
+		await completeAutoSet(exercise, step.setIndex);
+		if (autoStep + 1 >= autoQueue.length) {
+			stopAuto();
+			focusedId = null;
+			return;
+		}
+		autoStep += 1;
+		beginReady();
+	}
+
+	async function completeAutoSet(exercise: Exercise, setIndex: number) {
+		const patch: LoggedSet = suggestedSet(exercise, setIndex, false, true);
+		const sets = upsertSet(session.sets, patch);
+		await onSave({
+			...session,
+			startedAt: session.startedAt ?? new Date().toISOString(),
+			skipped: false,
+			endedAt: null,
+			sets
+		});
+	}
+
+	async function startAuto() {
+		if (activity.kind !== 'mobility' || !autoQueue.length) return;
+		void unlockBeep();
+		clearRest(false);
+		stopAuto();
+		editor = null;
+		editingTarget = false;
+		targetField = null;
+		autoStep = 0;
+		if (!session.startedAt) {
+			await onSave({
+				...session,
+				startedAt: new Date().toISOString(),
+				skipped: false,
+				endedAt: null
+			});
+		}
+		beginReady();
 	}
 
 	function isCompletingField(exercise: Exercise, field: LogField) {
@@ -391,12 +558,31 @@
 	});
 </script>
 
-{#if restRemaining > 0}
+{#if autoPhase && autoExercise}
+	<AutoTimer
+		label={autoPhase === 'hold' ? 'Hold' : 'Next'}
+		name={autoExercise.name}
+		secondsRemaining={autoRemaining}
+		paused={autoPaused}
+		onPause={toggleAutoPause}
+		onStop={stopAuto}
+	/>
+{:else if restRemaining > 0}
 	<RestTimer secondsRemaining={restRemaining} onSkip={() => clearRest(false)} />
 {/if}
 
 {#if !focusedId}
 	<div class="space-y-2">
+		{#if activity.kind === 'mobility' && autoQueue.length}
+			<button
+				type="button"
+				class="flex w-full items-center justify-center gap-2 rounded-3xl border border-lime-400/40 py-3 text-sm font-semibold text-lime-300"
+				onclick={() => void startAuto()}
+			>
+				<Icon name="timer" class="h-5 w-5" />
+				Auto timer
+			</button>
+		{/if}
 		{#each exercises as exercise (exercise.id)}
 			{@const done = plannedSetsDone(exercise, session.sets)}
 			<button
@@ -428,6 +614,7 @@
 			type="button"
 			class="mb-3 inline-flex items-center gap-1 text-sm text-zinc-400"
 			onclick={() => {
+				stopAuto();
 				focusedId = null;
 				editingTarget = false;
 				targetField = null;
