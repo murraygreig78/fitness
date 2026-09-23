@@ -26,6 +26,7 @@
 	} = $props();
 
 	let draft = $state(untrack(() => (value == null ? '' : String(value))));
+	let replaceOnType = $state(untrack(() => value != null));
 	let saving = $state(false);
 	const keys = $derived([
 		'1',
@@ -45,12 +46,27 @@
 	function press(key: string) {
 		if (key === '') return;
 		if (key === '⌫') {
+			if (replaceOnType) {
+				draft = '';
+				replaceOnType = false;
+				return;
+			}
 			draft = draft.slice(0, -1);
 			return;
 		}
 		if (key === '.') {
+			if (replaceOnType) {
+				draft = '0.';
+				replaceOnType = false;
+				return;
+			}
 			if (draft.includes('.')) return;
 			draft = draft ? `${draft}.` : '0.';
+			return;
+		}
+		if (replaceOnType) {
+			draft = key;
+			replaceOnType = false;
 			return;
 		}
 		if (draft === '0' && key !== '.') {
@@ -63,6 +79,7 @@
 	function useLast() {
 		if (last == null) return;
 		draft = String(last);
+		replaceOnType = true;
 	}
 
 	async function done(event?: Event) {
@@ -134,7 +151,11 @@
 		<div class="mb-3 flex items-start justify-between gap-3">
 			<div>
 				<p class="text-sm text-zinc-400">{label}</p>
-				<p class="font-mono text-4xl font-semibold tabular-nums text-zinc-50">
+				<p
+					class="font-mono text-4xl font-semibold tabular-nums {replaceOnType
+						? 'rounded-xl bg-lime-400/20 px-2 text-lime-300'
+						: 'text-zinc-50'}"
+				>
 					{draft || '0'}<span class="ml-2 text-lg text-zinc-500">{unit}</span>
 				</p>
 			</div>
