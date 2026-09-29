@@ -181,6 +181,56 @@ class FitnessApp {
 		return record;
 	}
 
+	async skipSession(day: PlanDay, activity: Activity, weekStart = this.weekStart): Promise<Session> {
+		const session = await this.ensureSession(day, activity, weekStart);
+		const skipped: Session = {
+			...session,
+			skipped: true,
+			completed: false,
+			endedAt: session.endedAt ?? new Date().toISOString()
+		};
+		await this.saveSession(skipped, { replaceSets: true });
+		return skipped;
+	}
+
+	async unskipSession(day: PlanDay, activity: Activity, weekStart = this.weekStart): Promise<Session> {
+		const session = await this.ensureSession(day, activity, weekStart);
+		const restored: Session = {
+			...session,
+			skipped: false,
+			completed: false,
+			endedAt: null
+		};
+		await this.saveSession(restored, { replaceSets: true });
+		return restored;
+	}
+
+	async removeCustomActivity(
+		activityId: string,
+		weekStart = this.weekStart
+	): Promise<{ ok: true } | { ok: false; error: string }> {
+		const record = this.customActivity(activityId, weekStart);
+		if (!record) return { ok: false, error: 'That activity is part of the weekly plan' };
+		const sessionId = `${record.weekStart}::${record.dayId}::${record.id}`;
+		await db.transaction('rw', db.customActivities, db.sessions, async () => {
+			await db.customActivities.delete(record.id);
+			await db.sessions.delete(sessionId);
+		});
+		this.customActivities = this.customActivities.filter((item) => item.id !== record.id);
+		this.sessions = this.sessions.filter((session) => session.id !== sessionId);
+		return { ok: true };
+	}
+
+	async clearSession(
+		dayId: string,
+		activityId: string,
+		weekStart = this.weekStart
+	): Promise<void> {
+		const sessionId = `${weekStart}::${dayId}::${activityId}`;
+		await db.sessions.delete(sessionId);
+		this.sessions = this.sessions.filter((session) => session.id !== sessionId);
+	}
+
 	async ensureSession(
 		day: PlanDay,
 		activity: Activity,
