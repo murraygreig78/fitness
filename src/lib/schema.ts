@@ -473,6 +473,28 @@ export function isAdhocActivityId(activityId: string): boolean {
 	return activityId.startsWith('adhoc-');
 }
 
+export function planActivitiesOfKind(
+	plan: Plan,
+	kind: ActivityKind
+): { activity: Activity; weekday: Weekday; dayName: string }[] {
+	const seen = new Set<string>();
+	const matches: { activity: Activity; weekday: Weekday; dayName: string }[] = [];
+	for (const day of plan.days) {
+		for (const activity of day.activities) {
+			if (activity.kind !== kind || seen.has(activity.id)) continue;
+			seen.add(activity.id);
+			matches.push({ activity, weekday: day.weekday, dayName: day.name });
+		}
+	}
+	return matches;
+}
+
+export function cloneActivityAsAdhoc(source: Activity): Activity {
+	const id = `adhoc-${source.kind}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+	const copy = JSON.parse(JSON.stringify(source)) as Activity;
+	return { ...copy, id };
+}
+
 export function createAdhocActivity(kind: ActivityKind): Activity {
 	const id = `adhoc-${kind}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 	switch (kind) {

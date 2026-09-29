@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { base } from '$app/paths';
+	import { goto } from '$app/navigation';
+	import { base, resolve } from '$app/paths';
 	import { fitness } from '$lib/app-state.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import SamplePlanList from '$lib/components/SamplePlanList.svelte';
@@ -110,6 +111,7 @@
 			}
 			message = `Loaded ${fitness.plan?.name ?? 'weekly plan'}. It will repeat each week.`;
 			selected = 'current';
+			await goto(resolve('/'));
 		} finally {
 			busy = false;
 		}
@@ -136,11 +138,12 @@
 		}
 	}
 
-	function loadedSample() {
+	async function loadedSample() {
 		error = null;
 		message = `Loaded ${fitness.plan?.name ?? 'weekly plan'}. It will repeat each week.`;
 		startPlanReminder(() => fitness.plan);
 		selected = 'current';
+		await goto(resolve('/'));
 	}
 
 	async function saveNotificationTime(value: string) {
