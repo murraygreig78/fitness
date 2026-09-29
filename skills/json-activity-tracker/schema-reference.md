@@ -60,7 +60,7 @@ Invalid: only `distanceKmMin` / `distanceKmMax`.
 }
 ```
 
-Warm up is offered in the app for every `weighted` exercise here. No JSON flag required.
+**Warm-ups:** add one or more normal `weighted` / `bodyweight` exercises before the working lift (for example `db-deadlift-warmup` then `db-deadlift`). The app does not generate warm-up sets from a button or from `warmup: true`.
 
 ### `mobility`
 
@@ -97,7 +97,7 @@ Shared:
   notes?: string,
   restSeconds?: number,          // nonnegative. Strength default comes from the activity
   supersetId?: string,           // same id on partners; rest after the pair
-  warmup?: boolean               // default false; ignored for showing the Warm up button
+  warmup?: boolean               // legacy; ignored — use a separate warm-up exercise instead
 }
 ```
 
@@ -120,7 +120,6 @@ Targets:
 1. Exercise `restSeconds` if set
 2. Else strength activity `restSeconds` (default 120)
 3. Else 0 (mobility / cardio / progress)
-4. Warm-up rest in the app is half of the working rest
 
 ## Ids and history
 

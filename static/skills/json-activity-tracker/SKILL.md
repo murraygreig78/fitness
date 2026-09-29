@@ -47,7 +47,8 @@ Then:
 - Timed and stretch `target` need `sets`, `durationSeconds`. No `kg` or `reps`.
 - Do not emit `sessions`, `sets` logs, `startedAt`, or backup wrappers.
 - Do not add fields the schema does not list. Unknown keys are stripped and confuse humans.
-- `warmup: true` is optional and unused for gating. The app offers Warm up on any weighted lift inside a strength activity.
+- **Warm-ups are separate exercises**, not a button or special set type in the app. Model each warm-up as its own `weighted` (or `bodyweight`) exercise in the same `strength` activity, placed **before** the working lift. Give each its own `id`, `name`, and full `target` (`sets`, `reps`, `kg`). Do **not** rely on `exercise.warmup: true` — that field is legacy and ignored.
+- Reuse the **same warm-up exercise id** across days when it is the same ramp (so last kg/reps follow that id).
 
 ## Mapping a written workout
 
@@ -63,6 +64,7 @@ Then:
 | “3 × 6–8 @ 12 kg” | `sets: 3`, `repsMin: 6`, `reps: 8`, `kg: 12` |
 | “alternate A and B, then rest” | same `supersetId` on both exercises |
 | “2 min rest” | `restSeconds: 120` on the activity or exercise |
+| “Warm-up: 2 × 12 @ 6 kg, then work sets” | two exercises: `{ id: "db-deadlift-warmup", name: "Deadlift warm-up", … target: { sets: 2, reps: 12, kg: 6 } }` then `{ id: "db-deadlift", … }` |
 
 If equipment is unknown, use a modest placeholder `kg` and say so in `notes`.
 

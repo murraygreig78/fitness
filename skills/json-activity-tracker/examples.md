@@ -2,6 +2,36 @@
 
 Copy the smallest template that fits, then expand. All of these are version-2 valid.
 
+## Strength with warm-up exercises
+
+Warm-ups are separate exercises in the list (not a flag on the working lift):
+
+```json
+{
+  "id": "lower-strength",
+  "name": "Lower body",
+  "kind": "strength",
+  "restSeconds": 120,
+  "exercises": [
+    {
+      "id": "db-deadlift-warmup",
+      "name": "Deadlift warm-up",
+      "kind": "weighted",
+      "primaryMuscles": ["back", "glutes", "hamstrings"],
+      "notes": "Ramp weight across sets; adjust kg to what you use.",
+      "target": { "sets": 3, "reps": 12, "kg": 6 }
+    },
+    {
+      "id": "db-deadlift",
+      "name": "Dumbbell deadlift",
+      "kind": "weighted",
+      "primaryMuscles": ["back", "glutes", "hamstrings"],
+      "target": { "sets": 3, "reps": 8, "repsMin": 6, "kg": 12 }
+    }
+  ]
+}
+```
+
 ## Minimal strength day
 
 ```json

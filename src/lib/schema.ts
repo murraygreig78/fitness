@@ -328,10 +328,8 @@ export function restSecondsFor(exercise: Exercise, activity: Activity): number {
 	return 0;
 }
 
-export function restSecondsForSet(exercise: Exercise, activity: Activity, warmup: boolean): number {
-	const full = restSecondsFor(exercise, activity);
-	if (!warmup) return full;
-	return Math.round(full / 2);
+export function restSecondsForSet(exercise: Exercise, activity: Activity, _warmup = false): number {
+	return restSecondsFor(exercise, activity);
 }
 
 export function emptyStatsForActivity(activity: Activity): LoggedStat[] {
