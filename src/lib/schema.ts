@@ -448,6 +448,23 @@ export function exercisesInActivity(activity: Activity): Exercise[] {
 	return [];
 }
 
+/** True when every planned working set for every exercise is marked complete. */
+export function plannedExercisesDone(activity: Activity, sets: LoggedSet[]): boolean {
+	const exercises = exercisesInActivity(activity);
+	if (!exercises.length) return true;
+	return exercises.every((exercise) =>
+		Array.from({ length: setCount(exercise) }, (_, index) =>
+			sets.some(
+				(set) =>
+					set.exerciseId === exercise.id &&
+					set.setIndex === index &&
+					!isWarmupSet(set) &&
+					set.completed
+			)
+		).every(Boolean)
+	);
+}
+
 export function freeDayId(weekday: Weekday): string {
 	return `free-${weekday}`;
 }

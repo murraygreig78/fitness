@@ -22,6 +22,7 @@
 		exercisesInActivity,
 		freeDayId,
 		isAdhocActivityId,
+		plannedExercisesDone,
 		sessionDay,
 		sessionStatus,
 		type Session,
@@ -138,9 +139,17 @@
 	}
 
 	async function complete() {
-		if (!day) return;
-		await startAnd((current) => ({
-			...current,
+		if (!day || !activity) return;
+		const current = await ensure();
+		if (!current) return;
+
+		const exerciseBased = activity.kind === 'strength' || activity.kind === 'mobility';
+		if (exerciseBased && !plannedExercisesDone(activity, current.sets)) {
+			return;
+		}
+
+		await startAnd((session) => ({
+			...session,
 			endedAt: new Date().toISOString(),
 			completed: true,
 			skipped: false
@@ -149,6 +158,13 @@
 	}
 
 	const status = $derived(sessionStatus(session));
+	const exercisesDone = $derived(
+		!activity || !session
+			? true
+			: activity.kind !== 'strength' && activity.kind !== 'mobility'
+				? true
+				: plannedExercisesDone(activity, session.sets)
+	);
 
 	$effect(() => {
 		if (!fitness.ready || !day || !activity) return;
@@ -281,9 +297,17 @@
 	</label>
 
 	{#if status !== 'done'}
+		{#if !exercisesDone}
+			<p class="mt-5 text-center text-sm text-zinc-500">
+				Finish the remaining exercises, then mark the activity completed.
+			</p>
+		{/if}
 		<button
 			type="button"
-			class="mt-5 w-full rounded-2xl bg-lime-400 py-3 text-sm font-semibold text-zinc-950"
+			class="mt-3 w-full rounded-2xl bg-lime-400 py-3 text-sm font-semibold text-zinc-950 disabled:opacity-40 {exercisesDone
+				? 'mt-5'
+				: ''}"
+			disabled={!exercisesDone}
 			onclick={() => void complete()}
 		>
 			Completed
