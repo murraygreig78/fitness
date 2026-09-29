@@ -138,12 +138,14 @@
 	}
 
 	async function complete() {
+		if (!day) return;
 		await startAnd((current) => ({
 			...current,
 			endedAt: new Date().toISOString(),
 			completed: true,
 			skipped: false
 		}));
+		await goto(resolve(`/?week=${weekStart}&day=${day.weekday}`));
 	}
 
 	const status = $derived(sessionStatus(session));
