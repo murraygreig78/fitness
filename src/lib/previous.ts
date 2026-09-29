@@ -70,6 +70,16 @@ export function lastUsedFieldValue(
 	field: LogField,
 	warmup = false
 ): number | undefined {
+	const earlier = currentSets
+		.filter(
+			(set) =>
+				set.exerciseId === exerciseId && set.setIndex < setIndex && Boolean(set.warmup) === warmup
+		)
+		.sort((a, b) => b.setIndex - a.setIndex);
+	for (const set of earlier) {
+		const value = setFieldValue(set, field);
+		if (value != null) return value;
+	}
 	const fromThisSet = previousSetValue(previousSessions, exerciseId, setIndex, field, warmup);
 	if (fromThisSet != null) return fromThisSet;
 	if (setIndex > 0) {
@@ -82,16 +92,6 @@ export function lastUsedFieldValue(
 		);
 		if (fromPriorSet != null) return fromPriorSet;
 	}
-	const earlier = currentSets
-		.filter(
-			(set) =>
-				set.exerciseId === exerciseId && set.setIndex < setIndex && Boolean(set.warmup) === warmup
-		)
-		.sort((a, b) => b.setIndex - a.setIndex);
-	for (const set of earlier) {
-		const value = setFieldValue(set, field);
-		if (value != null) return value;
-	}
 	return undefined;
 }
 
@@ -101,33 +101,32 @@ export function lastExerciseFieldValue(
 	exerciseId: string,
 	field: LogField
 ): number | undefined {
+	const fromSets = (sets: LoggedSet[], completedOnly: boolean) => {
+		const values = sets
+			.filter(
+				(set) =>
+					set.exerciseId === exerciseId &&
+					!isWarmupSet(set) &&
+					(!completedOnly || set.completed)
+			)
+			.sort((a, b) => b.setIndex - a.setIndex)
+			.map((set) => setFieldValue(set, field))
+			.filter((value): value is number => value != null);
+		return values[0];
+	};
 	const fromSessions = (sessions: Session[], completedOnly: boolean) => {
 		for (const session of sessions) {
-			const values = session.sets
-				.filter(
-					(set) =>
-						set.exerciseId === exerciseId &&
-						!isWarmupSet(set) &&
-						(!completedOnly || set.completed)
-				)
-				.sort((a, b) => b.setIndex - a.setIndex)
-				.map((set) => setFieldValue(set, field))
-				.filter((value): value is number => value != null);
-			if (values.length) return values[0];
+			const value = fromSets(session.sets, completedOnly);
+			if (value != null) return value;
 		}
 		return undefined;
 	};
-	const fromPrevious =
-		fromSessions(previousSessions, true) ?? fromSessions(previousSessions, false);
-	if (fromPrevious != null) return fromPrevious;
-	const current = currentSets
-		.filter((set) => set.exerciseId === exerciseId && !isWarmupSet(set))
-		.sort((a, b) => b.setIndex - a.setIndex);
-	for (const set of current) {
-		const value = setFieldValue(set, field);
-		if (value != null) return value;
-	}
-	return undefined;
+	return (
+		fromSets(currentSets, true) ??
+		fromSessions(previousSessions, true) ??
+		fromSessions(previousSessions, false) ??
+		fromSets(currentSets, false)
+	);
 }
 
 export function previousCardioValue(
