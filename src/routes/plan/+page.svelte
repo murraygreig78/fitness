@@ -85,7 +85,7 @@
 				id: 'screen',
 				label: 'Keep screen awake',
 				hint: fitness.preferences.keepScreenAwake
-					? 'On while a timer runs'
+					? 'On while an activity is open'
 					: 'Off'
 			},
 			{
@@ -459,8 +459,8 @@
 						</div>
 					{:else if item.id === 'screen'}
 						<p class="mb-4 text-sm leading-6 text-zinc-400">
-							When on, the phone screen stays awake while a rest or auto timer is running so it
-							doesn’t lock mid-set. Default is on.
+							When on, the phone screen stays awake for the whole activity session so it doesn’t
+							lock while you’re doing a set. Default is on.
 						</p>
 						<div class="grid grid-cols-2 gap-2">
 							<button

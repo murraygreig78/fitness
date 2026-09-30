@@ -36,6 +36,7 @@
 		formatPace,
 		kmToDisplay
 	} from '$lib/units';
+	import { setWakeLockDesired } from '$lib/wake-lock';
 	import {
 		calendarDays,
 		dateForWeekday,
@@ -193,6 +194,13 @@
 				void fitness.ensureSession(currentDay, currentActivity, currentWeek);
 			});
 		}
+	});
+
+	$effect(() => {
+		const open = Boolean(day && activity);
+		const want = fitness.preferences.keepScreenAwake && open;
+		setWakeLockDesired(want);
+		return () => setWakeLockDesired(false);
 	});
 </script>
 

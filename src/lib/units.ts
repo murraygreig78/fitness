@@ -4,7 +4,7 @@ export type DistanceUnit = 'km' | 'mi';
 export type AppPreferences = {
 	weightUnit: WeightUnit;
 	distanceUnit: DistanceUnit;
-	/** Keep the phone screen on while a rest or auto timer is running. */
+	/** Keep the phone screen on while an activity session is open. */
 	keepScreenAwake: boolean;
 };
 

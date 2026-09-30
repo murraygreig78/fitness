@@ -12,7 +12,6 @@
 		kgToDisplay,
 		weightUnitLabel
 	} from '$lib/units';
-	import { setWakeLockDesired } from '$lib/wake-lock';
 	import {
 		fieldsForExercise,
 		fieldLabel,
@@ -643,13 +642,6 @@
 		const exercise = exercises.find((item) => item.id === focusedId);
 		if (!exercise) return;
 		void hydrateWorkingSets(exercise);
-	});
-
-	$effect(() => {
-		const timerOn = autoPhase != null || restUntil != null;
-		const want = fitness.preferences.keepScreenAwake && timerOn;
-		setWakeLockDesired(want);
-		return () => setWakeLockDesired(false);
 	});
 </script>
 

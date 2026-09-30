@@ -1,4 +1,4 @@
-/** Keeps the phone screen on while an in-app timer is running (when enabled). */
+/** Keeps the phone screen on while an activity session is open (when enabled). */
 
 type WakeLockSentinelLike = {
 	released: boolean;
