@@ -13,6 +13,7 @@ export interface AppMeta {
 	activePlanId: string | null;
 	weightUnit?: WeightUnit;
 	distanceUnit?: DistanceUnit;
+	keepScreenAwake?: boolean;
 }
 
 export interface StoredCustomActivity {

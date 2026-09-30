@@ -112,7 +112,8 @@ class FitnessApp {
 			id: 'app',
 			activePlanId,
 			weightUnit: this.preferences.weightUnit,
-			distanceUnit: this.preferences.distanceUnit
+			distanceUnit: this.preferences.distanceUnit,
+			keepScreenAwake: this.preferences.keepScreenAwake
 		});
 	}
 
@@ -127,6 +128,10 @@ class FitnessApp {
 
 	async setDistanceUnit(distanceUnit: DistanceUnit): Promise<void> {
 		await this.setPreferences({ distanceUnit });
+	}
+
+	async setKeepScreenAwake(keepScreenAwake: boolean): Promise<void> {
+		await this.setPreferences({ keepScreenAwake });
 	}
 
 	async persistPlan(plan: Plan): Promise<{ ok: true } | { ok: false; error: string }> {
@@ -323,7 +328,8 @@ class FitnessApp {
 				id: 'app',
 				activePlanId: backup.plan?.id ?? null,
 				weightUnit: this.preferences.weightUnit,
-				distanceUnit: this.preferences.distanceUnit
+				distanceUnit: this.preferences.distanceUnit,
+				keepScreenAwake: this.preferences.keepScreenAwake
 			});
 		});
 		this.plan = backup.plan;

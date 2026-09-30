@@ -23,6 +23,7 @@
 		| 'import-plan'
 		| 'import-log'
 		| 'units'
+		| 'screen'
 		| 'reminder'
 		| 'coffee';
 
@@ -79,6 +80,13 @@
 					fitness.preferences.weightUnit === 'lb' || fitness.preferences.distanceUnit === 'mi'
 						? `${fitness.preferences.weightUnit === 'lb' ? 'lb' : 'kg'} · ${fitness.preferences.distanceUnit === 'mi' ? 'miles' : 'km'}`
 						: 'Kilograms and kilometres'
+			},
+			{
+				id: 'screen',
+				label: 'Keep screen awake',
+				hint: fitness.preferences.keepScreenAwake
+					? 'On while a timer runs'
+					: 'Off'
 			},
 			{
 				id: 'reminder',
@@ -448,6 +456,33 @@
 									</button>
 								</div>
 							</div>
+						</div>
+					{:else if item.id === 'screen'}
+						<p class="mb-4 text-sm leading-6 text-zinc-400">
+							When on, the phone screen stays awake while a rest or auto timer is running so it
+							doesn’t lock mid-set. Default is on.
+						</p>
+						<div class="grid grid-cols-2 gap-2">
+							<button
+								type="button"
+								class="rounded-2xl py-3 text-sm font-semibold {fitness.preferences
+									.keepScreenAwake
+									? 'bg-lime-400 text-zinc-950'
+									: 'border border-zinc-700 text-zinc-200'}"
+								onclick={() => void fitness.setKeepScreenAwake(true)}
+							>
+								On
+							</button>
+							<button
+								type="button"
+								class="rounded-2xl py-3 text-sm font-semibold {!fitness.preferences
+									.keepScreenAwake
+									? 'bg-lime-400 text-zinc-950'
+									: 'border border-zinc-700 text-zinc-200'}"
+								onclick={() => void fitness.setKeepScreenAwake(false)}
+							>
+								Off
+							</button>
 						</div>
 					{:else if item.id === 'reminder'}
 						{#if fitness.plan}

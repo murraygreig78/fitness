@@ -4,11 +4,14 @@ export type DistanceUnit = 'km' | 'mi';
 export type AppPreferences = {
 	weightUnit: WeightUnit;
 	distanceUnit: DistanceUnit;
+	/** Keep the phone screen on while a rest or auto timer is running. */
+	keepScreenAwake: boolean;
 };
 
 export const DEFAULT_PREFERENCES: AppPreferences = {
 	weightUnit: 'kg',
-	distanceUnit: 'km'
+	distanceUnit: 'km',
+	keepScreenAwake: true
 };
 
 const LB_PER_KG = 2.2046226218;
@@ -94,6 +97,7 @@ export function normalizePreferences(input: unknown): AppPreferences {
 	const record = input as Partial<AppPreferences>;
 	return {
 		weightUnit: record.weightUnit === 'lb' ? 'lb' : 'kg',
-		distanceUnit: record.distanceUnit === 'mi' ? 'mi' : 'km'
+		distanceUnit: record.distanceUnit === 'mi' ? 'mi' : 'km',
+		keepScreenAwake: record.keepScreenAwake === false ? false : true
 	};
 }
