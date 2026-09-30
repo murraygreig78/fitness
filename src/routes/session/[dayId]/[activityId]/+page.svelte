@@ -4,6 +4,7 @@
 	import { page } from '$app/state';
 	import { kindIconName, kindTextClass } from '$lib/activity-style';
 	import { fitness } from '$lib/app-state.svelte';
+	import EffortPicker from '$lib/components/EffortPicker.svelte';
 	import ExerciseLogger from '$lib/components/ExerciseLogger.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import Keypad from '$lib/components/Keypad.svelte';
@@ -28,6 +29,13 @@
 		type Session,
 		type Weekday
 	} from '$lib/schema';
+	import {
+		displayToKm,
+		distanceUnitLabel,
+		formatDistance,
+		formatPace,
+		kmToDisplay
+	} from '$lib/units';
 	import {
 		calendarDays,
 		dateForWeekday,
@@ -117,8 +125,13 @@
 		return stored?.weekday;
 	}
 
-	let cardioField = $state<'distanceKm' | 'durationSeconds' | null>(null);
+	let cardioField = $state<'distanceKm' | 'durationSeconds' | 'calories' | null>(null);
 	let statEditor = $state<{ statId: string; unit: string } | null>(null);
+	let notesOpen = $state(false);
+	const distanceUnit = $derived(fitness.preferences.distanceUnit);
+	const paceLabel = $derived(
+		formatPace(session?.distanceKm, session?.durationSeconds, distanceUnit)
+	);
 
 	async function ensure(): Promise<Session | null> {
 		if (!fitness.plan || !day || !activity) return null;
@@ -220,7 +233,9 @@
 				onclick={() => (cardioField = 'distanceKm')}
 			>
 				<p class="text-xs text-zinc-500">Distance</p>
-				<p class="font-mono text-3xl font-semibold">{formatNumber(session?.distanceKm)} km</p>
+				<p class="font-mono text-3xl font-semibold">
+					{formatDistance(session?.distanceKm, distanceUnit)}
+				</p>
 			</button>
 			<button
 				type="button"
@@ -232,6 +247,20 @@
 					{session?.durationSeconds != null ? formatDuration(session.durationSeconds) : '—'}
 				</p>
 			</button>
+			<button
+				type="button"
+				class="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 text-left"
+				onclick={() => (cardioField = 'calories')}
+			>
+				<p class="text-xs text-zinc-500">Calories</p>
+				<p class="font-mono text-3xl font-semibold">
+					{session?.calories != null ? formatNumber(session.calories, 0) : '—'}
+				</p>
+			</button>
+			<div class="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+				<p class="text-xs text-zinc-500">Avg pace</p>
+				<p class="font-mono text-3xl font-semibold">{paceLabel ?? '—'}</p>
+			</div>
 		</div>
 	{:else if activity.kind === 'progress'}
 		<div class="space-y-3">
@@ -281,20 +310,46 @@
 		/>
 	{/if}
 
-	<label class="mt-5 block">
-		<span class="mb-2 block text-sm text-zinc-400">Notes</span>
-		<textarea
-			class="min-h-24 w-full rounded-2xl border border-zinc-800 bg-zinc-900 p-3 text-sm"
-			value={session?.notes ?? ''}
-			onchange={async (event) => {
-				const current = await ensure();
-				if (!current) return;
-				await save({
-					...current,
-					notes: (event.currentTarget as HTMLTextAreaElement).value
-				});
-			}}></textarea>
-	</label>
+	<div class="mt-5">
+		<EffortPicker
+			value={session?.effort}
+			onChange={(effort) => void startAnd((current) => ({ ...current, effort }))}
+		/>
+	</div>
+
+	<div class="mt-4">
+		<button
+			type="button"
+			class="flex w-full items-center justify-between gap-3 py-1 text-left"
+			aria-expanded={notesOpen}
+			onclick={() => (notesOpen = !notesOpen)}
+		>
+			<span class="text-sm text-zinc-400">
+				Notes
+				{#if !notesOpen && session?.notes?.trim()}
+					<span class="ml-2 font-normal text-zinc-600">· saved</span>
+				{/if}
+			</span>
+			<Icon
+				name="chevronDown"
+				class="h-4 w-4 text-zinc-500 transition-transform {notesOpen ? 'rotate-180' : ''}"
+			/>
+		</button>
+		{#if notesOpen}
+			<textarea
+				class="mt-2 min-h-16 w-full rounded-2xl border border-zinc-800 bg-zinc-900 p-3 text-sm"
+				value={session?.notes ?? ''}
+				onchange={async (event) => {
+					const current = await ensure();
+					if (!current) return;
+					await save({
+						...current,
+						notes: (event.currentTarget as HTMLTextAreaElement).value
+					});
+				}}
+			></textarea>
+		{/if}
+	</div>
 
 	{#if status !== 'done'}
 		{#if !exercisesDone}
@@ -318,28 +373,56 @@
 {#if cardioField && activity?.kind === 'cardio'}
 	{@const field = cardioField}
 	{@const usesMinutes = field === 'durationSeconds'}
+	{@const usesCalories = field === 'calories'}
 	{#key field}
 		<Keypad
-			label={field === 'distanceKm' ? activity.name : `${activity.name} time`}
-			unit={usesMinutes ? 'min' : 'km'}
+			label={usesCalories
+				? `${activity.name} calories`
+				: field === 'distanceKm'
+					? activity.name
+					: `${activity.name} time`}
+			unit={usesMinutes ? 'min' : usesCalories ? 'kcal' : distanceUnitLabel(distanceUnit)}
 			value={usesMinutes
 				? session?.durationSeconds != null
 					? session.durationSeconds / 60
 					: undefined
-				: session?.distanceKm}
+				: usesCalories
+					? session?.calories
+					: session?.distanceKm != null
+						? kmToDisplay(session.distanceKm, distanceUnit)
+						: undefined}
 			last={usesMinutes
 				? previousCardioValue(previous, 'durationSeconds') != null
 					? (previousCardioValue(previous, 'durationSeconds') ?? 0) / 60
 					: undefined
-				: previousCardioValue(previous, 'distanceKm')}
-			allowDecimal={true}
+				: usesCalories
+					? undefined
+					: previousCardioValue(previous, 'distanceKm') != null
+						? kmToDisplay(previousCardioValue(previous, 'distanceKm') ?? 0, distanceUnit)
+						: undefined}
+			allowDecimal={!usesCalories}
 			onCommit={async (next) => {
-				const converted = usesMinutes && next != null ? next * 60 : next;
+				if (usesMinutes) {
+					await startAnd((current) => ({
+						...current,
+						durationSeconds: next == null ? undefined : next * 60
+					}));
+					cardioField = null;
+					return;
+				}
+				if (usesCalories) {
+					await startAnd((current) => ({
+						...current,
+						calories: next == null ? undefined : Math.round(next)
+					}));
+					cardioField = null;
+					return;
+				}
 				await startAnd((current) => ({
 					...current,
-					[field]: converted
+					distanceKm: next == null ? undefined : displayToKm(next, distanceUnit)
 				}));
-				cardioField = field === 'distanceKm' ? 'durationSeconds' : null;
+				cardioField = 'durationSeconds';
 			}}
 			onClose={() => (cardioField = null)}
 		/>

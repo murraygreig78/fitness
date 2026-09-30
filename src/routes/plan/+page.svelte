@@ -22,6 +22,7 @@
 		| 'starter'
 		| 'import-plan'
 		| 'import-log'
+		| 'units'
 		| 'reminder'
 		| 'coffee';
 
@@ -70,6 +71,14 @@
 				id: 'import-log',
 				label: 'Import past activity',
 				hint: 'Bring a log from another device'
+			},
+			{
+				id: 'units',
+				label: 'Units',
+				hint:
+					fitness.preferences.weightUnit === 'lb' || fitness.preferences.distanceUnit === 'mi'
+						? `${fitness.preferences.weightUnit === 'lb' ? 'lb' : 'kg'} · ${fitness.preferences.distanceUnit === 'mi' ? 'miles' : 'km'}`
+						: 'Kilograms and kilometres'
 			},
 			{
 				id: 'reminder',
@@ -383,6 +392,63 @@
 								onchange={importLogs}
 							/>
 						</label>
+					{:else if item.id === 'units'}
+						<p class="mb-4 text-sm leading-6 text-zinc-400">
+							Defaults are kilograms and kilometres. Values are still stored in kg and km so your
+							JSON stays consistent when you export.
+						</p>
+						<div class="space-y-4">
+							<div>
+								<p class="mb-2 text-sm text-zinc-400">Weight</p>
+								<div class="grid grid-cols-2 gap-2">
+									<button
+										type="button"
+										class="rounded-2xl py-3 text-sm font-semibold {fitness.preferences
+											.weightUnit === 'kg'
+											? 'bg-lime-400 text-zinc-950'
+											: 'border border-zinc-700 text-zinc-200'}"
+										onclick={() => void fitness.setWeightUnit('kg')}
+									>
+										Kilograms
+									</button>
+									<button
+										type="button"
+										class="rounded-2xl py-3 text-sm font-semibold {fitness.preferences
+											.weightUnit === 'lb'
+											? 'bg-lime-400 text-zinc-950'
+											: 'border border-zinc-700 text-zinc-200'}"
+										onclick={() => void fitness.setWeightUnit('lb')}
+									>
+										Pounds
+									</button>
+								</div>
+							</div>
+							<div>
+								<p class="mb-2 text-sm text-zinc-400">Distance</p>
+								<div class="grid grid-cols-2 gap-2">
+									<button
+										type="button"
+										class="rounded-2xl py-3 text-sm font-semibold {fitness.preferences
+											.distanceUnit === 'km'
+											? 'bg-lime-400 text-zinc-950'
+											: 'border border-zinc-700 text-zinc-200'}"
+										onclick={() => void fitness.setDistanceUnit('km')}
+									>
+										Kilometres
+									</button>
+									<button
+										type="button"
+										class="rounded-2xl py-3 text-sm font-semibold {fitness.preferences
+											.distanceUnit === 'mi'
+											? 'bg-lime-400 text-zinc-950'
+											: 'border border-zinc-700 text-zinc-200'}"
+										onclick={() => void fitness.setDistanceUnit('mi')}
+									>
+										Miles
+									</button>
+								</div>
+							</div>
+						</div>
 					{:else if item.id === 'reminder'}
 						{#if fitness.plan}
 							<label class="block">

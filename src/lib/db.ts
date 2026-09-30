@@ -1,4 +1,5 @@
 import Dexie, { type Table } from 'dexie';
+import type { DistanceUnit, WeightUnit } from './units';
 import type { Activity, Plan, Session, Weekday } from './schema';
 
 export interface StoredPlan {
@@ -10,6 +11,8 @@ export interface StoredPlan {
 export interface AppMeta {
 	id: 'app';
 	activePlanId: string | null;
+	weightUnit?: WeightUnit;
+	distanceUnit?: DistanceUnit;
 }
 
 export interface StoredCustomActivity {

@@ -1,10 +1,17 @@
 <script lang="ts">
+	import { fitness } from '$lib/app-state.svelte';
 	import AutoTimer from '$lib/components/AutoTimer.svelte';
 	import Keypad from '$lib/components/Keypad.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import RestTimer from '$lib/components/RestTimer.svelte';
-	import { formatDuration, formatKg, formatMuscle, formVideoSearchUrl } from '$lib/format';
+	import { formatDuration, formatMuscle, formVideoSearchUrl } from '$lib/format';
 	import { targetPreview } from '$lib/metrics';
+	import {
+		displayToKg,
+		formatWeight,
+		kgToDisplay,
+		weightUnitLabel
+	} from '$lib/units';
 	import {
 		fieldsForExercise,
 		fieldLabel,
@@ -115,11 +122,27 @@
 		restUntil = null;
 	}
 
+	const weightUnit = $derived(fitness.preferences.weightUnit);
+
 	function displayField(exercise: Exercise, field: LogField, raw: number | undefined): string {
 		if (raw == null) return '—';
-		if (field === 'kg') return formatKg(raw);
+		if (field === 'kg') return formatWeight(raw, weightUnit);
 		if (field === 'durationSeconds') return formatDuration(raw);
 		return String(raw);
+	}
+
+	function keypadValue(exercise: Exercise, setIndex: number, field: LogField) {
+		const raw = suggestedField(exercise, setIndex, field);
+		if (raw == null) return undefined;
+		if (field === 'kg') return kgToDisplay(raw, weightUnit);
+		return raw;
+	}
+
+	function keypadLast(exercise: Exercise, setIndex: number, field: LogField) {
+		const raw = lastFor(exercise, setIndex, field);
+		if (raw == null) return undefined;
+		if (field === 'kg') return kgToDisplay(raw, weightUnit);
+		return raw;
 	}
 
 	async function openEditor(exercise: Exercise, setIndex: number, field: LogField) {
@@ -328,12 +351,14 @@
 		const current = editor;
 		if (!current) return;
 		const { exercise, setIndex, field } = current;
+		const stored =
+			next == null ? undefined : field === 'kg' ? displayToKg(next, weightUnit) : next;
 		const existing = findSet(session.sets, exercise.id, setIndex, false);
-		const completing = next != null && isCompletingField(exercise, field);
+		const completing = stored != null && isCompletingField(exercise, field);
 		const patch: LoggedSet = {
 			...suggestedSet(exercise, setIndex),
 			completed: completing ? true : (existing?.completed ?? false),
-			[field]: next
+			[field]: stored
 		};
 		const sets = upsertSet(session.sets, patch);
 		const resting = completing && restSecondsForSet(exercise, activity, false) > 0;
@@ -374,6 +399,7 @@
 		const last = lastExerciseFieldValue(session.sets, previous, exercise.id, field);
 		if (last == null) return undefined;
 		if (field === 'durationSeconds') return `Last ${displayField(exercise, field, last)}`;
+		if (field === 'kg') return `Last ${displayField(exercise, field, last)}`;
 		return `Last ${displayField(exercise, field, last)} ${fieldLabel(field)}`;
 	}
 
@@ -562,7 +588,14 @@
 		const draft = targetDraft;
 		const field = targetField;
 		if (!draft || !field) return;
-		const value = field === 'restSeconds' ? (next == null ? undefined : next * 60) : next;
+		const value =
+			field === 'restSeconds'
+				? next == null
+					? undefined
+					: next * 60
+				: field === 'kg' && next != null
+					? displayToKg(next, weightUnit)
+					: next;
 		const updated = applyExerciseTarget(draft, field, value);
 		if ('error' in updated) return;
 		targetDraft = updated;
@@ -747,7 +780,7 @@
 									onclick={() => openEditor(exercise, setIndex, field)}
 								>
 									<p class="text-[11px] tracking-[0.16em] text-zinc-500 uppercase">
-										{fieldLabel(field)}
+										{field === 'kg' ? weightUnitLabel(weightUnit) : fieldLabel(field)}
 									</p>
 									<p class="font-mono text-xl font-semibold">
 										{displayField(exercise, field, suggestedField(exercise, setIndex, field))}
@@ -786,12 +819,12 @@
 {/if}
 
 {#if editor}
-	{#key `${editor.exercise.id}:${editor.setIndex}:${editor.field}`}
+	{#key `${editor.exercise.id}:${editor.setIndex}:${editor.field}:${weightUnit}`}
 		<Keypad
 			label={`${editor.exercise.name} · set ${editor.setIndex + 1}`}
-			unit={fieldLabel(editor.field)}
-			value={suggestedField(editor.exercise, editor.setIndex, editor.field)}
-			last={lastFor(editor.exercise, editor.setIndex, editor.field)}
+			unit={editor.field === 'kg' ? weightUnitLabel(weightUnit) : fieldLabel(editor.field)}
+			value={keypadValue(editor.exercise, editor.setIndex, editor.field)}
+			last={keypadLast(editor.exercise, editor.setIndex, editor.field)}
 			allowDecimal={editor.field === 'kg'}
 			showTimer={true}
 			onCommit={saveField}
@@ -855,7 +888,7 @@
 											: row.value == null
 												? '—'
 												: row.field === 'kg'
-													? formatKg(row.value)
+													? formatWeight(row.value, weightUnit)
 													: String(row.value)}
 								</span>
 							</button>
@@ -885,12 +918,16 @@
 		{#if targetField}
 			{@const row = targetFields(exercise).find((item) => item.field === targetField)}
 			{#if row}
-				{#key `${exercise.id}:${row.field}`}
+				{#key `${exercise.id}:${row.field}:${weightUnit}`}
 					<Keypad
 						label={`${exercise.name} · ${row.label}`}
-						unit={row.label}
-						value={row.value}
-						last={row.field === 'kg' ? lastWorkingKg(session.sets, previous, exercise) : undefined}
+						unit={row.field === 'kg' ? weightUnitLabel(weightUnit) : row.label}
+						value={row.field === 'kg' && row.value != null
+							? kgToDisplay(row.value, weightUnit)
+							: row.value}
+						last={row.field === 'kg'
+							? kgToDisplay(lastWorkingKg(session.sets, previous, exercise), weightUnit)
+							: undefined}
 						allowDecimal={row.allowDecimal}
 						onCommit={applyTargetDraft}
 						onClose={() => (targetField = null)}

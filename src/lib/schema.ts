@@ -213,6 +213,8 @@ export const loggedStatSchema = z.object({
 
 export type LoggedStat = z.infer<typeof loggedStatSchema>;
 
+export const effortSchema = z.number().int().min(1).max(5);
+
 export const sessionSchema = z.object({
 	id: z.string().min(1),
 	weekStart: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -228,6 +230,8 @@ export const sessionSchema = z.object({
 	stats: z.array(loggedStatSchema).default([]),
 	distanceKm: z.number().nonnegative().optional(),
 	durationSeconds: z.number().nonnegative().optional(),
+	calories: z.number().nonnegative().optional(),
+	effort: effortSchema.optional(),
 	photoUrl: optionalText,
 	completed: z.boolean().default(false)
 });
@@ -379,6 +383,8 @@ export function hasProgressData(session: Session): boolean {
 	return (
 		session.distanceKm != null ||
 		session.durationSeconds != null ||
+		session.calories != null ||
+		session.effort != null ||
 		Boolean(session.photoUrl) ||
 		session.stats.some((stat) => stat.value != null || Boolean(stat.photoUrl))
 	);

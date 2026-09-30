@@ -14,6 +14,13 @@ import {
 	type Session,
 	type Weekday
 } from './schema';
+import {
+	DEFAULT_PREFERENCES,
+	normalizePreferences,
+	type AppPreferences,
+	type DistanceUnit,
+	type WeightUnit
+} from './units';
 import { sundayOf } from './week';
 
 function asPlain<T>(value: T): T {
@@ -24,6 +31,7 @@ class FitnessApp {
 	plan = $state<Plan | null>(null);
 	sessions = $state<Session[]>([]);
 	customActivities = $state<StoredCustomActivity[]>([]);
+	preferences = $state<AppPreferences>({ ...DEFAULT_PREFERENCES });
 	ready = $state(false);
 	error = $state<string | null>(null);
 	weekStart = $state(sundayOf());
@@ -50,6 +58,7 @@ class FitnessApp {
 			this.plan = stored?.plan ?? null;
 			this.sessions = sessions;
 			this.customActivities = customActivities;
+			this.preferences = normalizePreferences(meta);
 			this.error = null;
 		} catch (error) {
 			this.error = error instanceof Error ? error.message : 'Could not open local data';
@@ -98,6 +107,28 @@ class FitnessApp {
 		return this.persistPlan(result.plan);
 	}
 
+	private async writeMeta(activePlanId: string | null = this.plan?.id ?? null) {
+		await db.meta.put({
+			id: 'app',
+			activePlanId,
+			weightUnit: this.preferences.weightUnit,
+			distanceUnit: this.preferences.distanceUnit
+		});
+	}
+
+	async setPreferences(next: Partial<AppPreferences>): Promise<void> {
+		this.preferences = normalizePreferences({ ...this.preferences, ...next });
+		await this.writeMeta();
+	}
+
+	async setWeightUnit(weightUnit: WeightUnit): Promise<void> {
+		await this.setPreferences({ weightUnit });
+	}
+
+	async setDistanceUnit(distanceUnit: DistanceUnit): Promise<void> {
+		await this.setPreferences({ distanceUnit });
+	}
+
 	async persistPlan(plan: Plan): Promise<{ ok: true } | { ok: false; error: string }> {
 		const result = parsePlanJson(asPlain(plan));
 		if ('error' in result) return { ok: false, error: result.error };
@@ -108,7 +139,7 @@ class FitnessApp {
 			plan: next,
 			importedAt: existing?.importedAt ?? new Date().toISOString()
 		});
-		await db.meta.put({ id: 'app', activePlanId: next.id });
+		await this.writeMeta(next.id);
 		this.plan = next;
 		this.error = null;
 		return { ok: true };
@@ -284,11 +315,16 @@ class FitnessApp {
 					plan: backup.plan,
 					importedAt: backup.exportedAt
 				});
-				await db.meta.put({ id: 'app', activePlanId: backup.plan.id });
 			}
 			if (backup.sessions.length) {
 				await db.sessions.bulkPut(backup.sessions);
 			}
+			await db.meta.put({
+				id: 'app',
+				activePlanId: backup.plan?.id ?? null,
+				weightUnit: this.preferences.weightUnit,
+				distanceUnit: this.preferences.distanceUnit
+			});
 		});
 		this.plan = backup.plan;
 		this.sessions = backup.sessions;

@@ -1,5 +1,13 @@
 import type { Exercise, Plan, Session } from './schema';
 import { volumeForSet } from './metrics';
+import {
+	formatDistance,
+	formatWeight,
+	kgToDisplay,
+	weightUnitLabel,
+	type DistanceUnit,
+	type WeightUnit
+} from './units';
 
 export type ExerciseTrend = {
 	id: string;
@@ -32,10 +40,6 @@ function max(values: number[]): number | undefined {
 	return Math.max(...values);
 }
 
-function formatKg(value: number): string {
-	return `${Number(value.toFixed(2))} kg`;
-}
-
 export function catalogExercises(
 	plan: Plan | null
 ): Map<string, { name: string; kind: Exercise['kind'] }> {
@@ -51,7 +55,11 @@ export function catalogExercises(
 	return map;
 }
 
-export function exerciseTrends(plan: Plan | null, sessions: Session[]): ExerciseTrend[] {
+export function exerciseTrends(
+	plan: Plan | null,
+	sessions: Session[],
+	weightUnit: WeightUnit = 'kg'
+): ExerciseTrend[] {
 	const catalog = catalogExercises(plan);
 	const byExercise = new Map<string, { kg: number[]; volume: number[]; reps: number[] }>();
 
@@ -94,17 +102,29 @@ export function exerciseTrends(plan: Plan | null, sessions: Session[]): Exercise
 			points,
 			bestLabel:
 				bestKg != null
-					? `Best ${formatKg(bestKg)}${bestVolume ? ` · ${Math.round(bestVolume)} kg·reps` : ''}`
+					? `Best ${formatWeight(bestKg, weightUnit)}${
+							bestVolume
+								? ` · ${Math.round(kgToDisplay(bestVolume, weightUnit))} ${weightUnitLabel(weightUnit)}·reps`
+								: ''
+						}`
 					: bestReps != null
 						? `Best ${bestReps} reps`
 						: 'Best —',
-			latestLabel: latest == null ? '—' : bucket.kg.length ? formatKg(latest) : `${latest} reps`
+			latestLabel:
+				latest == null
+					? '—'
+					: bucket.kg.length
+						? formatWeight(latest, weightUnit)
+						: `${latest} reps`
 		});
 	}
 	return trends.sort((a, b) => a.name.localeCompare(b.name));
 }
 
-export function cardioTrends(sessions: Session[]): CardioTrend[] {
+export function cardioTrends(
+	sessions: Session[],
+	distanceUnit: DistanceUnit = 'km'
+): CardioTrend[] {
 	const ordered = [...sessions]
 		.filter((session) => session.kind === 'cardio' && !session.skipped)
 		.sort((a, b) => a.weekStart.localeCompare(b.weekStart));
@@ -117,12 +137,13 @@ export function cardioTrends(sessions: Session[]): CardioTrend[] {
 	const trends: CardioTrend[] = [];
 	if (distances.length) {
 		const best = max(distances) ?? 0;
+		const latest = distances.at(-1);
 		trends.push({
 			id: 'distance',
 			name: 'Walk / run distance',
 			points: distances,
-			bestLabel: `Best ${best} km`,
-			latestLabel: `${distances.at(-1)} km`
+			bestLabel: `Best ${formatDistance(best, distanceUnit)}`,
+			latestLabel: formatDistance(latest, distanceUnit)
 		});
 	}
 	if (durations.length) {

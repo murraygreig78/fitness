@@ -9,6 +9,7 @@
 		| 'plus'
 		| 'chevronLeft'
 		| 'chevronRight'
+		| 'chevronDown'
 		| 'check'
 		| 'skip'
 		| 'play'
@@ -61,6 +62,8 @@
 		<path d="M15 5 8 12l7 7" />
 	{:else if name === 'chevronRight'}
 		<path d="M9 5l7 7-7 7" />
+	{:else if name === 'chevronDown'}
+		<path d="M5 9l7 7 7-7" />
 	{:else if name === 'check'}
 		<circle cx="12" cy="12" r="9" />
 		<path d="m8 12 2.8 2.8L16.5 9" />

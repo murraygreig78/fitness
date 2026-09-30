@@ -4,8 +4,10 @@
 
 	let query = $state('');
 
-	const lifts = $derived(exerciseTrends(fitness.plan, fitness.sessions));
-	const cardio = $derived(cardioTrends(fitness.sessions));
+	const lifts = $derived(
+		exerciseTrends(fitness.plan, fitness.sessions, fitness.preferences.weightUnit)
+	);
+	const cardio = $derived(cardioTrends(fitness.sessions, fitness.preferences.distanceUnit));
 	const stats = $derived(statTrends(fitness.plan, fitness.sessions));
 	const empty = $derived(!lifts.length && !cardio.length && !stats.length);
 
