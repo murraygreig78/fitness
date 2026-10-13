@@ -231,7 +231,9 @@
 		{/if}
 	</header>
 
-	<LastTime {activity} {last} weekdayLabel={lastLabel} />
+	{#if activity.kind !== 'strength' && activity.kind !== 'mobility'}
+		<LastTime {activity} {last} weekdayLabel={lastLabel} />
+	{/if}
 
 	{#if activity.kind === 'cardio'}
 		<div class="grid grid-cols-2 gap-3">
