@@ -6,12 +6,7 @@
 	import RestTimer from '$lib/components/RestTimer.svelte';
 	import { formatDuration, formatMuscle, formVideoSearchUrl } from '$lib/format';
 	import { targetPreview } from '$lib/metrics';
-	import {
-		displayToKg,
-		formatWeight,
-		kgToDisplay,
-		weightUnitLabel
-	} from '$lib/units';
+	import { displayToKg, formatWeight, kgToDisplay, weightUnitLabel } from '$lib/units';
 	import {
 		fieldsForExercise,
 		fieldLabel,
@@ -26,6 +21,7 @@
 		applyExerciseTarget,
 		displayedSetCount,
 		isWarmupSet,
+		nextExerciseAfterCompletedSet,
 		restSecondsFor,
 		restSecondsForSet,
 		setCount,
@@ -109,9 +105,7 @@
 		return steps;
 	});
 	const autoCurrent = $derived(autoQueue[autoStep]);
-	const autoExercise = $derived(
-		autoCurrent ? exercises[autoCurrent.exerciseIndex] : undefined
-	);
+	const autoExercise = $derived(autoCurrent ? exercises[autoCurrent.exerciseIndex] : undefined);
 
 	function clearRest(playBeep: boolean) {
 		if (restBeepTimer != null) {
@@ -329,6 +323,15 @@
 		).every(Boolean);
 	}
 
+	function focusAfterCompletedSet(exercise: Exercise, setIndex: number, sets: LoggedSet[]) {
+		const nextId = nextExerciseAfterCompletedSet(exercises, sets, exercise.id, setIndex, rowCount);
+		if (nextId !== exercise.id) {
+			editor = null;
+			closeTargetEditor();
+		}
+		focusedId = nextId;
+	}
+
 	function completedSetCount(exercise: Exercise): number {
 		return session.sets.filter(
 			(set) => set.exerciseId === exercise.id && set.completed && !isWarmupSet(set)
@@ -351,8 +354,7 @@
 		const current = editor;
 		if (!current) return;
 		const { exercise, setIndex, field } = current;
-		const stored =
-			next == null ? undefined : field === 'kg' ? displayToKg(next, weightUnit) : next;
+		const stored = next == null ? undefined : field === 'kg' ? displayToKg(next, weightUnit) : next;
 		const existing = findSet(session.sets, exercise.id, setIndex, false);
 		const completing = stored != null && isCompletingField(exercise, field);
 		const patch: LoggedSet = {
@@ -371,7 +373,7 @@
 			endedAt: null,
 			sets
 		});
-		if (plannedSetsDone(exercise, sets)) focusedId = null;
+		if (completing) focusAfterCompletedSet(exercise, setIndex, sets);
 	}
 
 	async function toggleComplete(exercise: Exercise, setIndex: number) {
@@ -388,7 +390,7 @@
 			endedAt: null,
 			sets
 		});
-		if (completed && plannedSetsDone(exercise, sets)) focusedId = null;
+		if (completed) focusAfterCompletedSet(exercise, setIndex, sets);
 	}
 
 	function lastFor(exercise: Exercise, setIndex: number, field: LogField) {
@@ -491,11 +493,7 @@
 				...session,
 				sets: session.sets.filter(
 					(set) =>
-						!(
-							set.exerciseId === exercise.id &&
-							!isWarmupSet(set) &&
-							set.setIndex === lastIndex
-						)
+						!(set.exerciseId === exercise.id && !isWarmupSet(set) && set.setIndex === lastIndex)
 				)
 			},
 			{ replaceSets: true }
@@ -505,9 +503,7 @@
 		return exercises.find((exercise) => exercise.id === focusedId);
 	}
 
-	function targetFields(
-		exercise: Exercise
-	): {
+	function targetFields(exercise: Exercise): {
 		field: ExerciseTargetField;
 		label: string;
 		value: number | undefined;
@@ -747,8 +743,11 @@
 				<p class="mt-2 text-sm leading-6 text-zinc-400">{exercise.instructions}</p>
 			{/if}
 			{#if exercise.supersetId}
+				{@const partners = exercises.filter(
+					(item) => item.supersetId === exercise.supersetId && item.id !== exercise.id
+				)}
 				<p class="mt-2 text-xs font-semibold tracking-[0.18em] text-orange-300 uppercase">
-					Superset · alternate, then rest
+					Superset{partners.length ? ` with ${partners.map((item) => item.name).join(', ')}` : ''}
 				</p>
 			{/if}
 			<ol class="mt-3 space-y-2">

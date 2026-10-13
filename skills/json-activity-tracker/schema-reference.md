@@ -96,7 +96,7 @@ Shared:
   instructions?: string,
   notes?: string,
   restSeconds?: number,          // nonnegative. Strength default comes from the activity
-  supersetId?: string,           // same id on partners; rest after the pair
+  supersetId?: string,           // same id on partners, in alternate order. Rest is for the exercise just finished
   warmup?: boolean               // legacy; ignored — use a separate warm-up exercise instead
 }
 ```

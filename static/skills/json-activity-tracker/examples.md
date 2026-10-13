@@ -136,7 +136,7 @@ Walk with only distance:
 
 ## Superset
 
-Same `supersetId`. Rest after the pair, not between the two.
+Same `supersetId`, listed in alternate order. Completing a set switches to the next partner. Rest comes from the exercise just finished, so only the last partner carries the rest after the round.
 
 ```json
 {

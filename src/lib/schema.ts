@@ -74,12 +74,7 @@ export const exerciseSchema = z.discriminatedUnion('kind', [
 export type Exercise = z.infer<typeof exerciseSchema>;
 
 export type ExerciseTargetField =
-	| 'sets'
-	| 'reps'
-	| 'repsMin'
-	| 'kg'
-	| 'durationSeconds'
-	| 'restSeconds';
+	'sets' | 'reps' | 'repsMin' | 'kg' | 'durationSeconds' | 'restSeconds';
 
 export function applyExerciseTarget(
 	exercise: Exercise,
@@ -399,6 +394,58 @@ export function dayStatus(day: PlanDay, sessions: Session[]): SessionStatus {
 	if (statuses.some((status) => status === 'in-progress' || status === 'done'))
 		return 'in-progress';
 	return 'upcoming';
+}
+
+function workingSetComplete(sets: LoggedSet[], exerciseId: string, setIndex: number): boolean {
+	return sets.some(
+		(set) =>
+			set.exerciseId === exerciseId &&
+			set.setIndex === setIndex &&
+			!isWarmupSet(set) &&
+			set.completed
+	);
+}
+
+/**
+ * After a completed set, stay on a straight exercise until its planned sets are done.
+ * A superset moves to the next partner at the same set number, then the next round.
+ * Returns null when the exercise or circuit is finished.
+ */
+export function nextExerciseAfterCompletedSet(
+	exercises: Exercise[],
+	sets: LoggedSet[],
+	exerciseId: string,
+	setIndex: number,
+	rowCountFor: (exercise: Exercise) => number = (exercise) => displayedSetCount(exercise, sets)
+): string | null {
+	const exercise = exercises.find((item) => item.id === exerciseId);
+	if (!exercise) return null;
+	if (!exercise.supersetId) {
+		const plannedDone = Array.from({ length: setCount(exercise) }, (_, index) =>
+			workingSetComplete(sets, exercise.id, index)
+		).every(Boolean);
+		return plannedDone ? null : exercise.id;
+	}
+
+	const partners = exercises.filter((item) => item.supersetId === exercise.supersetId);
+	const start = partners.findIndex((item) => item.id === exercise.id);
+	if (start < 0) return null;
+
+	const openAt = (partner: Exercise, index: number) =>
+		index < rowCountFor(partner) && !workingSetComplete(sets, partner.id, index);
+
+	for (let offset = 1; offset < partners.length; offset++) {
+		const partner = partners[(start + offset) % partners.length];
+		if (openAt(partner, setIndex)) return partner.id;
+	}
+
+	const maxRows = partners.reduce((max, partner) => Math.max(max, rowCountFor(partner)), 0);
+	for (let round = setIndex + 1; round < maxRows; round++) {
+		for (const partner of partners) {
+			if (openAt(partner, round)) return partner.id;
+		}
+	}
+	return null;
 }
 
 export function groupExercises(

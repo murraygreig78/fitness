@@ -64,6 +64,8 @@ Then:
 | “3 × 6–8 @ 12 kg” | `sets: 3`, `repsMin: 6`, `reps: 8`, `kg: 12` |
 | “alternate A and B, then rest” | same `supersetId` on both exercises |
 | “2 min rest” | `restSeconds: 120` on the activity or exercise |
+
+Supersets use one `supersetId`, with the first movement listed first. The logger switches to the next partner when a set is completed. Put `restSeconds: 0` on every partner except the last, which carries the rest after the round.
 | “Warm-up: 2 × 12 @ 6 kg, then work sets” | two exercises: `{ id: "db-deadlift-warmup", name: "Deadlift warm-up", … target: { sets: 2, reps: 12, kg: 6 } }` then `{ id: "db-deadlift", … }` |
 
 If equipment is unknown, use a modest placeholder `kg` and say so in `notes`.
