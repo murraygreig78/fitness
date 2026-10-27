@@ -206,7 +206,7 @@
 		</div>
 		<button
 			type="button"
-			class="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 text-zinc-950 disabled:opacity-30"
+			class="flex h-10 w-10 items-center justify-center rounded-full bg-lime-400 text-zinc-950 disabled:opacity-30"
 			aria-label="Start unscheduled activity"
 			disabled={!fitness.plan}
 			onclick={() => (picking = true)}

@@ -463,7 +463,8 @@
 					{:else if item.id === 'appearance'}
 						<p class="mb-4 text-sm leading-6 text-zinc-400">
 							Industrial Swiss is the default: off-white surfaces, charcoal type, wireframe
-							borders, and safety orange for actions. Night keeps the older dark lime look.
+							borders, and safety orange for actions. Pale sky blue is reserved for the calendar
+							day dots. Night keeps the older dark lime look.
 						</p>
 						<div class="grid grid-cols-2 gap-2">
 							<button
@@ -486,8 +487,7 @@
 							</button>
 						</div>
 						<p class="mt-4 text-xs leading-5 text-zinc-500">
-							Swiss uses Inter, flatter cards, and monochrome activity cues. Your choice is saved on
-							this device.
+							Swiss uses Inter and flatter cards. Your choice is saved on this device.
 						</p>
 					{:else if item.id === 'screen'}
 						<p class="mb-4 text-sm leading-6 text-zinc-400">
