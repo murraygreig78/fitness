@@ -15,7 +15,7 @@ export const DEFAULT_PREFERENCES: AppPreferences = {
 	weightUnit: 'kg',
 	distanceUnit: 'km',
 	keepScreenAwake: true,
-	theme: 'night'
+	theme: 'swiss'
 };
 
 export function themeLabel(theme: AppTheme): string {
@@ -107,6 +107,6 @@ export function normalizePreferences(input: unknown): AppPreferences {
 		weightUnit: record.weightUnit === 'lb' ? 'lb' : 'kg',
 		distanceUnit: record.distanceUnit === 'mi' ? 'mi' : 'km',
 		keepScreenAwake: record.keepScreenAwake === false ? false : true,
-		theme: record.theme === 'swiss' ? 'swiss' : 'night'
+		theme: record.theme === 'night' ? 'night' : 'swiss'
 	};
 }

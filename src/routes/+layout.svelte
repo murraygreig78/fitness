@@ -28,9 +28,9 @@
 
 	$effect(() => {
 		if (typeof document === 'undefined') return;
-		const theme = fitness.ready ? fitness.preferences.theme : 'night';
+		const theme = fitness.ready ? fitness.preferences.theme : 'swiss';
 		document.documentElement.dataset.theme = theme;
-		const color = theme === 'swiss' ? '#F8F9FA' : '#09090b';
+		const color = theme === 'night' ? '#09090b' : '#F8F9FA';
 		let meta = document.querySelector('meta[name="theme-color"]');
 		if (!meta) {
 			meta = document.createElement('meta');
