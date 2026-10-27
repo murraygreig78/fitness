@@ -90,15 +90,16 @@
 	--app-zinc-900: #ffffff;
 	--app-zinc-950: #f8f9fa;
 
-	--app-lime-200: #ffb899;
-	--app-lime-300: #ff6a26;
+	/* Primary actions stay safety orange; lime-300 secondary UI becomes sky. */
+	--app-lime-200: #b9dff0;
+	--app-lime-300: #4b9ebf;
 	--app-lime-400: #ff4f00;
 	--app-lime-900: #c23d00;
 
-	/* Monochrome activity cues; orange remains the only loud accent. */
-	--app-sky-400: #4b5563;
-	--app-amber-400: #374151;
-	--app-violet-400: #6b7280;
+	/* Activity kind cues: pale sky plus soft companions, not flat gray. */
+	--app-sky-400: #7ec8e3;
+	--app-amber-400: #e0b56a;
+	--app-violet-400: #8fa3c4;
 
 	--radius-xl: 0.25rem;
 	--radius-2xl: 0.375rem;
