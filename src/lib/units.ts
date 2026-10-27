@@ -1,18 +1,26 @@
 export type WeightUnit = 'kg' | 'lb';
 export type DistanceUnit = 'km' | 'mi';
+export type AppTheme = 'night' | 'swiss';
 
 export type AppPreferences = {
 	weightUnit: WeightUnit;
 	distanceUnit: DistanceUnit;
 	/** Keep the phone screen on while an activity session is open. */
 	keepScreenAwake: boolean;
+	/** Visual theme. night = current dark lime; swiss = industrial off-white. */
+	theme: AppTheme;
 };
 
 export const DEFAULT_PREFERENCES: AppPreferences = {
 	weightUnit: 'kg',
 	distanceUnit: 'km',
-	keepScreenAwake: true
+	keepScreenAwake: true,
+	theme: 'night'
 };
+
+export function themeLabel(theme: AppTheme): string {
+	return theme === 'swiss' ? 'Industrial Swiss' : 'Night';
+}
 
 const LB_PER_KG = 2.2046226218;
 const MI_PER_KM = 0.6213711922;
@@ -98,6 +106,7 @@ export function normalizePreferences(input: unknown): AppPreferences {
 	return {
 		weightUnit: record.weightUnit === 'lb' ? 'lb' : 'kg',
 		distanceUnit: record.distanceUnit === 'mi' ? 'mi' : 'km',
-		keepScreenAwake: record.keepScreenAwake === false ? false : true
+		keepScreenAwake: record.keepScreenAwake === false ? false : true,
+		theme: record.theme === 'swiss' ? 'swiss' : 'night'
 	};
 }

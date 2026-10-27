@@ -18,6 +18,7 @@ import {
 	DEFAULT_PREFERENCES,
 	normalizePreferences,
 	type AppPreferences,
+	type AppTheme,
 	type DistanceUnit,
 	type WeightUnit
 } from './units';
@@ -113,7 +114,8 @@ class FitnessApp {
 			activePlanId,
 			weightUnit: this.preferences.weightUnit,
 			distanceUnit: this.preferences.distanceUnit,
-			keepScreenAwake: this.preferences.keepScreenAwake
+			keepScreenAwake: this.preferences.keepScreenAwake,
+			theme: this.preferences.theme
 		});
 	}
 
@@ -132,6 +134,10 @@ class FitnessApp {
 
 	async setKeepScreenAwake(keepScreenAwake: boolean): Promise<void> {
 		await this.setPreferences({ keepScreenAwake });
+	}
+
+	async setTheme(theme: AppTheme): Promise<void> {
+		await this.setPreferences({ theme });
 	}
 
 	async persistPlan(plan: Plan): Promise<{ ok: true } | { ok: false; error: string }> {
@@ -217,7 +223,11 @@ class FitnessApp {
 		return record;
 	}
 
-	async skipSession(day: PlanDay, activity: Activity, weekStart = this.weekStart): Promise<Session> {
+	async skipSession(
+		day: PlanDay,
+		activity: Activity,
+		weekStart = this.weekStart
+	): Promise<Session> {
 		const session = await this.ensureSession(day, activity, weekStart);
 		const skipped: Session = {
 			...session,
@@ -229,7 +239,11 @@ class FitnessApp {
 		return skipped;
 	}
 
-	async unskipSession(day: PlanDay, activity: Activity, weekStart = this.weekStart): Promise<Session> {
+	async unskipSession(
+		day: PlanDay,
+		activity: Activity,
+		weekStart = this.weekStart
+	): Promise<Session> {
 		const session = await this.ensureSession(day, activity, weekStart);
 		const restored: Session = {
 			...session,
@@ -257,11 +271,7 @@ class FitnessApp {
 		return { ok: true };
 	}
 
-	async clearSession(
-		dayId: string,
-		activityId: string,
-		weekStart = this.weekStart
-	): Promise<void> {
+	async clearSession(dayId: string, activityId: string, weekStart = this.weekStart): Promise<void> {
 		const sessionId = `${weekStart}::${dayId}::${activityId}`;
 		await db.sessions.delete(sessionId);
 		this.sessions = this.sessions.filter((session) => session.id !== sessionId);
@@ -289,9 +299,7 @@ class FitnessApp {
 				? {
 						...current,
 						...session,
-						sets: options?.replaceSets
-							? session.sets
-							: mergeLoggedSets(current.sets, session.sets)
+						sets: options?.replaceSets ? session.sets : mergeLoggedSets(current.sets, session.sets)
 					}
 				: session
 		);
@@ -329,7 +337,8 @@ class FitnessApp {
 				activePlanId: backup.plan?.id ?? null,
 				weightUnit: this.preferences.weightUnit,
 				distanceUnit: this.preferences.distanceUnit,
-				keepScreenAwake: this.preferences.keepScreenAwake
+				keepScreenAwake: this.preferences.keepScreenAwake,
+				theme: this.preferences.theme
 			});
 		});
 		this.plan = backup.plan;
