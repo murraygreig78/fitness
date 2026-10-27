@@ -30,6 +30,12 @@
 	--color-sky-400: var(--app-sky-400);
 	--color-amber-400: var(--app-amber-400);
 	--color-violet-400: var(--app-violet-400);
+
+	/* Calendar day dots only — kept separate from kind text/icons. */
+	--color-kind-dot-cardio: var(--app-kind-dot-cardio);
+	--color-kind-dot-strength: var(--app-kind-dot-strength);
+	--color-kind-dot-mobility: var(--app-kind-dot-mobility);
+	--color-kind-dot-progress: var(--app-kind-dot-progress);
 }
 
 :root,
@@ -64,6 +70,11 @@
 	--app-amber-400: #fbbf24;
 	--app-violet-400: #a78bfa;
 
+	--app-kind-dot-cardio: #38bdf8;
+	--app-kind-dot-strength: #fbbf24;
+	--app-kind-dot-mobility: #a78bfa;
+	--app-kind-dot-progress: #a3e635;
+
 	color-scheme: dark;
 }
 
@@ -90,16 +101,20 @@
 	--app-zinc-900: #ffffff;
 	--app-zinc-950: #f8f9fa;
 
-	/* Primary actions stay safety orange; lime-300 secondary UI becomes sky. */
-	--app-lime-200: #b9dff0;
-	--app-lime-300: #4b9ebf;
+	--app-lime-200: #ffb899;
+	--app-lime-300: #ff6a26;
 	--app-lime-400: #ff4f00;
 	--app-lime-900: #c23d00;
 
-	/* Activity kind cues: pale sky plus soft companions, not flat gray. */
-	--app-sky-400: #7ec8e3;
-	--app-amber-400: #e0b56a;
-	--app-violet-400: #8fa3c4;
+	/* Kind text/icons stay quiet; calendar dots keep pale sky + soft companions. */
+	--app-sky-400: #4b5563;
+	--app-amber-400: #374151;
+	--app-violet-400: #6b7280;
+
+	--app-kind-dot-cardio: #7ec8e3;
+	--app-kind-dot-strength: #e0b56a;
+	--app-kind-dot-mobility: #8fa3c4;
+	--app-kind-dot-progress: #ff4f00;
 
 	--radius-xl: 0.25rem;
 	--radius-2xl: 0.375rem;

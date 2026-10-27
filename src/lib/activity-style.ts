@@ -3,13 +3,13 @@ import type { ActivityKind, SessionStatus } from './schema';
 export function kindDotClass(kind: ActivityKind): string {
 	switch (kind) {
 		case 'cardio':
-			return 'bg-sky-400';
+			return 'bg-kind-dot-cardio';
 		case 'strength':
-			return 'bg-amber-400';
+			return 'bg-kind-dot-strength';
 		case 'mobility':
-			return 'bg-violet-400';
+			return 'bg-kind-dot-mobility';
 		case 'progress':
-			return 'bg-lime-400';
+			return 'bg-kind-dot-progress';
 	}
 }
 
