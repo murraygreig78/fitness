@@ -462,20 +462,10 @@
 						</div>
 					{:else if item.id === 'appearance'}
 						<p class="mb-4 text-sm leading-6 text-zinc-400">
-							Switch the whole app between the current dark lime look and an Industrial Swiss
-							experiment: off-white surfaces, charcoal type, wireframe borders, and safety orange
-							for actions.
+							Industrial Swiss is the default: off-white surfaces, charcoal type, wireframe
+							borders, and safety orange for actions. Night keeps the older dark lime look.
 						</p>
 						<div class="grid grid-cols-2 gap-2">
-							<button
-								type="button"
-								class="rounded-2xl py-3 text-sm font-semibold {fitness.preferences.theme === 'night'
-									? 'bg-lime-400 text-zinc-950'
-									: 'border border-zinc-700 text-zinc-200'}"
-								onclick={() => void fitness.setTheme('night')}
-							>
-								Night
-							</button>
 							<button
 								type="button"
 								class="rounded-2xl py-3 text-sm font-semibold {fitness.preferences.theme === 'swiss'
@@ -484,6 +474,15 @@
 								onclick={() => void fitness.setTheme('swiss')}
 							>
 								Swiss
+							</button>
+							<button
+								type="button"
+								class="rounded-2xl py-3 text-sm font-semibold {fitness.preferences.theme === 'night'
+									? 'bg-lime-400 text-zinc-950'
+									: 'border border-zinc-700 text-zinc-200'}"
+								onclick={() => void fitness.setTheme('night')}
+							>
+								Night
 							</button>
 						</div>
 						<p class="mt-4 text-xs leading-5 text-zinc-500">
