@@ -1,26 +1,134 @@
 @import 'tailwindcss';
 
 @theme {
-	--font-sans: 'Sora', 'ui-sans-serif', 'system-ui', sans-serif;
-	--color-ink: #09090b;
-	--color-panel: #141418;
-	--color-line: #2a2a32;
-	--color-accent: #c8f542;
-	--color-accent-ink: #111827;
-	--color-warn: #fb923c;
+	--font-sans: var(--app-font-sans);
+	--color-ink: var(--app-ink);
+	--color-panel: var(--app-panel);
+	--color-line: var(--app-line);
+	--color-accent: var(--app-accent);
+	--color-accent-ink: var(--app-accent-ink);
+	--color-warn: var(--app-warn);
+
+	/* Remap shared utilities so themes restyle the existing screens. */
+	--color-zinc-50: var(--app-zinc-50);
+	--color-zinc-100: var(--app-zinc-100);
+	--color-zinc-200: var(--app-zinc-200);
+	--color-zinc-300: var(--app-zinc-300);
+	--color-zinc-400: var(--app-zinc-400);
+	--color-zinc-500: var(--app-zinc-500);
+	--color-zinc-600: var(--app-zinc-600);
+	--color-zinc-700: var(--app-zinc-700);
+	--color-zinc-800: var(--app-zinc-800);
+	--color-zinc-900: var(--app-zinc-900);
+	--color-zinc-950: var(--app-zinc-950);
+
+	--color-lime-200: var(--app-lime-200);
+	--color-lime-300: var(--app-lime-300);
+	--color-lime-400: var(--app-lime-400);
+	--color-lime-900: var(--app-lime-900);
+
+	--color-sky-400: var(--app-sky-400);
+	--color-amber-400: var(--app-amber-400);
+	--color-violet-400: var(--app-violet-400);
+}
+
+:root,
+[data-theme='night'] {
+	--app-font-sans: 'Sora', 'ui-sans-serif', 'system-ui', sans-serif;
+	--app-ink: #09090b;
+	--app-panel: #141418;
+	--app-line: #2a2a32;
+	--app-accent: #c8f542;
+	--app-accent-ink: #111827;
+	--app-warn: #fb923c;
+	--app-body: #f4f4f5;
+
+	--app-zinc-50: #fafafa;
+	--app-zinc-100: #f4f4f5;
+	--app-zinc-200: #e4e4e7;
+	--app-zinc-300: #d4d4d8;
+	--app-zinc-400: #a1a1aa;
+	--app-zinc-500: #71717a;
+	--app-zinc-600: #52525b;
+	--app-zinc-700: #3f3f46;
+	--app-zinc-800: #27272a;
+	--app-zinc-900: #18181b;
+	--app-zinc-950: #09090b;
+
+	--app-lime-200: #d9f99d;
+	--app-lime-300: #bef264;
+	--app-lime-400: #a3e635;
+	--app-lime-900: #365314;
+
+	--app-sky-400: #38bdf8;
+	--app-amber-400: #fbbf24;
+	--app-violet-400: #a78bfa;
+
+	color-scheme: dark;
+}
+
+[data-theme='swiss'] {
+	--app-font-sans: 'Inter', 'ui-sans-serif', 'system-ui', sans-serif;
+	--app-ink: #f8f9fa;
+	--app-panel: #ffffff;
+	--app-line: #e5e7eb;
+	--app-accent: #ff4f00;
+	--app-accent-ink: #ffffff;
+	--app-warn: #ff4f00;
+	--app-body: #111827;
+
+	/* Deep zinc = light surfaces; light zinc = dark type (inverted night scale). */
+	--app-zinc-50: #111827;
+	--app-zinc-100: #1f2937;
+	--app-zinc-200: #374151;
+	--app-zinc-300: #4b5563;
+	--app-zinc-400: #6b7280;
+	--app-zinc-500: #6b7280;
+	--app-zinc-600: #9ca3af;
+	--app-zinc-700: #d1d5db;
+	--app-zinc-800: #e5e7eb;
+	--app-zinc-900: #ffffff;
+	--app-zinc-950: #f8f9fa;
+
+	--app-lime-200: #ffb899;
+	--app-lime-300: #ff6a26;
+	--app-lime-400: #ff4f00;
+	--app-lime-900: #c23d00;
+
+	/* Monochrome activity cues; orange remains the only loud accent. */
+	--app-sky-400: #4b5563;
+	--app-amber-400: #374151;
+	--app-violet-400: #6b7280;
+
+	--radius-xl: 0.25rem;
+	--radius-2xl: 0.375rem;
+	--radius-3xl: 0.5rem;
+	--shadow-lg: 0 0 #0000;
+
+	color-scheme: light;
 }
 
 html {
-	background: var(--color-ink);
+	background: var(--app-ink);
 }
 
 body {
 	margin: 0;
 	min-height: 100dvh;
-	background: var(--color-ink);
-	color: #f4f4f5;
-	font-family: var(--font-sans);
+	background: var(--app-ink);
+	color: var(--app-body);
+	font-family: var(--app-font-sans);
 	-webkit-tap-highlight-color: transparent;
+}
+
+[data-theme='swiss'] body {
+	letter-spacing: -0.01em;
+}
+
+[data-theme='swiss'] .font-mono,
+[data-theme='swiss'] .tabular-nums {
+	font-variant-numeric: tabular-nums;
+	letter-spacing: -0.03em;
 }
 
 button,

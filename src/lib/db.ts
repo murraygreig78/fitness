@@ -1,5 +1,5 @@
 import Dexie, { type Table } from 'dexie';
-import type { DistanceUnit, WeightUnit } from './units';
+import type { AppTheme, DistanceUnit, WeightUnit } from './units';
 import type { Activity, Plan, Session, Weekday } from './schema';
 
 export interface StoredPlan {
@@ -14,6 +14,7 @@ export interface AppMeta {
 	weightUnit?: WeightUnit;
 	distanceUnit?: DistanceUnit;
 	keepScreenAwake?: boolean;
+	theme?: AppTheme;
 }
 
 export interface StoredCustomActivity {

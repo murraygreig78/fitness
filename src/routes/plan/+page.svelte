@@ -14,6 +14,7 @@
 	import { APP_NAME, KOFI_URL, REPO_URL, starterPlans } from '$lib/samples';
 	import { summarizeActivities } from '$lib/schema';
 	import { downloadSkillPack } from '$lib/skill-pack';
+	import { themeLabel } from '$lib/units';
 
 	type Panel =
 		| 'current'
@@ -23,6 +24,7 @@
 		| 'import-plan'
 		| 'import-log'
 		| 'units'
+		| 'appearance'
 		| 'screen'
 		| 'reminder'
 		| 'coffee';
@@ -78,6 +80,11 @@
 					fitness.preferences.weightUnit === 'lb' || fitness.preferences.distanceUnit === 'mi'
 						? `${fitness.preferences.weightUnit === 'lb' ? 'lb' : 'kg'} · ${fitness.preferences.distanceUnit === 'mi' ? 'miles' : 'km'}`
 						: 'Kilograms and kilometres'
+			},
+			{
+				id: 'appearance',
+				label: 'Appearance',
+				hint: themeLabel(fitness.preferences.theme)
 			},
 			{
 				id: 'screen',
@@ -453,6 +460,35 @@
 								</div>
 							</div>
 						</div>
+					{:else if item.id === 'appearance'}
+						<p class="mb-4 text-sm leading-6 text-zinc-400">
+							Industrial Swiss is the default: off-white surfaces, charcoal type, wireframe
+							borders, and safety orange for actions. Night keeps the older dark lime look.
+						</p>
+						<div class="grid grid-cols-2 gap-2">
+							<button
+								type="button"
+								class="rounded-2xl py-3 text-sm font-semibold {fitness.preferences.theme === 'swiss'
+									? 'bg-lime-400 text-zinc-950'
+									: 'border border-zinc-700 text-zinc-200'}"
+								onclick={() => void fitness.setTheme('swiss')}
+							>
+								Swiss
+							</button>
+							<button
+								type="button"
+								class="rounded-2xl py-3 text-sm font-semibold {fitness.preferences.theme === 'night'
+									? 'bg-lime-400 text-zinc-950'
+									: 'border border-zinc-700 text-zinc-200'}"
+								onclick={() => void fitness.setTheme('night')}
+							>
+								Night
+							</button>
+						</div>
+						<p class="mt-4 text-xs leading-5 text-zinc-500">
+							Swiss uses Inter, flatter cards, and monochrome activity cues. Your choice is saved on
+							this device.
+						</p>
 					{:else if item.id === 'screen'}
 						<p class="mb-4 text-sm leading-6 text-zinc-400">
 							When on, the phone screen stays awake for the whole activity session so it doesn’t
