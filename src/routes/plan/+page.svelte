@@ -34,9 +34,7 @@
 	let permission = $state(reminderPermission());
 	let selected = $state<Panel | null>(null);
 
-	const panel = $derived(
-		selected ?? (fitness.plan ? 'current' : 'how-it-works')
-	);
+	const panel = $derived(selected ?? (fitness.plan ? 'current' : 'how-it-works'));
 
 	const menuItems = $derived.by(() => {
 		const items: { id: Panel; label: string; hint: string }[] = [];
@@ -84,9 +82,7 @@
 			{
 				id: 'screen',
 				label: 'Keep screen awake',
-				hint: fitness.preferences.keepScreenAwake
-					? 'On while an activity is open'
-					: 'Off'
+				hint: fitness.preferences.keepScreenAwake ? 'On while an activity is open' : 'Off'
 			},
 			{
 				id: 'reminder',
@@ -291,16 +287,16 @@
 					{:else if item.id === 'how-it-works'}
 						<div class="space-y-3 text-sm leading-6 text-zinc-400">
 							<p>
-								{APP_NAME} keeps your week in a JSON fitness plan and your logs in this browser.
-								There is no account and nothing leaves the device unless you download a file.
+								{APP_NAME} keeps your week in a JSON fitness plan and your logs in this browser. There
+								is no account and nothing leaves the device unless you download a file.
 							</p>
 							<p>
 								Load a starter week or import your own plan. Open a day from the home screen, then
 								log each activity. The keypad remembers last kg and reps for an exercise.
 							</p>
 							<p>
-								To change the week with Claude or ChatGPT: download the AI skills and your plan,
-								ask for an updated JSON, then import it here.
+								To change the week with Claude or ChatGPT: download the AI skills and your plan, ask
+								for an updated JSON, then import it here.
 							</p>
 							<p>
 								Moving phones or browsers? Download your activity log, then import it on the other
@@ -465,8 +461,7 @@
 						<div class="grid grid-cols-2 gap-2">
 							<button
 								type="button"
-								class="rounded-2xl py-3 text-sm font-semibold {fitness.preferences
-									.keepScreenAwake
+								class="rounded-2xl py-3 text-sm font-semibold {fitness.preferences.keepScreenAwake
 									? 'bg-lime-400 text-zinc-950'
 									: 'border border-zinc-700 text-zinc-200'}"
 								onclick={() => void fitness.setKeepScreenAwake(true)}
@@ -475,8 +470,7 @@
 							</button>
 							<button
 								type="button"
-								class="rounded-2xl py-3 text-sm font-semibold {!fitness.preferences
-									.keepScreenAwake
+								class="rounded-2xl py-3 text-sm font-semibold {!fitness.preferences.keepScreenAwake
 									? 'bg-lime-400 text-zinc-950'
 									: 'border border-zinc-700 text-zinc-200'}"
 								onclick={() => void fitness.setKeepScreenAwake(false)}
@@ -484,6 +478,11 @@
 								Off
 							</button>
 						</div>
+						<p class="mt-4 text-sm leading-6 text-zinc-400">
+							For the best portrait layout, add this site to your Home Screen and open it from
+							there. The installed app asks the phone to stay in portrait; a normal browser tab can
+							still rotate.
+						</p>
 					{:else if item.id === 'reminder'}
 						{#if fitness.plan}
 							<label class="block">
