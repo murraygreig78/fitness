@@ -27,8 +27,8 @@ jobs:
       - run: npm run build
         env:
           BASE_PATH: /fitness
-          PUBLIC_GOATCOUNTER_ENDPOINT: ${{ vars.PUBLIC_GOATCOUNTER_ENDPOINT }}
-          PUBLIC_GOATCOUNTER_SRC: ${{ vars.PUBLIC_GOATCOUNTER_SRC }}
+          PUBLIC_GOATCOUNTER_ENDPOINT: ${{ secrets.PUBLIC_GOATCOUNTER_ENDPOINT }}
+          PUBLIC_GOATCOUNTER_SRC: ${{ secrets.PUBLIC_GOATCOUNTER_SRC }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: build
