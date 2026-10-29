@@ -58,17 +58,22 @@ Local `npm run dev` still serves from `/`.
 
 ## Analytics (optional)
 
-Market-test usage uses [Plausible](https://plausible.io/) — cookie-free, ~1KB script, no PII. Leave `PUBLIC_PLAUSIBLE_DOMAIN` blank to keep analytics off (local default).
+Market-test usage uses [GoatCounter](https://www.goatcounter.com/) — free for personal use, cookie-free, tiny script, no PII. Leave `PUBLIC_GOATCOUNTER_ENDPOINT` blank to keep analytics off (local default).
 
-1. Create a Plausible site for `murraygreig78.github.io` (shared host; path `/fitness` is fine).
-2. In GitHub → **Settings → Variables**, set `PUBLIC_PLAUSIBLE_DOMAIN` to `murraygreig78.github.io`. Optionally set `PUBLIC_PLAUSIBLE_SRC` if you self-host the script.
-3. Redeploy. In Plausible, add custom goals for the events you care about, including:
+1. Create a free GoatCounter site (code like `yourcode` → `https://yourcode.goatcounter.com`).
+2. In site settings, allow the Pages origin `https://murraygreig78.github.io`.
+3. In GitHub → **Settings → Variables**, set:
+   - `PUBLIC_GOATCOUNTER_ENDPOINT` = `https://yourcode.goatcounter.com/count`
+   - optionally `PUBLIC_GOATCOUNTER_SRC` (default `https://gc.zgo.at/count.js`)
+4. Redeploy Pages. In GoatCounter, open **Events** for:
    `app_open`, `getting_started_open`, `plan_load`, `plan_import`, `plan_export`,
    `session_open`, `exercise_open`, `session_complete`,
    `session_skip`, `activities_view`, `mobility_auto_start`, `keypad_last`,
    `exercise_target_save`, `logs_import`, `logs_export`, `coffee_click`, `theme_change`.
 
-Workout data, notes, and weights never leave the device. Events only carry coarse props (e.g. activity kind, theme, display mode, unit).
+Coarse props (kind, mode, theme, etc.) are sent as the event title (`key=value …`), not as workout data.
+
+Workout data, notes, and weights never leave the device.
 
 ## Stack
 

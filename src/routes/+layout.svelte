@@ -4,8 +4,9 @@
 	import {
 		analyticsEnabled,
 		displayMode,
-		plausibleDomain,
-		plausibleScriptSrc,
+		flushAnalytics,
+		goatcounterEndpoint,
+		goatcounterScriptSrc,
 		track
 	} from '$lib/analytics';
 	import { fitness } from '$lib/app-state.svelte';
@@ -15,12 +16,13 @@
 
 	let { children } = $props();
 	const analyticsOn = analyticsEnabled();
-	const analyticsDomain = plausibleDomain();
-	const analyticsSrc = plausibleScriptSrc();
+	const analyticsEndpoint = goatcounterEndpoint();
+	const analyticsSrc = goatcounterScriptSrc();
 
 	onMount(() => {
 		void fitness.init().then(() => {
 			if (!analyticsOn) return;
+			flushAnalytics();
 			track('app_open', {
 				display_mode: displayMode(),
 				theme: fitness.preferences.theme,
@@ -67,7 +69,12 @@
 		rel="stylesheet"
 	/>
 	{#if analyticsOn}
-		<script defer data-domain={analyticsDomain} src={analyticsSrc}></script>
+		<script
+			async
+			data-goatcounter={analyticsEndpoint}
+			data-goatcounter-settings={JSON.stringify({ no_events: true })}
+			src={analyticsSrc}
+		></script>
 	{/if}
 </svelte:head>
 
