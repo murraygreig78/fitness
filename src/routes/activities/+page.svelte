@@ -214,8 +214,8 @@
 								? formatWeight(latest, weightUnit)
 								: `${latest} reps`,
 					bestLabel: usesWeight
-						? `Best ${formatWeight(best, weightUnit)}`
-						: `Best ${best} reps`
+						? formatWeight(best, weightUnit)
+						: `${best} reps`
 				}
 			];
 		});
@@ -240,7 +240,7 @@
 					points,
 					dates,
 					latestLabel: latest == null ? '—' : label(latest),
-					bestLabel: asDistance ? `Best ${label(best)}` : `Longest ${label(best)}`,
+					bestLabel: label(best),
 					metric: row.id
 				}
 			];
@@ -262,7 +262,7 @@
 					points,
 					dates,
 					latestLabel: latest == null ? '—' : `${latest} ${row.unit}`.trim(),
-					bestLabel: `Best ${best} ${row.unit}`.trim(),
+					bestLabel: `${best} ${row.unit}`.trim(),
 					unit: row.unit
 				}
 			];
@@ -508,8 +508,11 @@
 					{#each shownLifts as row (row.id)}
 						<li class="rounded-3xl border border-zinc-800 bg-zinc-900 p-4">
 							<p class="text-lg font-semibold">{row.name}</p>
-							<p class="mt-1 font-mono text-xl font-semibold">{row.latestLabel}</p>
-							<p class="mt-1 text-sm text-zinc-400">{row.bestLabel}</p>
+							<p class="mt-1 font-mono text-xl font-semibold">
+								{row.latestLabel}
+								{' '}
+								<span class="text-zinc-400">({row.bestLabel})</span>
+							</p>
 							{#if showListGraph(row)}
 								{@const domain = listDomain()}
 								{@const plotted = sparkPoints(row.points, row.dates, domain)}
@@ -581,8 +584,11 @@
 					{#each shownCardio as row (row.id)}
 						<li class="rounded-3xl border border-zinc-800 bg-zinc-900 p-4">
 							<p class="text-lg font-semibold">{row.name}</p>
-							<p class="mt-1 font-mono text-xl font-semibold">{row.latestLabel}</p>
-							<p class="mt-1 text-sm text-zinc-400">{row.bestLabel}</p>
+							<p class="mt-1 font-mono text-xl font-semibold">
+								{row.latestLabel}
+								{' '}
+								<span class="text-zinc-400">({row.bestLabel})</span>
+							</p>
 							{#if showListGraph(row)}
 								{@const domain = listDomain()}
 								{@const plotted = sparkPoints(row.points, row.dates, domain)}
@@ -655,8 +661,11 @@
 					{#each shownStats as row (row.id)}
 						<li class="rounded-3xl border border-zinc-800 bg-zinc-900 p-4">
 							<p class="text-lg font-semibold">{row.name}</p>
-							<p class="mt-1 font-mono text-xl font-semibold">{row.latestLabel}</p>
-							<p class="mt-1 text-sm text-zinc-400">{row.bestLabel}</p>
+							<p class="mt-1 font-mono text-xl font-semibold">
+								{row.latestLabel}
+								{' '}
+								<span class="text-zinc-400">({row.bestLabel})</span>
+							</p>
 							{#if showListGraph(row)}
 								{@const domain = listDomain()}
 								{@const plotted = sparkPoints(row.points, row.dates, domain)}
