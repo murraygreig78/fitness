@@ -55,7 +55,7 @@ export const starterPlans: SamplePlanInfo[] = [
 		equipment: 'bodyweight',
 		focus: 'cardio',
 		summary:
-			'Easy 3km walk each day, plus a longer run on Saturday. Add this into a strength or stretch week.'
+			'Easy 3km walk most days. Saturday is a longer run instead of the walk. Add this into a strength or stretch week.'
 	},
 	{
 		id: 'full-body-stretch',
