@@ -3,6 +3,7 @@
 	import { base, resolve } from '$app/paths';
 	import { fitness } from '$lib/app-state.svelte';
 	import Icon from '$lib/components/Icon.svelte';
+	import PlanOutline from '$lib/components/PlanOutline.svelte';
 	import SamplePlanList from '$lib/components/SamplePlanList.svelte';
 	import { downloadJson } from '$lib/download';
 	import {
@@ -12,15 +13,13 @@
 		startPlanReminder
 	} from '$lib/plan-reminder';
 	import { APP_NAME, KOFI_URL, REPO_URL, starterPlans } from '$lib/samples';
-	import { summarizeActivities } from '$lib/schema';
 	import { downloadSkillPack } from '$lib/skill-pack';
 	import { themeLabel } from '$lib/units';
 
 	type Panel =
-		| 'current'
+		| 'week'
 		| 'how-it-works'
 		| 'ask-ai'
-		| 'starter'
 		| 'import-plan'
 		| 'import-log'
 		| 'units'
@@ -36,18 +35,15 @@
 	let permission = $state(reminderPermission());
 	let selected = $state<Panel | null>(null);
 
-	const panel = $derived(selected ?? (fitness.plan ? 'current' : 'how-it-works'));
+	const panel = $derived(selected ?? 'week');
 
 	const menuItems = $derived.by(() => {
-		const items: { id: Panel; label: string; hint: string }[] = [];
-		if (fitness.plan) {
-			items.push({
-				id: 'current',
-				label: 'Current plan',
-				hint: fitness.plan.name
-			});
-		}
-		items.push(
+		const items: { id: Panel; label: string; hint: string }[] = [
+			{
+				id: 'week',
+				label: 'Weekly plan',
+				hint: fitness.plan ? fitness.plan.name : 'Choose or build a starter week'
+			},
 			{
 				id: 'how-it-works',
 				label: 'How it works',
@@ -57,11 +53,6 @@
 				id: 'ask-ai',
 				label: 'Ask AI to update your week',
 				hint: 'Skills, plan JSON, and activity log'
-			},
-			{
-				id: 'starter',
-				label: 'Choose a starter plan',
-				hint: 'Load a sample week'
 			},
 			{
 				id: 'import-plan',
@@ -101,7 +92,7 @@
 				label: 'Buy us a coffee',
 				hint: 'Support the project on Ko-fi'
 			}
-		);
+		];
 		return items;
 	});
 
@@ -130,7 +121,7 @@
 				return;
 			}
 			message = `Loaded ${fitness.plan?.name ?? 'weekly plan'}. It will repeat each week.`;
-			selected = 'current';
+			selected = 'week';
 			await goto(resolve('/'));
 		} finally {
 			busy = false;
@@ -158,12 +149,18 @@
 		}
 	}
 
-	async function loadedSample() {
+	async function loadedSample(mode: 'replace' | 'merge', sample: (typeof starterPlans)[number]) {
 		error = null;
-		message = `Loaded ${fitness.plan?.name ?? 'weekly plan'}. It will repeat each week.`;
 		startPlanReminder(() => fitness.plan);
-		selected = 'current';
-		await goto(resolve('/'));
+		selected = 'week';
+		if (mode === 'merge') {
+			message = `Added “${sample.name}” into your week. The schedule above now includes those days and exercises.`;
+		} else {
+			message = `Loaded “${fitness.plan?.name ?? sample.name}”. It will repeat each week.`;
+		}
+		if (typeof window !== 'undefined') {
+			window.scrollTo({ top: 0, behavior: 'smooth' });
+		}
 	}
 
 	async function saveNotificationTime(value: string) {
@@ -225,7 +222,7 @@
 				return;
 			}
 			message = `Imported ${fitness.sessions.length} logged activities.`;
-			if (fitness.plan) selected = 'current';
+			if (fitness.plan) selected = 'week';
 		} catch (caught) {
 			error = caught instanceof Error ? caught.message : 'Could not import activity log';
 		} finally {
@@ -242,6 +239,16 @@
 		Pick what you want to do. Your week lives in a JSON plan that stays on this device.
 	</p>
 </header>
+
+{#if message}
+	<p class="mb-4 rounded-2xl border border-lime-400/30 bg-lime-400/10 p-3 text-sm text-lime-200">
+		{message}
+	</p>
+{/if}
+{#if error}
+	<pre
+		class="mb-4 overflow-auto rounded-2xl border border-red-500/40 bg-red-950/40 p-3 text-xs whitespace-pre-wrap text-red-200">{error}</pre>
+{/if}
 
 <div class="space-y-2" role="list">
 	{#each menuItems as item (item.id)}
@@ -270,27 +277,36 @@
 
 			{#if open}
 				<div class="border-t border-zinc-800 px-4 pt-3 pb-4">
-					{#if item.id === 'current' && fitness.plan}
-						<p class="text-xs tracking-[0.16em] text-zinc-500 uppercase">This week’s plan</p>
-						<h2 class="mt-1 text-lg font-semibold">{fitness.plan.name}</h2>
-						<p class="mt-1 text-sm text-zinc-400">
-							{fitness.plan.days.length} training days each week
-						</p>
-						{#if fitness.plan.notes}
-							<p class="mt-2 text-sm leading-6 text-zinc-400">{fitness.plan.notes}</p>
+					{#if item.id === 'week'}
+						{#if fitness.plan}
+							<p class="text-xs tracking-[0.16em] text-zinc-500 uppercase">This week’s plan</p>
+							<h2 class="mt-1 text-lg font-semibold">{fitness.plan.name}</h2>
+							<p class="mt-1 text-sm text-zinc-400">
+								{fitness.plan.days.length} training days each week
+							</p>
+							{#if fitness.plan.notes}
+								<p class="mt-2 text-sm leading-6 text-zinc-400">{fitness.plan.notes}</p>
+							{/if}
+							<div class="mt-3">
+								<PlanOutline plan={fitness.plan} />
+							</div>
+							<button
+								type="button"
+								class="mt-4 w-full rounded-2xl border border-zinc-600 py-3 text-sm font-semibold"
+								onclick={exportPlan}
+							>
+								Download weekly plan
+							</button>
+							<p class="mt-5 mb-3 text-sm leading-6 text-zinc-400">
+								Replace this week with a starter, or add another starter into these days.
+							</p>
+						{:else}
+							<p class="mb-3 text-sm leading-6 text-zinc-400">
+								No week loaded yet. Pick a starter below, or import JSON. Use Show schedule to see
+								which exercises fall on which days before you load one.
+							</p>
 						{/if}
-						<ul class="mt-3 space-y-1 text-sm text-zinc-300">
-							{#each fitness.plan.days as day (day.id)}
-								<li>{day.weekday}: {day.name} · {summarizeActivities(day.activities)}</li>
-							{/each}
-						</ul>
-						<button
-							type="button"
-							class="mt-4 w-full rounded-2xl border border-zinc-600 py-3 text-sm font-semibold"
-							onclick={exportPlan}
-						>
-							Download weekly plan
-						</button>
+						<SamplePlanList plans={starterPlans} bind:busy bind:error onLoaded={loadedSample} />
 					{:else if item.id === 'how-it-works'}
 						<div class="space-y-3 text-sm leading-6 text-zinc-400">
 							<p>
@@ -355,11 +371,6 @@
 								Download activity log
 							</button>
 						</div>
-					{:else if item.id === 'starter'}
-						<p class="mb-3 text-sm leading-6 text-zinc-400">
-							Load one of these, then your schedule shows on the home screen.
-						</p>
-						<SamplePlanList plans={starterPlans} bind:busy bind:error onLoaded={loadedSample} />
 					{:else if item.id === 'import-plan'}
 						<p class="mb-3 text-sm leading-6 text-zinc-400">
 							Bring your own JSON from a trainer or an AI.
@@ -462,9 +473,9 @@
 						</div>
 					{:else if item.id === 'appearance'}
 						<p class="mb-4 text-sm leading-6 text-zinc-400">
-							Industrial Swiss is the default: off-white surfaces, charcoal type, wireframe
-							borders, and safety orange for actions. Pale sky blue is reserved for the calendar
-							day dots. Night keeps the older dark lime look.
+							Industrial Swiss is the default: off-white surfaces, charcoal type, wireframe borders,
+							and safety orange for actions. Pale sky blue is reserved for the calendar day dots.
+							Night keeps the older dark lime look.
 						</p>
 						<div class="grid grid-cols-2 gap-2">
 							<button
@@ -557,9 +568,9 @@
 							<button
 								type="button"
 								class="mt-3 w-full rounded-2xl border border-zinc-600 py-3 text-sm font-semibold"
-								onclick={() => openPanel('starter')}
+								onclick={() => openPanel('week')}
 							>
-								Choose a starter plan
+								Open weekly plan
 							</button>
 						{/if}
 					{:else if item.id === 'coffee'}
@@ -582,12 +593,3 @@
 	{/each}
 </div>
 
-{#if message}
-	<p class="mt-4 rounded-2xl border border-lime-400/30 bg-lime-400/10 p-3 text-sm text-lime-200">
-		{message}
-	</p>
-{/if}
-{#if error}
-	<pre
-		class="mt-4 overflow-auto rounded-2xl border border-red-500/40 bg-red-950/40 p-3 text-xs whitespace-pre-wrap text-red-200">{error}</pre>
-{/if}
