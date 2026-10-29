@@ -1,8 +1,19 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+	import { track } from '$lib/analytics';
 	import { fitness } from '$lib/app-state.svelte';
 	import { cardioTrends, exerciseTrends, statTrends } from '$lib/history';
 
 	let query = $state('');
+
+	onMount(() => {
+		const hasPlan = Boolean(fitness.plan);
+		const hasLogs = fitness.sessions.some((session) => session.completed || session.sets.length);
+		track('activities_view', {
+			has_plan: hasPlan,
+			has_logs: hasLogs
+		});
+	});
 
 	const lifts = $derived(
 		exerciseTrends(fitness.plan, fitness.sessions, fitness.preferences.weightUnit)

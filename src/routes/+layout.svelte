@@ -1,15 +1,34 @@
 <script lang="ts">
 	import './layout.css';
 	import { onMount } from 'svelte';
+	import {
+		analyticsEnabled,
+		displayMode,
+		flushAnalytics,
+		goatcounterEndpoint,
+		goatcounterScriptSrc,
+		track
+	} from '$lib/analytics';
 	import { fitness } from '$lib/app-state.svelte';
 	import Nav from '$lib/components/Nav.svelte';
 	import { startPlanReminder, stopPlanReminder } from '$lib/plan-reminder';
 	import { APP_NAME } from '$lib/samples';
 
 	let { children } = $props();
+	const analyticsOn = analyticsEnabled();
+	const analyticsEndpoint = goatcounterEndpoint();
+	const analyticsSrc = goatcounterScriptSrc();
 
 	onMount(() => {
-		void fitness.init();
+		void fitness.init().then(() => {
+			if (!analyticsOn) return;
+			flushAnalytics();
+			track('app_open', {
+				display_mode: displayMode(),
+				theme: fitness.preferences.theme,
+				has_plan: Boolean(fitness.plan)
+			});
+		});
 		return () => stopPlanReminder();
 	});
 
@@ -49,6 +68,14 @@
 		href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@400;600;700&display=swap"
 		rel="stylesheet"
 	/>
+	{#if analyticsOn}
+		<script
+			async
+			data-goatcounter={analyticsEndpoint}
+			data-goatcounter-settings={JSON.stringify({ no_events: true })}
+			src={analyticsSrc}
+		></script>
+	{/if}
 </svelte:head>
 
 <div class="mx-auto min-h-dvh max-w-lg px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-24">

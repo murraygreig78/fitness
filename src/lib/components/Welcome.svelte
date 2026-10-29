@@ -14,8 +14,9 @@
 <div class="space-y-4 text-sm leading-6 text-zinc-400">
 	<p>First, load a weekly plan. Once that is done, your schedule shows on the home screen.</p>
 	<p>
-		You do not share any information with us. Everything stays in this browser’s local storage, so
-		if you open a different browser, your data will not be there.
+		Your plan and workout history stay in this browser’s local storage — there is no account. If you
+		open a different browser, your data will not be there. Anonymous, cookieless page stats may be
+		counted so we can see what testers use — never your sets, weights, or notes.
 	</p>
 	<p>
 		If you would like us to add sync, let us know. Pull requests and feature requests are welcome on

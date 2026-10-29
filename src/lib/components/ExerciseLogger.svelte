@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { track } from '$lib/analytics';
 	import { fitness } from '$lib/app-state.svelte';
 	import AutoTimer from '$lib/components/AutoTimer.svelte';
 	import Keypad from '$lib/components/Keypad.svelte';
@@ -288,6 +289,11 @@
 		editor = null;
 		closeTargetEditor();
 		autoStep = 0;
+		track('mobility_auto_start', {
+			kind: activity.kind,
+			steps: autoQueue.length,
+			exercises: exercises.length
+		});
 		if (!session.startedAt) {
 			await onSave({
 				...session,
@@ -297,6 +303,14 @@
 			});
 		}
 		beginReady();
+	}
+
+	function openExercise(exercise: Exercise) {
+		focusedId = exercise.id;
+		track('exercise_open', {
+			activity_kind: activity.kind,
+			exercise_kind: exercise.kind
+		});
 	}
 
 	function isCompletingField(exercise: Exercise, field: LogField) {
@@ -609,6 +623,17 @@
 		savingTarget = true;
 		try {
 			await onUpdateExercise(draft);
+			const changed = [
+				JSON.stringify(draft.target) !== JSON.stringify(saved.target) ? 'target' : null,
+				draft.restSeconds !== saved.restSeconds ? 'rest' : null
+			]
+				.filter(Boolean)
+				.join(',');
+			track('exercise_target_save', {
+				activity_kind: activity.kind,
+				exercise_kind: draft.kind,
+				changed
+			});
 			closeTargetEditor();
 		} finally {
 			savingTarget = false;
@@ -671,7 +696,7 @@
 			<button
 				type="button"
 				class="flex w-full items-center gap-3 rounded-3xl border border-zinc-800 bg-zinc-900 p-4 text-left"
-				onclick={() => (focusedId = exercise.id)}
+				onclick={() => openExercise(exercise)}
 			>
 				<span
 					class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full {done

@@ -1,3 +1,4 @@
+import { track } from './analytics';
 import { parsePlanJson } from './schema';
 import { fitness } from './app-state.svelte';
 
@@ -149,4 +150,9 @@ export async function importSampleFromUrl(
 	const result =
 		mode === 'merge' ? await fitness.mergePlan(parsed.plan) : await fitness.importPlan(parsed.plan);
 	if (!result.ok) throw new Error(result.error);
+	track('plan_load', {
+		mode,
+		plan_id: parsed.plan.id,
+		days: parsed.plan.days.length
+	});
 }

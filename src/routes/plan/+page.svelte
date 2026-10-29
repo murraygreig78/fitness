@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { base, resolve } from '$app/paths';
+	import { track } from '$lib/analytics';
 	import { fitness } from '$lib/app-state.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import PlanOutline from '$lib/components/PlanOutline.svelte';
@@ -14,7 +15,12 @@
 	} from '$lib/plan-reminder';
 	import { APP_NAME, KOFI_URL, starterPlans } from '$lib/samples';
 	import { downloadSkillPack } from '$lib/skill-pack';
-	import { themeLabel } from '$lib/units';
+	import { themeLabel, type AppTheme } from '$lib/units';
+
+	async function chooseTheme(theme: AppTheme) {
+		await fitness.setTheme(theme);
+		track('theme_change', { theme });
+	}
 
 	type Panel =
 		| 'getting-started'
@@ -100,6 +106,7 @@
 		message = null;
 		error = null;
 		selected = next;
+		if (next === 'getting-started') track('getting_started_open');
 	}
 
 	async function readJson(text: string): Promise<unknown> {
@@ -110,7 +117,7 @@
 		}
 	}
 
-	async function importObject(input: unknown) {
+	async function importObject(input: unknown, source: 'paste' | 'file') {
 		busy = true;
 		error = null;
 		message = null;
@@ -120,6 +127,11 @@
 				error = result.error;
 				return;
 			}
+			track('plan_import', {
+				source,
+				plan_id: fitness.plan?.id,
+				days: fitness.plan?.days.length
+			});
 			message = `Loaded ${fitness.plan?.name ?? 'weekly plan'}. It will repeat each week.`;
 			selected = 'week';
 			await goto(resolve('/'));
@@ -130,7 +142,7 @@
 
 	async function importPasted() {
 		try {
-			await importObject(await readJson(paste));
+			await importObject(await readJson(paste), 'paste');
 		} catch (caught) {
 			error = caught instanceof Error ? caught.message : 'Could not import';
 		}
@@ -141,7 +153,7 @@
 		const file = input.files?.[0];
 		if (!file) return;
 		try {
-			await importObject(await readJson(await file.text()));
+			await importObject(await readJson(await file.text()), 'file');
 		} catch (caught) {
 			error = caught instanceof Error ? caught.message : 'Could not import';
 		} finally {
@@ -197,6 +209,7 @@
 			return;
 		}
 		downloadJson(`${fitness.plan.id}.json`, fitness.plan);
+		track('plan_export', { plan_id: fitness.plan.id, days: fitness.plan.days.length });
 		message =
 			'Downloaded your weekly fitness plan. Send this JSON to a trainer or AI for an updated week.';
 	}
@@ -204,6 +217,7 @@
 	function exportLogs() {
 		const backup = fitness.exportBackup();
 		downloadJson(`fitness-activity-log-${backup.exportedAt.slice(0, 10)}.json`, backup);
+		track('logs_export', { sessions: backup.sessions.length });
 		message =
 			'Downloaded your activity log. Send this to a trainer or AI so they can recommend the next plan.';
 	}
@@ -221,6 +235,7 @@
 				error = result.error;
 				return;
 			}
+			track('logs_import', { sessions: fitness.sessions.length });
 			message = `Imported ${fitness.sessions.length} logged activities.`;
 			if (fitness.plan) selected = 'week';
 		} catch (caught) {
@@ -308,9 +323,8 @@
 					{:else if item.id === 'getting-started'}
 						<div class="space-y-4 text-sm leading-6 text-zinc-400">
 							<p>
-								{APP_NAME} is a local training log. Your week lives in a JSON plan and your history stays
-								in this browser — there is no account, and nothing leaves the device unless you download
-								a file.
+								{APP_NAME} is a local training log. Your week lives in a JSON plan and your workout history
+								stays in this browser — there is no account.
 							</p>
 
 							<div>
@@ -360,7 +374,11 @@
 
 							<div>
 								<p class="font-semibold text-zinc-200">5. It stays on this device</p>
-								<p class="mt-1">Your plan stays on this device, as does your activity.</p>
+								<p class="mt-1">
+									Your plan stays on this device, as does your activity. Anonymous, cookieless page
+									stats may be counted so we can see what testers use — never your sets, weights, or
+									notes.
+								</p>
 							</div>
 						</div>
 					{:else if item.id === 'ask-ai'}
@@ -514,7 +532,7 @@
 								class="rounded-2xl py-3 text-sm font-semibold {fitness.preferences.theme === 'swiss'
 									? 'bg-lime-400 text-zinc-950'
 									: 'border border-zinc-700 text-zinc-200'}"
-								onclick={() => void fitness.setTheme('swiss')}
+								onclick={() => void chooseTheme('swiss')}
 							>
 								Swiss
 							</button>
@@ -523,7 +541,7 @@
 								class="rounded-2xl py-3 text-sm font-semibold {fitness.preferences.theme === 'night'
 									? 'bg-lime-400 text-zinc-950'
 									: 'border border-zinc-700 text-zinc-200'}"
-								onclick={() => void fitness.setTheme('night')}
+								onclick={() => void chooseTheme('night')}
 							>
 								Night
 							</button>
@@ -614,6 +632,7 @@
 							href={KOFI_URL}
 							target="_blank"
 							rel="noreferrer"
+							onclick={() => track('coffee_click', { surface: 'admin' })}
 						>
 							Buy us a coffee
 						</a>

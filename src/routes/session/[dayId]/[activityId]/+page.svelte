@@ -3,6 +3,7 @@
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { kindIconName, kindTextClass } from '$lib/activity-style';
+	import { track } from '$lib/analytics';
 	import { fitness } from '$lib/app-state.svelte';
 	import EffortPicker from '$lib/components/EffortPicker.svelte';
 	import ExerciseLogger from '$lib/components/ExerciseLogger.svelte';
@@ -65,6 +66,16 @@
 	const session = $derived(
 		day && activity ? fitness.sessionFor(day.id, activity.id, weekStart) : undefined
 	);
+
+	let trackedSessionOpen = false;
+	$effect(() => {
+		if (!activity || trackedSessionOpen) return;
+		trackedSessionOpen = true;
+		track('session_open', {
+			kind: activity.kind,
+			adhoc: isAdhocActivityId(activity.id)
+		});
+	});
 
 	const dayIndexById = $derived.by(() => {
 		const map: Record<string, number> = {};
@@ -168,6 +179,7 @@
 			completed: true,
 			skipped: false
 		}));
+		track('session_complete', { kind: activity.kind });
 		await goto(resolve(`/?week=${weekStart}&day=${day.weekday}`));
 	}
 
@@ -356,8 +368,7 @@
 						...current,
 						notes: (event.currentTarget as HTMLTextAreaElement).value
 					});
-				}}
-			></textarea>
+				}}></textarea>
 		{/if}
 	</div>
 
