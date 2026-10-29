@@ -135,37 +135,22 @@
 				id: 'activities',
 				label: 'Activities',
 				current: String(current.activities),
-				previous: String(previous.activities),
 				delta: delta(current.activities, previous.activities)
 			},
 			{
 				id: 'volume',
 				label: 'Kg lifted',
 				current: volume(current.volumeKg),
-				previous: volume(previous.volumeKg),
 				delta: delta(current.volumeKg, previous.volumeKg)
 			},
 			{
 				id: 'distance',
 				label: 'Distance',
 				current: formatDistance(current.distanceKm, distanceUnit),
-				previous: formatDistance(previous.distanceKm, distanceUnit),
 				delta: delta(current.distanceKm, previous.distanceKm)
 			}
 		];
 	});
-
-	function shortRange(start: string, end: string): string {
-		const startText = parseDateOnly(start).toLocaleDateString(undefined, {
-			day: 'numeric',
-			month: 'short'
-		});
-		const endText = parseDateOnly(end).toLocaleDateString(undefined, {
-			day: 'numeric',
-			month: 'short'
-		});
-		return `${startText} – ${endText}`;
-	}
 
 	const needle = $derived(query.trim().toLowerCase());
 
@@ -475,31 +460,19 @@
 		caption={chartRange === 'day' ? 'Unique activities per day' : 'Unique activities per week'}
 	/>
 
-	<section class="mb-6 rounded-3xl border border-zinc-800 bg-zinc-900 p-4">
-		<div class="mb-3 flex flex-wrap items-end justify-between gap-2">
-			<div>
-				<h2 class="text-lg font-semibold">Last 7 days</h2>
-				<p class="mt-1 text-sm text-zinc-400">
-					{shortRange(sevenDayCompare.currentStart, sevenDayCompare.currentEnd)} vs
-					{shortRange(sevenDayCompare.previousStart, sevenDayCompare.previousEnd)}
-				</p>
-			</div>
-		</div>
-		<ul class="space-y-3">
+	<section class="mb-6">
+		<p class="mb-2 text-sm text-zinc-500">Last 7 days</p>
+		<ul class="flex gap-2 overflow-x-auto">
 			{#each compareRows as row (row.id)}
-				<li class="flex items-center justify-between gap-3 rounded-2xl border border-zinc-800 bg-zinc-950/40 px-3 py-3">
-					<div class="min-w-0">
-						<p class="text-sm text-zinc-400">{row.label}</p>
-						<p class="mt-1 font-mono text-xl font-semibold">{row.current}</p>
-						<p class="mt-1 text-sm text-zinc-500">Prior {row.previous}</p>
-					</div>
+				<li class="min-w-0 flex-1 rounded-2xl border border-zinc-800 bg-zinc-900 px-3 py-3">
+					<p class="truncate text-xs text-zinc-500">{row.label}</p>
+					<p class="mt-1 truncate font-mono text-sm font-semibold">{row.current}</p>
 					<p
-						class="shrink-0 rounded-full px-2.5 py-1 text-sm font-semibold {row.delta.tone ===
-						'up'
-							? 'bg-lime-400/15 text-lime-300'
+						class="mt-1 text-xs font-semibold {row.delta.tone === 'up'
+							? 'text-lime-300'
 							: row.delta.tone === 'down'
-								? 'bg-orange-400/15 text-orange-300'
-								: 'bg-zinc-800 text-zinc-400'}"
+								? 'text-orange-300'
+								: 'text-zinc-500'}"
 					>
 						{row.delta.text}
 					</p>
