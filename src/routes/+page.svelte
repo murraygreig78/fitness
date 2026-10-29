@@ -154,7 +154,8 @@
 	}
 </script>
 
-<header class="mb-5 flex items-center justify-between gap-3">
+<div class="flex min-h-[calc(100dvh-6.5rem-env(safe-area-inset-top,0px))] flex-col">
+	<header class="mb-5 flex items-center justify-between gap-3">
 		<p class="text-lg font-semibold">{formatMonthYear(fitness.weekStart)}</p>
 		<div class="flex items-center gap-1">
 			<button
@@ -260,12 +261,13 @@
 		</ol>
 	{/if}
 
-	<p class="mt-10 pb-2 text-center text-sm leading-6 text-zinc-500">
+	<p class="mt-auto pt-10 pb-2 text-center text-sm leading-6 text-zinc-500">
 		If this helps your training,
 		<a class="text-lime-300 underline" href={KOFI_URL} target="_blank" rel="noreferrer"
 			>buy us a coffee</a
 		>.
 	</p>
+</div>
 
 {#if picking}
 	<KindSheet
