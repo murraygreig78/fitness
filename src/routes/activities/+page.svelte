@@ -531,7 +531,7 @@
 										/>
 									{/if}
 									{#each plotted as point, index (`${row.id}:${index}`)}
-										<circle cx={point.x} cy={point.y} r="1.8" fill="currentColor" />
+										<circle cx={point.x} cy={point.y} r="0.9" fill="currentColor" />
 									{/each}
 								</svg>
 								{#if marks.length}
@@ -595,7 +595,7 @@
 										/>
 									{/if}
 									{#each plotted as point, index (`${row.id}:${index}`)}
-										<circle cx={point.x} cy={point.y} r="1.8" fill="currentColor" />
+										<circle cx={point.x} cy={point.y} r="0.9" fill="currentColor" />
 									{/each}
 								</svg>
 								{#if marks.length}
@@ -661,7 +661,7 @@
 										/>
 									{/if}
 									{#each plotted as point, index (`${row.id}:${index}`)}
-										<circle cx={point.x} cy={point.y} r="1.8" fill="currentColor" />
+										<circle cx={point.x} cy={point.y} r="0.9" fill="currentColor" />
 									{/each}
 								</svg>
 								{#if marks.length}
