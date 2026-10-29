@@ -387,7 +387,14 @@
 			endedAt: null,
 			sets
 		});
-		if (completing) focusAfterCompletedSet(exercise, setIndex, sets);
+		if (completing) {
+			track('set_complete', {
+				activity_kind: activity.kind,
+				exercise_kind: exercise.kind,
+				source: 'keypad'
+			});
+			focusAfterCompletedSet(exercise, setIndex, sets);
+		}
 	}
 
 	async function toggleComplete(exercise: Exercise, setIndex: number) {
@@ -404,7 +411,14 @@
 			endedAt: null,
 			sets
 		});
-		if (completed) focusAfterCompletedSet(exercise, setIndex, sets);
+		if (completed) {
+			track('set_complete', {
+				activity_kind: activity.kind,
+				exercise_kind: exercise.kind,
+				source: 'circle'
+			});
+			focusAfterCompletedSet(exercise, setIndex, sets);
+		}
 	}
 
 	function lastFor(exercise: Exercise, setIndex: number, field: LogField) {
