@@ -528,7 +528,10 @@
 											<polyline
 												fill="none"
 												stroke="currentColor"
-												stroke-width="2"
+												stroke-width="1.5"
+												vector-effect="non-scaling-stroke"
+												stroke-linecap="round"
+												stroke-linejoin="round"
 												points={line}
 											/>
 										{/if}
@@ -597,7 +600,10 @@
 											<polyline
 												fill="none"
 												stroke="currentColor"
-												stroke-width="2"
+												stroke-width="1.5"
+												vector-effect="non-scaling-stroke"
+												stroke-linecap="round"
+												stroke-linejoin="round"
 												points={line}
 											/>
 										{/if}
@@ -668,7 +674,10 @@
 											<polyline
 												fill="none"
 												stroke="currentColor"
-												stroke-width="2"
+												stroke-width="1.5"
+												vector-effect="non-scaling-stroke"
+												stroke-linecap="round"
+												stroke-linejoin="round"
 												points={line}
 											/>
 										{/if}
