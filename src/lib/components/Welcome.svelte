@@ -30,6 +30,10 @@
 
 <section class="mt-8">
 	<h2 class="mb-3 text-lg font-semibold">Choose a weekly plan</h2>
+	<p class="mb-3 text-sm leading-6 text-zinc-400">
+		Filter by bodyweight or dumbbell, and by how many days you want. You can also add a second plan
+		into the week later from Admin.
+	</p>
 	<SamplePlanList plans={starterPlans} bind:busy bind:error />
 </section>
 

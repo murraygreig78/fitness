@@ -1,0 +1,130 @@
+{
+	"version": 2,
+	"id": "daily-cardio",
+	"name": "Daily cardio",
+	"notes": "Easy 3km walk most days, with a longer run on Saturday instead of the walk. Add this into a strength or stretch week with Add to week.",
+	"notificationTime": "07:00",
+	"days": [
+		{
+			"id": "mon-walk",
+			"weekday": "monday",
+			"name": "Daily walk",
+			"estimatedMinutes": 35,
+			"activities": [
+				{
+					"id": "walk-3k",
+					"name": "3km walk",
+					"kind": "cardio",
+					"instructions": "Easy daily walk. Log the distance and how long it took.",
+					"target": {
+						"distanceKm": 3
+					}
+				}
+			]
+		},
+		{
+			"id": "tue-walk",
+			"weekday": "tuesday",
+			"name": "Daily walk",
+			"estimatedMinutes": 35,
+			"activities": [
+				{
+					"id": "walk-3k",
+					"name": "3km walk",
+					"kind": "cardio",
+					"instructions": "Easy daily walk. Log the distance and how long it took.",
+					"target": {
+						"distanceKm": 3
+					}
+				}
+			]
+		},
+		{
+			"id": "wed-walk",
+			"weekday": "wednesday",
+			"name": "Daily walk",
+			"estimatedMinutes": 35,
+			"activities": [
+				{
+					"id": "walk-3k",
+					"name": "3km walk",
+					"kind": "cardio",
+					"instructions": "Easy daily walk. Log the distance and how long it took.",
+					"target": {
+						"distanceKm": 3
+					}
+				}
+			]
+		},
+		{
+			"id": "thu-walk",
+			"weekday": "thursday",
+			"name": "Daily walk",
+			"estimatedMinutes": 35,
+			"activities": [
+				{
+					"id": "walk-3k",
+					"name": "3km walk",
+					"kind": "cardio",
+					"instructions": "Easy daily walk. Log the distance and how long it took.",
+					"target": {
+						"distanceKm": 3
+					}
+				}
+			]
+		},
+		{
+			"id": "fri-walk",
+			"weekday": "friday",
+			"name": "Daily walk",
+			"estimatedMinutes": 35,
+			"activities": [
+				{
+					"id": "walk-3k",
+					"name": "3km walk",
+					"kind": "cardio",
+					"instructions": "Easy daily walk. Log the distance and how long it took.",
+					"target": {
+						"distanceKm": 3
+					}
+				}
+			]
+		},
+		{
+			"id": "sat-long-run",
+			"weekday": "saturday",
+			"name": "Long run",
+			"estimatedMinutes": 55,
+			"activities": [
+				{
+					"id": "long-run",
+					"name": "Long run",
+					"kind": "cardio",
+					"instructions": "5\u20138km. Log the distance you actually ran and the time it took.",
+					"target": {
+						"distanceKm": 6,
+						"distanceKmMin": 5,
+						"distanceKmMax": 8
+					}
+				}
+			]
+		},
+		{
+			"id": "sun-walk",
+			"weekday": "sunday",
+			"name": "Daily walk",
+			"estimatedMinutes": 35,
+			"activities": [
+				{
+					"id": "walk-3k",
+					"name": "3km walk",
+					"kind": "cardio",
+					"instructions": "Easy daily walk. Log the distance and how long it took.",
+					"target": {
+						"distanceKm": 3
+					}
+				}
+			]
+		}
+	]
+}

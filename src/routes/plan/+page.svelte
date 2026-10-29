@@ -3,6 +3,7 @@
 	import { base, resolve } from '$app/paths';
 	import { fitness } from '$lib/app-state.svelte';
 	import Icon from '$lib/components/Icon.svelte';
+	import PlanOutline from '$lib/components/PlanOutline.svelte';
 	import SamplePlanList from '$lib/components/SamplePlanList.svelte';
 	import { downloadJson } from '$lib/download';
 	import {
@@ -11,16 +12,14 @@
 		requestReminderPermission,
 		startPlanReminder
 	} from '$lib/plan-reminder';
-	import { APP_NAME, KOFI_URL, REPO_URL, starterPlans } from '$lib/samples';
-	import { summarizeActivities } from '$lib/schema';
+	import { APP_NAME, KOFI_URL, starterPlans } from '$lib/samples';
 	import { downloadSkillPack } from '$lib/skill-pack';
 	import { themeLabel } from '$lib/units';
 
 	type Panel =
-		| 'current'
-		| 'how-it-works'
+		| 'getting-started'
+		| 'week'
 		| 'ask-ai'
-		| 'starter'
 		| 'import-plan'
 		| 'import-log'
 		| 'units'
@@ -36,32 +35,24 @@
 	let permission = $state(reminderPermission());
 	let selected = $state<Panel | null>(null);
 
-	const panel = $derived(selected ?? (fitness.plan ? 'current' : 'how-it-works'));
+	const panel = $derived(selected ?? (fitness.plan ? 'week' : 'getting-started'));
 
 	const menuItems = $derived.by(() => {
-		const items: { id: Panel; label: string; hint: string }[] = [];
-		if (fitness.plan) {
-			items.push({
-				id: 'current',
-				label: 'Current plan',
-				hint: fitness.plan.name
-			});
-		}
-		items.push(
+		const items: { id: Panel; label: string; hint: string }[] = [
 			{
-				id: 'how-it-works',
-				label: 'How it works',
-				hint: 'Local plans, logging, and AI updates'
+				id: 'getting-started',
+				label: 'Getting started',
+				hint: 'Install the app, load a week, and log'
+			},
+			{
+				id: 'week',
+				label: 'Weekly plan',
+				hint: fitness.plan ? fitness.plan.name : 'Choose or build a starter week'
 			},
 			{
 				id: 'ask-ai',
 				label: 'Ask AI to update your week',
 				hint: 'Skills, plan JSON, and activity log'
-			},
-			{
-				id: 'starter',
-				label: 'Choose a starter plan',
-				hint: 'Load a sample week'
 			},
 			{
 				id: 'import-plan',
@@ -101,7 +92,7 @@
 				label: 'Buy us a coffee',
 				hint: 'Support the project on Ko-fi'
 			}
-		);
+		];
 		return items;
 	});
 
@@ -130,7 +121,7 @@
 				return;
 			}
 			message = `Loaded ${fitness.plan?.name ?? 'weekly plan'}. It will repeat each week.`;
-			selected = 'current';
+			selected = 'week';
 			await goto(resolve('/'));
 		} finally {
 			busy = false;
@@ -158,12 +149,18 @@
 		}
 	}
 
-	async function loadedSample() {
+	async function loadedSample(mode: 'replace' | 'merge', sample: (typeof starterPlans)[number]) {
 		error = null;
-		message = `Loaded ${fitness.plan?.name ?? 'weekly plan'}. It will repeat each week.`;
 		startPlanReminder(() => fitness.plan);
-		selected = 'current';
-		await goto(resolve('/'));
+		selected = 'week';
+		if (mode === 'merge') {
+			message = `Added “${sample.name}” into your week. The schedule above now includes those days and exercises.`;
+		} else {
+			message = `Loaded “${fitness.plan?.name ?? sample.name}”. It will repeat each week.`;
+		}
+		if (typeof window !== 'undefined') {
+			window.scrollTo({ top: 0, behavior: 'smooth' });
+		}
 	}
 
 	async function saveNotificationTime(value: string) {
@@ -225,7 +222,7 @@
 				return;
 			}
 			message = `Imported ${fitness.sessions.length} logged activities.`;
-			if (fitness.plan) selected = 'current';
+			if (fitness.plan) selected = 'week';
 		} catch (caught) {
 			error = caught instanceof Error ? caught.message : 'Could not import activity log';
 		} finally {
@@ -237,11 +234,19 @@
 
 <header class="mb-6">
 	<p class="text-xs font-semibold tracking-[0.22em] text-lime-300 uppercase">Admin</p>
-	<h1 class="text-2xl font-bold">Weekly fitness plan</h1>
-	<p class="mt-1 text-sm leading-6 text-zinc-400">
-		Pick what you want to do. Your week lives in a JSON plan that stays on this device.
-	</p>
+	<h1 class="text-2xl font-bold">{APP_NAME}</h1>
+	<p class="mt-1 text-sm leading-6 text-zinc-400">Choose your weekly fitness plan.</p>
 </header>
+
+{#if message}
+	<p class="mb-4 rounded-2xl border border-lime-400/30 bg-lime-400/10 p-3 text-sm text-lime-200">
+		{message}
+	</p>
+{/if}
+{#if error}
+	<pre
+		class="mb-4 overflow-auto rounded-2xl border border-red-500/40 bg-red-950/40 p-3 text-xs whitespace-pre-wrap text-red-200">{error}</pre>
+{/if}
 
 <div class="space-y-2" role="list">
 	{#each menuItems as item (item.id)}
@@ -270,51 +275,93 @@
 
 			{#if open}
 				<div class="border-t border-zinc-800 px-4 pt-3 pb-4">
-					{#if item.id === 'current' && fitness.plan}
-						<p class="text-xs tracking-[0.16em] text-zinc-500 uppercase">This week’s plan</p>
-						<h2 class="mt-1 text-lg font-semibold">{fitness.plan.name}</h2>
-						<p class="mt-1 text-sm text-zinc-400">
-							{fitness.plan.days.length} training days each week
-						</p>
-						{#if fitness.plan.notes}
-							<p class="mt-2 text-sm leading-6 text-zinc-400">{fitness.plan.notes}</p>
+					{#if item.id === 'week'}
+						{#if fitness.plan}
+							<p class="text-xs tracking-[0.16em] text-zinc-500 uppercase">This week’s plan</p>
+							<h2 class="mt-1 text-lg font-semibold">{fitness.plan.name}</h2>
+							<p class="mt-1 text-sm text-zinc-400">
+								{fitness.plan.days.length} training days each week
+							</p>
+							{#if fitness.plan.notes}
+								<p class="mt-2 text-sm leading-6 text-zinc-400">{fitness.plan.notes}</p>
+							{/if}
+							<div class="mt-3">
+								<PlanOutline plan={fitness.plan} />
+							</div>
+							<button
+								type="button"
+								class="mt-4 w-full rounded-2xl border border-zinc-600 py-3 text-sm font-semibold"
+								onclick={exportPlan}
+							>
+								Download weekly plan
+							</button>
+							<p class="mt-5 mb-3 text-sm leading-6 text-zinc-400">
+								Replace this week with a starter, or add another starter into these days.
+							</p>
+						{:else}
+							<p class="mb-3 text-sm leading-6 text-zinc-400">
+								No week loaded yet. Pick a starter below, or import JSON. Use Show schedule to see
+								which exercises fall on which days before you load one.
+							</p>
 						{/if}
-						<ul class="mt-3 space-y-1 text-sm text-zinc-300">
-							{#each fitness.plan.days as day (day.id)}
-								<li>{day.weekday}: {day.name} · {summarizeActivities(day.activities)}</li>
-							{/each}
-						</ul>
-						<button
-							type="button"
-							class="mt-4 w-full rounded-2xl border border-zinc-600 py-3 text-sm font-semibold"
-							onclick={exportPlan}
-						>
-							Download weekly plan
-						</button>
-					{:else if item.id === 'how-it-works'}
-						<div class="space-y-3 text-sm leading-6 text-zinc-400">
+						<SamplePlanList plans={starterPlans} bind:busy bind:error onLoaded={loadedSample} />
+					{:else if item.id === 'getting-started'}
+						<div class="space-y-4 text-sm leading-6 text-zinc-400">
 							<p>
-								{APP_NAME} keeps your week in a JSON fitness plan and your logs in this browser. There
-								is no account and nothing leaves the device unless you download a file.
+								{APP_NAME} is a local training log. Your week lives in a JSON plan and your history stays
+								in this browser — there is no account, and nothing leaves the device unless you download
+								a file.
 							</p>
-							<p>
-								Load a starter week or import your own plan. Open a day from the home screen, then
-								log each activity. The keypad remembers last kg and reps for an exercise.
-							</p>
-							<p>
-								To change the week with Claude or ChatGPT: download the AI skills and your plan, ask
-								for an updated JSON, then import it here.
-							</p>
-							<p>
-								Moving phones or browsers? Download your activity log, then import it on the other
-								device.
-							</p>
-							<p>
-								Pull requests and ideas are welcome on
-								<a class="text-lime-300 underline" href={REPO_URL} target="_blank" rel="noreferrer"
-									>GitHub</a
-								>.
-							</p>
+
+							<div>
+								<p class="font-semibold text-zinc-200">1. Save it on your phone</p>
+								<p class="mt-1">
+									Add this site to your Home Screen so it opens like an app, stays in portrait, and
+									is easier to reach mid-workout.
+								</p>
+								<ul class="mt-2 list-disc space-y-2 pl-5">
+									<li>
+										<span class="font-medium text-zinc-300">iPhone (Safari):</span> open this site, tap
+										Share, then Add to Home Screen. Open it from the new icon afterwards.
+									</li>
+									<li>
+										<span class="font-medium text-zinc-300">Android (Chrome):</span> open this site, tap
+										the menu (⋮), then Install app. If you do not see that, choose Add to Home screen.
+										Open it from the new icon afterwards.
+									</li>
+								</ul>
+							</div>
+
+							<div>
+								<p class="font-semibold text-zinc-200">2. Load a week</p>
+								<p class="mt-1">
+									Open Weekly plan and pick a starter. Use Show schedule to see which exercises fall
+									on which days. You can Replace week, or Add to week to combine modules — for
+									example Home dumbbell week, then Daily cardio, then Full-body stretch.
+								</p>
+							</div>
+
+							<div>
+								<p class="font-semibold text-zinc-200">3. Log as you train</p>
+								<p class="mt-1">
+									From the home screen, open a day, then an activity. Mark sets complete and enter
+									kg, reps, or time. The keypad can fill the last value you used for that exercise.
+								</p>
+							</div>
+
+							<div>
+								<p class="font-semibold text-zinc-200">4. Change or move the week</p>
+								<p class="mt-1">
+									Ask AI to update your week downloads skills and your plan for Claude or ChatGPT.
+									Import the JSON it returns here. Moving phones? Download your activity log, then
+									import it on the other device.
+								</p>
+							</div>
+
+							<div>
+								<p class="font-semibold text-zinc-200">5. It stays on this device</p>
+								<p class="mt-1">Your plan stays on this device, as does your activity.</p>
+							</div>
 						</div>
 					{:else if item.id === 'ask-ai'}
 						<ol class="list-decimal space-y-2 pl-5 text-sm leading-6 text-zinc-400">
@@ -355,11 +402,6 @@
 								Download activity log
 							</button>
 						</div>
-					{:else if item.id === 'starter'}
-						<p class="mb-3 text-sm leading-6 text-zinc-400">
-							Load one of these, then your schedule shows on the home screen.
-						</p>
-						<SamplePlanList plans={starterPlans} bind:busy bind:error onLoaded={loadedSample} />
 					{:else if item.id === 'import-plan'}
 						<p class="mb-3 text-sm leading-6 text-zinc-400">
 							Bring your own JSON from a trainer or an AI.
@@ -462,9 +504,9 @@
 						</div>
 					{:else if item.id === 'appearance'}
 						<p class="mb-4 text-sm leading-6 text-zinc-400">
-							Industrial Swiss is the default: off-white surfaces, charcoal type, wireframe
-							borders, and safety orange for actions. Pale sky blue is reserved for the calendar
-							day dots. Night keeps the older dark lime look.
+							Industrial Swiss is the default: off-white surfaces, charcoal type, wireframe borders,
+							and safety orange for actions. Pale sky blue is reserved for the calendar day dots.
+							Night keeps the older dark lime look.
 						</p>
 						<div class="grid grid-cols-2 gap-2">
 							<button
@@ -557,9 +599,9 @@
 							<button
 								type="button"
 								class="mt-3 w-full rounded-2xl border border-zinc-600 py-3 text-sm font-semibold"
-								onclick={() => openPanel('starter')}
+								onclick={() => openPanel('week')}
 							>
-								Choose a starter plan
+								Open weekly plan
 							</button>
 						{/if}
 					{:else if item.id === 'coffee'}
@@ -581,13 +623,3 @@
 		</section>
 	{/each}
 </div>
-
-{#if message}
-	<p class="mt-4 rounded-2xl border border-lime-400/30 bg-lime-400/10 p-3 text-sm text-lime-200">
-		{message}
-	</p>
-{/if}
-{#if error}
-	<pre
-		class="mt-4 overflow-auto rounded-2xl border border-red-500/40 bg-red-950/40 p-3 text-xs whitespace-pre-wrap text-red-200">{error}</pre>
-{/if}

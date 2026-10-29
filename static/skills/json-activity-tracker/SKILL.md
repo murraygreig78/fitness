@@ -63,6 +63,8 @@ Then:
 | Weight, waist, photos | activity `kind: progress` |
 | “3 × 6–8 @ 12 kg” | `sets: 3`, `repsMin: 6`, `reps: 8`, `kg: 12` |
 | “alternate A and B, then rest” | same `supersetId` on both exercises |
+| “each side / both legs / both arms” (timed stretch) | same exercise, `sets: 2` (or N×2), `instructions` say to swap after set 1 |
+| Modular week (strength + stretch + walk as separate starters) | two or more small plans by weekday; the app can merge them into one week |
 | “2 min rest” | `restSeconds: 120` on the activity or exercise |
 
 Supersets use one `supersetId`, with the first movement listed first. The logger switches to the next partner when a set is completed. Put `restSeconds: 0` on every partner except the last, which carries the rest after the round.

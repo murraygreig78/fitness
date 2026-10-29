@@ -1,0 +1,603 @@
+{
+	"version": 2,
+	"id": "full-body-stretch",
+	"name": "Full-body stretch",
+	"notes": "The mobility sessions from the home dumbbell week, as their own plan. One-sided stretches use two sets so both sides get done. Add into a strength week with Add to week.",
+	"notificationTime": "07:00",
+	"days": [
+		{
+			"id": "tue-full-stretch",
+			"weekday": "tuesday",
+			"name": "Full-body stretch",
+			"estimatedMinutes": 20,
+			"activities": [
+				{
+					"id": "tue-full-stretch-flow",
+					"name": "Full-body stretch",
+					"kind": "mobility",
+					"instructions": "30-second holds. For one-sided stretches, do both sides (two sets). Move slowly into each position.",
+					"exercises": [
+						{
+							"id": "upward-salute",
+							"name": "Upward salute",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 1,
+								"durationSeconds": 30
+							}
+						},
+						{
+							"id": "toe-touch",
+							"name": "Toe touch",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 1,
+								"durationSeconds": 30
+							}
+						},
+						{
+							"id": "chest-opener",
+							"name": "Chest opener",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 1,
+								"durationSeconds": 30
+							}
+						},
+						{
+							"id": "wide-leg-bend",
+							"name": "Wide-leg bend",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 1,
+								"durationSeconds": 30
+							}
+						},
+						{
+							"id": "side-lunge",
+							"name": "Side lunge",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 2,
+								"durationSeconds": 30
+							},
+							"instructions": "Hold 30 seconds on the left, then swap to the right for set 2."
+						},
+						{
+							"id": "lunge-stretch",
+							"name": "Lunge",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 2,
+								"durationSeconds": 30
+							},
+							"instructions": "Hold 30 seconds on the left, then swap to the right for set 2."
+						},
+						{
+							"id": "upward-dog",
+							"name": "Upward dog",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 1,
+								"durationSeconds": 30
+							}
+						},
+						{
+							"id": "childs-pose",
+							"name": "Child's pose",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 1,
+								"durationSeconds": 30
+							}
+						},
+						{
+							"id": "downward-dog",
+							"name": "Downward dog",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 1,
+								"durationSeconds": 30
+							}
+						},
+						{
+							"id": "thunderbolt",
+							"name": "Thunderbolt",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 1,
+								"durationSeconds": 30
+							}
+						},
+						{
+							"id": "pigeon",
+							"name": "Pigeon",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 2,
+								"durationSeconds": 30
+							},
+							"instructions": "Hold 30 seconds on the left, then swap to the right for set 2."
+						},
+						{
+							"id": "seated-twist",
+							"name": "Seated twist",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 2,
+								"durationSeconds": 30
+							},
+							"instructions": "Hold 30 seconds twisting left, then swap to the right for set 2."
+						},
+						{
+							"id": "knees-to-chest",
+							"name": "Knees to chest",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 1,
+								"durationSeconds": 30
+							}
+						},
+						{
+							"id": "lying-figure-four",
+							"name": "Lying figure four",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 2,
+								"durationSeconds": 30
+							},
+							"instructions": "Hold 30 seconds with the left ankle crossed, then swap to the right for set 2."
+						},
+						{
+							"id": "lying-hamstring",
+							"name": "Lying hamstring",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 2,
+								"durationSeconds": 30
+							},
+							"instructions": "Hold 30 seconds on the left leg, then swap to the right for set 2."
+						},
+						{
+							"id": "reclined-butterfly",
+							"name": "Reclined butterfly",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 1,
+								"durationSeconds": 30
+							}
+						},
+						{
+							"id": "spinal-twist",
+							"name": "Spinal twist",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 2,
+								"durationSeconds": 30
+							},
+							"instructions": "Hold 30 seconds on the left, then swap to the right for set 2."
+						},
+						{
+							"id": "quad-stretch",
+							"name": "Quad stretch",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 2,
+								"durationSeconds": 30
+							},
+							"instructions": "Hold 30 seconds on the left, then swap to the right for set 2."
+						},
+						{
+							"id": "butterfly",
+							"name": "Butterfly",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 1,
+								"durationSeconds": 30
+							}
+						},
+						{
+							"id": "seated-fold",
+							"name": "Seated fold",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 1,
+								"durationSeconds": 30
+							}
+						},
+						{
+							"id": "plow",
+							"name": "Plow",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 1,
+								"durationSeconds": 30
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "thu-full-stretch",
+			"weekday": "thursday",
+			"name": "Full-body stretch",
+			"estimatedMinutes": 20,
+			"activities": [
+				{
+					"id": "thu-full-stretch-flow",
+					"name": "Full-body stretch",
+					"kind": "mobility",
+					"instructions": "30-second holds. For one-sided stretches, do both sides (two sets). Move slowly into each position.",
+					"exercises": [
+						{
+							"id": "upward-salute",
+							"name": "Upward salute",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 1,
+								"durationSeconds": 30
+							}
+						},
+						{
+							"id": "toe-touch",
+							"name": "Toe touch",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 1,
+								"durationSeconds": 30
+							}
+						},
+						{
+							"id": "chest-opener",
+							"name": "Chest opener",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 1,
+								"durationSeconds": 30
+							}
+						},
+						{
+							"id": "wide-leg-bend",
+							"name": "Wide-leg bend",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 1,
+								"durationSeconds": 30
+							}
+						},
+						{
+							"id": "side-lunge",
+							"name": "Side lunge",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 2,
+								"durationSeconds": 30
+							},
+							"instructions": "Hold 30 seconds on the left, then swap to the right for set 2."
+						},
+						{
+							"id": "lunge-stretch",
+							"name": "Lunge",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 2,
+								"durationSeconds": 30
+							},
+							"instructions": "Hold 30 seconds on the left, then swap to the right for set 2."
+						},
+						{
+							"id": "upward-dog",
+							"name": "Upward dog",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 1,
+								"durationSeconds": 30
+							}
+						},
+						{
+							"id": "childs-pose",
+							"name": "Child's pose",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 1,
+								"durationSeconds": 30
+							}
+						},
+						{
+							"id": "downward-dog",
+							"name": "Downward dog",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 1,
+								"durationSeconds": 30
+							}
+						},
+						{
+							"id": "thunderbolt",
+							"name": "Thunderbolt",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 1,
+								"durationSeconds": 30
+							}
+						},
+						{
+							"id": "pigeon",
+							"name": "Pigeon",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 2,
+								"durationSeconds": 30
+							},
+							"instructions": "Hold 30 seconds on the left, then swap to the right for set 2."
+						},
+						{
+							"id": "seated-twist",
+							"name": "Seated twist",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 2,
+								"durationSeconds": 30
+							},
+							"instructions": "Hold 30 seconds twisting left, then swap to the right for set 2."
+						},
+						{
+							"id": "knees-to-chest",
+							"name": "Knees to chest",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 1,
+								"durationSeconds": 30
+							}
+						},
+						{
+							"id": "lying-figure-four",
+							"name": "Lying figure four",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 2,
+								"durationSeconds": 30
+							},
+							"instructions": "Hold 30 seconds with the left ankle crossed, then swap to the right for set 2."
+						},
+						{
+							"id": "lying-hamstring",
+							"name": "Lying hamstring",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 2,
+								"durationSeconds": 30
+							},
+							"instructions": "Hold 30 seconds on the left leg, then swap to the right for set 2."
+						},
+						{
+							"id": "reclined-butterfly",
+							"name": "Reclined butterfly",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 1,
+								"durationSeconds": 30
+							}
+						},
+						{
+							"id": "spinal-twist",
+							"name": "Spinal twist",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 2,
+								"durationSeconds": 30
+							},
+							"instructions": "Hold 30 seconds on the left, then swap to the right for set 2."
+						},
+						{
+							"id": "quad-stretch",
+							"name": "Quad stretch",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 2,
+								"durationSeconds": 30
+							},
+							"instructions": "Hold 30 seconds on the left, then swap to the right for set 2."
+						},
+						{
+							"id": "butterfly",
+							"name": "Butterfly",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 1,
+								"durationSeconds": 30
+							}
+						},
+						{
+							"id": "seated-fold",
+							"name": "Seated fold",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 1,
+								"durationSeconds": 30
+							}
+						},
+						{
+							"id": "plow",
+							"name": "Plow",
+							"kind": "stretch",
+							"primaryMuscles": [
+								"mobility"
+							],
+							"restSeconds": 5,
+							"target": {
+								"sets": 1,
+								"durationSeconds": 30
+							}
+						}
+					]
+				}
+			]
+		}
+	]
+}

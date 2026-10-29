@@ -4,6 +4,7 @@ import {
 	createSession,
 	dayIdForWeekday,
 	mergeLoggedSets,
+	mergePlans,
 	parseLogsBackup,
 	parsePlanJson,
 	type Activity,
@@ -106,6 +107,14 @@ class FitnessApp {
 		const result = parsePlanJson(input);
 		if ('error' in result) return { ok: false, error: result.error };
 		return this.persistPlan(result.plan);
+	}
+
+	/** Append another plan’s days/activities into the current week (or load it if empty). */
+	async mergePlan(input: unknown): Promise<{ ok: true } | { ok: false; error: string }> {
+		const result = parsePlanJson(input);
+		if ('error' in result) return { ok: false, error: result.error };
+		if (!this.plan) return this.persistPlan(result.plan);
+		return this.persistPlan(mergePlans(this.plan, result.plan));
 	}
 
 	private async writeMeta(activePlanId: string | null = this.plan?.id ?? null) {

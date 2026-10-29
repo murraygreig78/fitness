@@ -9,15 +9,14 @@ A **day** is a list of **activities**. Activity kinds:
 - `mobility` — a stretching session of nested exercises (timed holds).
 - `progress` — body stats over time (weight, height, waist, and a photo **link**, not the image file).
 
-The bundled week:
+Starter plans are modular. You can load one week, then **Add to week** to merge another:
 
-- Every day: 3km walk (cardio)
-- Monday / Wednesday / Friday: strength
-- Tuesday / Thursday: mobility
-- Saturday: long run (second cardio)
-- Sunday: body stats (progress)
+- **Home dumbbell week** — strength Mon/Wed/Fri, body stats Sunday
+- **Daily cardio** — 3km walk most days; Saturday is a longer run
+- **Full-body stretch** — mobility Tue/Thu
+- Beginner bodyweight and stretching plans for shorter weeks
 
-Monday’s week card therefore reads **2 activities · cardio, strength**.
+Merged Monday therefore reads **2 activities · cardio, strength**.
 
 ## Daily use
 
