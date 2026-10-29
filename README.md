@@ -11,8 +11,9 @@ A **day** is a list of **activities**. Activity kinds:
 
 Starter plans are modular. You can load one week, then **Add to week** to merge another:
 
-- **Home dumbbell week** — strength Mon/Wed/Fri, mobility Tue/Thu, body stats Sunday
-- **Daily walk** — 3km walk each day, plus a longer run on Saturday
+- **Home dumbbell week** — strength Mon/Wed/Fri, body stats Sunday
+- **Daily cardio** — 3km walk each day, plus a longer run on Saturday
+- **Full-body stretch** — mobility Tue/Thu
 - Beginner bodyweight and stretching plans for shorter weeks
 
 Merged Monday therefore reads **2 activities · cardio, strength**.

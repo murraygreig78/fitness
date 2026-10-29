@@ -46,9 +46,9 @@ export const starterPlans: SamplePlanInfo[] = [
 			'Gentle holds on Tuesday, Thursday, and Sunday. One-sided stretches use two sets so both sides get done.'
 	},
 	{
-		id: 'daily-walk-cardio',
-		file: '/plans/daily-walk.json',
-		name: 'Daily walk',
+		id: 'daily-cardio',
+		file: '/plans/daily-cardio.json',
+		name: 'Daily cardio',
 		daysLabel: '7 days a week',
 		daysPerWeek: 7,
 		level: 'Home',
@@ -58,16 +58,28 @@ export const starterPlans: SamplePlanInfo[] = [
 			'Easy 3km walk each day, plus a longer run on Saturday. Add this into a strength or stretch week.'
 	},
 	{
+		id: 'full-body-stretch',
+		file: '/plans/full-body-stretch.json',
+		name: 'Full-body stretch',
+		daysLabel: '2 days a week',
+		daysPerWeek: 2,
+		level: 'Home',
+		equipment: 'bodyweight',
+		focus: 'mobility',
+		summary:
+			'Tuesday and Thursday mobility from the old home week. Add into a strength week when you want the stretch days back.'
+	},
+	{
 		id: 'home-dumbbell-week',
 		file: '/plans/weekly.json',
 		name: 'Home dumbbell week',
-		daysLabel: '6 days a week',
-		daysPerWeek: 6,
+		daysLabel: '4 days a week',
+		daysPerWeek: 4,
 		level: 'Home',
 		equipment: 'dumbbell',
-		focus: 'full',
+		focus: 'strength',
 		summary:
-			'Dumbbell strength three times, mobility twice, and Sunday body stats. Pair with Daily walk if you want cardio.'
+			'Dumbbell strength Mon/Wed/Fri and Sunday body stats. Pair with Daily cardio and Full-body stretch to rebuild the full home week.'
 	},
 	{
 		id: 'full-body-3-day',
