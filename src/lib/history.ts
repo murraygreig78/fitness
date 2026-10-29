@@ -8,7 +8,7 @@ import {
 	type DistanceUnit,
 	type WeightUnit
 } from './units';
-import { calendarDays, dateForWeekday } from './week';
+import { addDays, calendarDays, dateForWeekday, toDateOnly } from './week';
 
 export type TrendGrain = 'week' | 'day';
 
@@ -21,6 +21,73 @@ function sessionTrendDate(
 	const index = dayIndexById[session.dayId];
 	if (index == null) return session.weekStart;
 	return dateForWeekday(session.weekStart, calendarDays[index]!);
+}
+
+export type WindowTotals = {
+	activities: number;
+	volumeKg: number;
+	distanceKm: number;
+};
+
+export type RollingComparison = {
+	current: WindowTotals;
+	previous: WindowTotals;
+	currentStart: string;
+	currentEnd: string;
+	previousStart: string;
+	previousEnd: string;
+};
+
+function sessionHasWork(session: Session): boolean {
+	if (session.skipped) return false;
+	if (session.completed) return true;
+	if (session.sets.some((set) => set.completed && !set.warmup)) return true;
+	if ((session.distanceKm ?? 0) > 0 || (session.durationSeconds ?? 0) > 0) return true;
+	if (session.stats.some((stat) => stat.value != null)) return true;
+	return false;
+}
+
+function totalsForWindow(
+	sessions: Session[],
+	dayIndexById: Record<string, number>,
+	start: string,
+	end: string
+): WindowTotals {
+	let activities = 0;
+	let volumeKg = 0;
+	let distanceKm = 0;
+	for (const session of sessions) {
+		if (!sessionHasWork(session)) continue;
+		const date = sessionTrendDate(session, 'day', dayIndexById);
+		if (date < start || date > end) continue;
+		activities += 1;
+		distanceKm += session.distanceKm ?? 0;
+		for (const set of session.sets) {
+			if (!set.completed || set.warmup) continue;
+			volumeKg += volumeForSet(set);
+		}
+	}
+	return { activities, volumeKg, distanceKm };
+}
+
+/** Latest 7 calendar days vs the 7 days before that. */
+export function rollingSevenDayComparison(
+	sessions: Session[],
+	dayIndexById: Record<string, number>,
+	today = toDateOnly(new Date())
+): RollingComparison {
+	const currentEnd = today;
+	const currentStart = addDays(today, -6);
+	const previousEnd = addDays(today, -7);
+	const previousStart = addDays(today, -13);
+	return {
+		current: totalsForWindow(sessions, dayIndexById, currentStart, currentEnd),
+		previous: totalsForWindow(sessions, dayIndexById, previousStart, previousEnd),
+		currentStart,
+		currentEnd,
+		previousStart,
+		previousEnd
+	};
 }
 
 export type ExerciseTrend = {

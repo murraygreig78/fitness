@@ -4,12 +4,23 @@
 	import { fitness } from '$lib/app-state.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import TrendsOverlay, { type TrendSeries } from '$lib/components/TrendsOverlay.svelte';
-	import { cardioTrends, exerciseTrends, statTrends, type TrendGrain } from '$lib/history';
+	import {
+		cardioTrends,
+		exerciseTrends,
+		rollingSevenDayComparison,
+		statTrends,
+		type TrendGrain
+	} from '$lib/history';
 	import {
 		dayIdForWeekday,
 		freeDayId
 	} from '$lib/schema';
-	import { formatDistance, formatWeight } from '$lib/units';
+	import {
+		formatDistance,
+		formatWeight,
+		kgToDisplay,
+		weightUnitLabel
+	} from '$lib/units';
 	import {
 		calendarDays,
 		dateForWeekday,
@@ -93,6 +104,68 @@
 	const dayDomain = $derived(
 		calendarDays.map((weekday) => dateForWeekday(focusWeekStart, weekday))
 	);
+
+	const sevenDayCompare = $derived(
+		rollingSevenDayComparison(fitness.sessions, dayIndexById)
+	);
+
+	const compareRows = $derived.by(() => {
+		const weightUnit = fitness.preferences.weightUnit;
+		const distanceUnit = fitness.preferences.distanceUnit;
+		const { current, previous } = sevenDayCompare;
+
+		function delta(currentValue: number, previousValue: number) {
+			const diff = currentValue - previousValue;
+			if (diff === 0) return { text: 'Same', tone: 'flat' as const };
+			const sign = diff > 0 ? '+' : '−';
+			const abs = Math.abs(diff);
+			const pct =
+				previousValue > 0 ? Math.round((Math.abs(diff) / previousValue) * 100) : null;
+			return {
+				text: pct == null ? `${sign}${abs}` : `${sign}${pct}%`,
+				tone: (diff > 0 ? 'up' : 'down') as 'up' | 'down'
+			};
+		}
+
+		const volume = (kg: number) =>
+			`${Math.round(kgToDisplay(kg, weightUnit)).toLocaleString()} ${weightUnitLabel(weightUnit)}·reps`;
+
+		return [
+			{
+				id: 'activities',
+				label: 'Activities',
+				current: String(current.activities),
+				previous: String(previous.activities),
+				delta: delta(current.activities, previous.activities)
+			},
+			{
+				id: 'volume',
+				label: 'Kg lifted',
+				current: volume(current.volumeKg),
+				previous: volume(previous.volumeKg),
+				delta: delta(current.volumeKg, previous.volumeKg)
+			},
+			{
+				id: 'distance',
+				label: 'Distance',
+				current: formatDistance(current.distanceKm, distanceUnit),
+				previous: formatDistance(previous.distanceKm, distanceUnit),
+				delta: delta(current.distanceKm, previous.distanceKm)
+			}
+		];
+	});
+
+	function shortRange(start: string, end: string): string {
+		const startText = parseDateOnly(start).toLocaleDateString(undefined, {
+			day: 'numeric',
+			month: 'short'
+		});
+		const endText = parseDateOnly(end).toLocaleDateString(undefined, {
+			day: 'numeric',
+			month: 'short'
+		});
+		return `${startText} – ${endText}`;
+	}
 
 	const needle = $derived(query.trim().toLowerCase());
 
@@ -401,6 +474,39 @@
 		domainDates={chartRange === 'day' ? dayDomain : null}
 		caption={chartRange === 'day' ? 'Unique activities per day' : 'Unique activities per week'}
 	/>
+
+	<section class="mb-6 rounded-3xl border border-zinc-800 bg-zinc-900 p-4">
+		<div class="mb-3 flex flex-wrap items-end justify-between gap-2">
+			<div>
+				<h2 class="text-lg font-semibold">Last 7 days</h2>
+				<p class="mt-1 text-sm text-zinc-400">
+					{shortRange(sevenDayCompare.currentStart, sevenDayCompare.currentEnd)} vs
+					{shortRange(sevenDayCompare.previousStart, sevenDayCompare.previousEnd)}
+				</p>
+			</div>
+		</div>
+		<ul class="space-y-3">
+			{#each compareRows as row (row.id)}
+				<li class="flex items-center justify-between gap-3 rounded-2xl border border-zinc-800 bg-zinc-950/40 px-3 py-3">
+					<div class="min-w-0">
+						<p class="text-sm text-zinc-400">{row.label}</p>
+						<p class="mt-1 font-mono text-xl font-semibold">{row.current}</p>
+						<p class="mt-1 text-sm text-zinc-500">Prior {row.previous}</p>
+					</div>
+					<p
+						class="shrink-0 rounded-full px-2.5 py-1 text-sm font-semibold {row.delta.tone ===
+						'up'
+							? 'bg-lime-400/15 text-lime-300'
+							: row.delta.tone === 'down'
+								? 'bg-orange-400/15 text-orange-300'
+								: 'bg-zinc-800 text-zinc-400'}"
+					>
+						{row.delta.text}
+					</p>
+				</li>
+			{/each}
+		</ul>
+	</section>
 
 	<label class="mb-6 block">
 		<span class="sr-only">Search activities</span>
