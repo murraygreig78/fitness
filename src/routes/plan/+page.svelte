@@ -326,7 +326,8 @@
 									</li>
 									<li>
 										<span class="font-medium text-zinc-300">Android (Chrome):</span> open this site, tap
-										the menu (⋮), then Add to Home screen or Install app. Open it from the new icon afterwards.
+										the menu (⋮), then Install app. If you do not see that, choose Add to Home screen.
+										Open it from the new icon afterwards.
 									</li>
 								</ul>
 							</div>
