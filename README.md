@@ -64,7 +64,7 @@ Market-test usage uses [Plausible](https://plausible.io/) — cookie-free, ~1KB 
 2. In GitHub → **Settings → Variables**, set `PUBLIC_PLAUSIBLE_DOMAIN` to `murraygreig78.github.io`. Optionally set `PUBLIC_PLAUSIBLE_SRC` if you self-host the script.
 3. Redeploy. In Plausible, add custom goals for the events you care about, including:
    `app_open`, `getting_started_open`, `plan_load`, `plan_import`, `plan_export`,
-   `starter_schedule_open`, `session_open`, `exercise_open`, `session_complete`,
+   `session_open`, `exercise_open`, `session_complete`,
    `session_skip`, `activities_view`, `mobility_auto_start`, `keypad_last`,
    `exercise_target_save`, `logs_import`, `logs_export`, `coffee_click`, `theme_change`.
 
