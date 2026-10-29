@@ -6,7 +6,7 @@ export const KOFI_URL = 'https://ko-fi.com/murraygreig';
 export const REPO_URL = 'https://github.com/murraygreig78/fitness';
 
 export type StarterEquipment = 'bodyweight' | 'dumbbell' | 'mixed';
-export type StarterFocus = 'strength' | 'mobility' | 'full';
+export type StarterFocus = 'strength' | 'mobility' | 'cardio' | 'full';
 
 export type SamplePlanInfo = {
 	id: string;
@@ -46,16 +46,28 @@ export const starterPlans: SamplePlanInfo[] = [
 			'Gentle holds on Tuesday, Thursday, and Sunday. One-sided stretches use two sets so both sides get done.'
 	},
 	{
-		id: 'home-dumbbell-week',
-		file: '/plans/weekly.json',
-		name: 'Home dumbbell week',
+		id: 'daily-walk-cardio',
+		file: '/plans/daily-walk.json',
+		name: 'Daily walk',
 		daysLabel: '7 days a week',
 		daysPerWeek: 7,
 		level: 'Home',
-		equipment: 'mixed',
+		equipment: 'bodyweight',
+		focus: 'cardio',
+		summary:
+			'Easy 3km walk each day, plus a longer run on Saturday. Add this into a strength or stretch week.'
+	},
+	{
+		id: 'home-dumbbell-week',
+		file: '/plans/weekly.json',
+		name: 'Home dumbbell week',
+		daysLabel: '6 days a week',
+		daysPerWeek: 6,
+		level: 'Home',
+		equipment: 'dumbbell',
 		focus: 'full',
 		summary:
-			'Walks most days, dumbbell strength three times, mobility twice, a long run, and Sunday stats.'
+			'Dumbbell strength three times, mobility twice, and Sunday body stats. Pair with Daily walk if you want cardio.'
 	},
 	{
 		id: 'full-body-3-day',

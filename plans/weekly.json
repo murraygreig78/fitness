@@ -2,23 +2,14 @@
 	"version": 2,
 	"id": "home-dumbbell-week",
 	"name": "Home dumbbell week",
-	"notes": "Each day is a list of activities (cardio, strength, mobility, progress). Strength and mobility nest their exercises underneath.",
+	"notes": "Dumbbell strength three times, mobility twice, and Sunday body stats. Add the Daily walk starter if you want cardio on the same week.",
 	"days": [
 		{
 			"id": "mon-back-shoulders",
 			"weekday": "monday",
-			"name": "Walk and strength",
-			"estimatedMinutes": 50,
+			"name": "Strength",
+			"estimatedMinutes": 20,
 			"activities": [
-				{
-					"id": "walk-3k",
-					"name": "3km walk",
-					"kind": "cardio",
-					"instructions": "Easy daily walk. Log the distance and how long it took.",
-					"target": {
-						"distanceKm": 3
-					}
-				},
 				{
 					"id": "back-shoulders",
 					"name": "Back and shoulders",
@@ -108,18 +99,9 @@
 		{
 			"id": "tue-mobility",
 			"weekday": "tuesday",
-			"name": "Walk and mobility",
-			"estimatedMinutes": 40,
+			"name": "Mobility",
+			"estimatedMinutes": 20,
 			"activities": [
-				{
-					"id": "walk-3k",
-					"name": "3km walk",
-					"kind": "cardio",
-					"instructions": "Easy daily walk. Log the distance and how long it took.",
-					"target": {
-						"distanceKm": 3
-					}
-				},
 				{
 					"id": "tue-mobility-flow",
 					"name": "Mobility stretching",
@@ -414,18 +396,9 @@
 		{
 			"id": "wed-chest-arms",
 			"weekday": "wednesday",
-			"name": "Walk and strength",
-			"estimatedMinutes": 50,
+			"name": "Strength",
+			"estimatedMinutes": 20,
 			"activities": [
-				{
-					"id": "walk-3k",
-					"name": "3km walk",
-					"kind": "cardio",
-					"instructions": "Easy daily walk. Log the distance and how long it took.",
-					"target": {
-						"distanceKm": 3
-					}
-				},
 				{
 					"id": "chest-arms",
 					"name": "Chest and arms",
@@ -511,18 +484,9 @@
 		{
 			"id": "thu-mobility",
 			"weekday": "thursday",
-			"name": "Walk and mobility",
-			"estimatedMinutes": 40,
+			"name": "Mobility",
+			"estimatedMinutes": 20,
 			"activities": [
-				{
-					"id": "walk-3k",
-					"name": "3km walk",
-					"kind": "cardio",
-					"instructions": "Easy daily walk. Log the distance and how long it took.",
-					"target": {
-						"distanceKm": 3
-					}
-				},
 				{
 					"id": "thu-mobility-flow",
 					"name": "Mobility stretching",
@@ -817,18 +781,9 @@
 		{
 			"id": "fri-legs-abs",
 			"weekday": "friday",
-			"name": "Walk and strength",
-			"estimatedMinutes": 55,
+			"name": "Strength",
+			"estimatedMinutes": 20,
 			"activities": [
-				{
-					"id": "walk-3k",
-					"name": "3km walk",
-					"kind": "cardio",
-					"instructions": "Easy daily walk. Log the distance and how long it took.",
-					"target": {
-						"distanceKm": 3
-					}
-				},
 				{
 					"id": "legs-abs",
 					"name": "Legs and abs",
@@ -930,48 +885,11 @@
 			]
 		},
 		{
-			"id": "sat-long-run",
-			"weekday": "saturday",
-			"name": "Walk and long run",
-			"estimatedMinutes": 70,
-			"activities": [
-				{
-					"id": "walk-3k",
-					"name": "3km walk",
-					"kind": "cardio",
-					"instructions": "Easy daily walk. Log the distance and how long it took.",
-					"target": {
-						"distanceKm": 3
-					}
-				},
-				{
-					"id": "long-run",
-					"name": "Long run",
-					"kind": "cardio",
-					"instructions": "5\u20138km. Log the distance you actually ran and the time it took.",
-					"target": {
-						"distanceKm": 6,
-						"distanceKmMin": 5,
-						"distanceKmMax": 8
-					}
-				}
-			]
-		},
-		{
 			"id": "sun-walk",
 			"weekday": "sunday",
-			"name": "Walk and progress",
-			"estimatedMinutes": 40,
+			"name": "Progress",
+			"estimatedMinutes": 20,
 			"activities": [
-				{
-					"id": "walk-3k",
-					"name": "3km walk",
-					"kind": "cardio",
-					"instructions": "Easy daily walk. Log the distance and how long it took.",
-					"target": {
-						"distanceKm": 3
-					}
-				},
 				{
 					"id": "body-stats",
 					"name": "Body stats",
