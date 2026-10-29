@@ -50,10 +50,6 @@
 		segments: Segment[];
 	};
 
-	function dayMs(value: string): number {
-		return parseDateOnly(value).getTime();
-	}
-
 	const colored = $derived(
 		series
 			.filter((item) => item.points.length > 0 && item.dates.length > 0)
