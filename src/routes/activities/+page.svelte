@@ -5,6 +5,7 @@
 	import TrendsOverlay, { type TrendSeries } from '$lib/components/TrendsOverlay.svelte';
 	import { cardioTrends, exerciseTrends, statTrends } from '$lib/history';
 	import { formatDistance, formatWeight } from '$lib/units';
+	import { parseDateOnly } from '$lib/week';
 
 	let query = $state('');
 
@@ -106,6 +107,27 @@
 			})
 			.join(' ');
 	}
+
+	function formatSparkDate(date: string): string {
+		return parseDateOnly(date).toLocaleDateString(undefined, {
+			day: 'numeric',
+			month: 'short'
+		});
+	}
+
+	function timelineMarks(dates: string[]): { date: string; label: string; left: number }[] {
+		if (dates.length < 2) return [];
+		const picks =
+			dates.length <= 3
+				? dates
+				: [dates[0], dates[Math.floor((dates.length - 1) / 2)], dates.at(-1)!];
+		const unique = [...new Set(picks)];
+		return unique.map((date, index) => ({
+			date,
+			label: formatSparkDate(date),
+			left: unique.length === 1 ? 50 : (index / (unique.length - 1)) * 100
+		}));
+	}
 </script>
 
 <header class="mb-6">
@@ -164,6 +186,18 @@
 										points={spark(row.points)}
 									/>
 								</svg>
+								{#if row.dates.length > 1}
+									<div class="relative mt-1 h-4">
+										{#each timelineMarks(row.dates) as mark (mark.date)}
+											<span
+												class="absolute -translate-x-1/2 font-mono text-[10px] leading-none text-zinc-500 tabular-nums"
+												style="left: {mark.left}%"
+											>
+												{mark.label}
+											</span>
+										{/each}
+									</div>
+								{/if}
 							{/if}
 						</li>
 					{/each}
@@ -193,6 +227,18 @@
 										points={spark(row.points)}
 									/>
 								</svg>
+								{#if row.dates.length > 1}
+									<div class="relative mt-1 h-4">
+										{#each timelineMarks(row.dates) as mark (mark.date)}
+											<span
+												class="absolute -translate-x-1/2 font-mono text-[10px] leading-none text-zinc-500 tabular-nums"
+												style="left: {mark.left}%"
+											>
+												{mark.label}
+											</span>
+										{/each}
+									</div>
+								{/if}
 							{/if}
 						</li>
 					{/each}
