@@ -50,14 +50,12 @@
 		return map;
 	});
 
-	const lifts = $derived(
-		exerciseTrends(fitness.plan, fitness.sessions, fitness.preferences.weightUnit)
+	const hasHistory = $derived(
+		fitness.sessions.some((session) => !session.skipped && (session.completed || session.sets.length))
 	);
-	const cardio = $derived(cardioTrends(fitness.sessions, fitness.preferences.distanceUnit));
-	const stats = $derived(statTrends(fitness.plan, fitness.sessions));
-	const empty = $derived(!lifts.length && !cardio.length && !stats.length);
+	const empty = $derived(!hasHistory);
 
-	const chartLifts = $derived(
+	const rangeLifts = $derived(
 		exerciseTrends(
 			fitness.plan,
 			fitness.sessions,
@@ -66,7 +64,7 @@
 			dayIndexById
 		)
 	);
-	const chartCardio = $derived(
+	const rangeCardio = $derived(
 		cardioTrends(
 			fitness.sessions,
 			fitness.preferences.distanceUnit,
@@ -74,7 +72,7 @@
 			dayIndexById
 		)
 	);
-	const chartStats = $derived(
+	const rangeStats = $derived(
 		statTrends(fitness.plan, fitness.sessions, chartRange, dayIndexById)
 	);
 
@@ -116,73 +114,148 @@
 			.sort((a, b) => rankName(a.name) - rankName(b.name) || a.name.localeCompare(b.name));
 	}
 
-	const shownLifts = $derived(filterRows(lifts));
-	const shownCardio = $derived(filterRows(cardio));
-	const shownStats = $derived(filterRows(stats));
+	type ListRow = {
+		id: string;
+		name: string;
+		points: number[];
+		dates: string[];
+		latestLabel: string;
+		bestLabel: string;
+		unit?: string;
+		metric?: 'distance' | 'duration';
+	};
+
+	function indexesForRange(dates: string[]): number[] {
+		if (chartRange === 'week') return dates.map((_, index) => index);
+		const weekSet = new Set(dayDomain);
+		return dates
+			.map((date, index) => (weekSet.has(date) ? index : -1))
+			.filter((index) => index >= 0);
+	}
+
+	const shownLifts = $derived.by((): ListRow[] => {
+		const weightUnit = fitness.preferences.weightUnit;
+		return filterRows(rangeLifts).flatMap((row) => {
+			const indexes = indexesForRange(row.dates);
+			if (!indexes.length) return [];
+			const points = indexes.map((index) => row.points[index]!);
+			const dates = indexes.map((index) => row.dates[index]!);
+			const usesWeight = /\b(kg|lb)\b/i.test(row.latestLabel);
+			const latest = points.at(-1);
+			const best = Math.max(...points);
+			return [
+				{
+					id: row.id,
+					name: row.name,
+					points,
+					dates,
+					latestLabel:
+						latest == null
+							? '—'
+							: usesWeight
+								? formatWeight(latest, weightUnit)
+								: `${latest} reps`,
+					bestLabel: usesWeight
+						? `Best ${formatWeight(best, weightUnit)}`
+						: `Best ${best} reps`
+				}
+			];
+		});
+	});
+
+	const shownCardio = $derived.by((): ListRow[] => {
+		const distanceUnit = fitness.preferences.distanceUnit;
+		return filterRows(rangeCardio).flatMap((row) => {
+			const indexes = indexesForRange(row.dates);
+			if (!indexes.length) return [];
+			const points = indexes.map((index) => row.points[index]!);
+			const dates = indexes.map((index) => row.dates[index]!);
+			const latest = points.at(-1);
+			const best = Math.max(...points);
+			const asDistance = row.id === 'distance';
+			const label = (value: number) =>
+				asDistance ? formatDistance(value, distanceUnit) : `${Math.round(value / 60)} min`;
+			return [
+				{
+					id: row.id,
+					name: row.name,
+					points,
+					dates,
+					latestLabel: latest == null ? '—' : label(latest),
+					bestLabel: asDistance ? `Best ${label(best)}` : `Longest ${label(best)}`,
+					metric: row.id
+				}
+			];
+		});
+	});
+
+	const shownStats = $derived.by((): ListRow[] => {
+		return filterRows(rangeStats).flatMap((row) => {
+			const indexes = indexesForRange(row.dates);
+			if (!indexes.length) return [];
+			const points = indexes.map((index) => row.points[index]!);
+			const dates = indexes.map((index) => row.dates[index]!);
+			const latest = points.at(-1);
+			const best = Math.max(...points);
+			return [
+				{
+					id: row.id,
+					name: row.name,
+					points,
+					dates,
+					latestLabel: latest == null ? '—' : `${latest} ${row.unit}`.trim(),
+					bestLabel: `Best ${best} ${row.unit}`.trim(),
+					unit: row.unit
+				}
+			];
+		});
+	});
+
 	const noMatches = $derived(
 		Boolean(needle) && !shownLifts.length && !shownCardio.length && !shownStats.length
 	);
 
-	const shownChartLifts = $derived(filterRows(chartLifts));
-	const shownChartCardio = $derived(filterRows(chartCardio));
-	const shownChartStats = $derived(filterRows(chartStats));
+	const rangeEmpty = $derived(
+		!shownLifts.length && !shownCardio.length && !shownStats.length && !needle
+	);
 
 	const overlaySeries = $derived.by((): TrendSeries[] => {
 		const weightUnit = fitness.preferences.weightUnit;
 		const distanceUnit = fitness.preferences.distanceUnit;
 		const series: TrendSeries[] = [];
-		const weekSet = new Set(dayDomain);
 
-		function keepDate(date: string) {
-			return chartRange === 'week' || weekSet.has(date);
-		}
-
-		for (const row of shownChartLifts) {
+		for (const row of shownLifts) {
 			const usesWeight = /\b(kg|lb)\b/i.test(row.latestLabel);
-			const indexes = row.dates
-				.map((date, index) => (keepDate(date) ? index : -1))
-				.filter((index) => index >= 0);
-			if (!indexes.length) continue;
 			series.push({
 				id: `lift:${row.id}`,
 				name: row.name,
-				points: indexes.map((index) => row.points[index]!),
-				dates: indexes.map((index) => row.dates[index]!),
-				labels: indexes.map((index) => {
-					const value = row.points[index]!;
-					return usesWeight ? formatWeight(value, weightUnit) : `${value} reps`;
-				})
+				points: row.points,
+				dates: row.dates,
+				labels: row.points.map((value) =>
+					usesWeight ? formatWeight(value, weightUnit) : `${value} reps`
+				)
 			});
 		}
-		for (const row of shownChartCardio) {
-			const indexes = row.dates
-				.map((date, index) => (keepDate(date) ? index : -1))
-				.filter((index) => index >= 0);
-			if (!indexes.length) continue;
+		for (const row of shownCardio) {
 			series.push({
 				id: `cardio:${row.id}`,
 				name: row.name,
-				points: indexes.map((index) => row.points[index]!),
-				dates: indexes.map((index) => row.dates[index]!),
-				labels: indexes.map((index) => {
-					const value = row.points[index]!;
-					return row.id === 'distance'
+				points: row.points,
+				dates: row.dates,
+				labels: row.points.map((value) =>
+					row.metric === 'distance'
 						? formatDistance(value, distanceUnit)
-						: `${Math.round(value / 60)} min`;
-				})
+						: `${Math.round(value / 60)} min`
+				)
 			});
 		}
-		for (const row of shownChartStats) {
-			const indexes = row.dates
-				.map((date, index) => (keepDate(date) ? index : -1))
-				.filter((index) => index >= 0);
-			if (!indexes.length) continue;
+		for (const row of shownStats) {
 			series.push({
 				id: `stat:${row.id}`,
 				name: row.name,
-				points: indexes.map((index) => row.points[index]!),
-				dates: indexes.map((index) => row.dates[index]!),
-				labels: indexes.map((index) => `${row.points[index]!} ${row.unit}`.trim())
+				points: row.points,
+				dates: row.dates,
+				labels: row.points.map((value) => `${value} ${row.unit ?? ''}`.trim())
 			});
 		}
 		return series.filter((item) => item.points.length > 0);
@@ -317,6 +390,12 @@
 
 	{#if noMatches}
 		<p class="text-sm leading-6 text-zinc-400">No activities match “{query.trim()}”.</p>
+	{:else if rangeEmpty}
+		<p class="text-sm leading-6 text-zinc-400">
+			{chartRange === 'day'
+				? 'Nothing logged in this week. Try another week.'
+				: 'Nothing to show for this range.'}
+		</p>
 	{:else}
 		{#if shownLifts.length}
 			<section class="mb-6">
@@ -454,6 +533,33 @@
 										points={spark(row.points)}
 									/>
 								</svg>
+								{#if row.dates.length > 1}
+									{@const marks = timelineMarks(row.dates)}
+									<div class="mt-1 space-y-1">
+										<div class="relative h-3">
+											{#each marks as mark (mark.key)}
+												<span
+													class="absolute -translate-x-1/2 font-mono text-[10px] leading-none text-zinc-500 tabular-nums"
+													style="left: {mark.left}%"
+												>
+													{mark.day}
+												</span>
+											{/each}
+										</div>
+										<div class="relative h-3">
+											{#each marks as mark (mark.key)}
+												{#if mark.month}
+													<span
+														class="absolute -translate-x-1/2 text-[10px] leading-none text-zinc-500"
+														style="left: {mark.left}%"
+													>
+														{mark.month}
+													</span>
+												{/if}
+											{/each}
+										</div>
+									</div>
+								{/if}
 							{/if}
 						</li>
 					{/each}
