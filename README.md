@@ -62,7 +62,7 @@ Market-test usage uses [GoatCounter](https://www.goatcounter.com/) — free for 
 
 1. GoatCounter site: [jsonactivitytracker.goatcounter.com](https://jsonactivitytracker.goatcounter.com).
 2. In site settings, allow the Pages origin `https://murraygreig78.github.io`.
-3. In GitHub → **Settings → Variables**, set:
+3. In GitHub → **Settings → Secrets and variables → Actions → Secrets**, set:
    - `PUBLIC_GOATCOUNTER_ENDPOINT` = `https://jsonactivitytracker.goatcounter.com/count`
    - optionally `PUBLIC_GOATCOUNTER_SRC` (default `https://gc.zgo.at/count.js`)
 4. Redeploy Pages. In GoatCounter, open **Events** for:

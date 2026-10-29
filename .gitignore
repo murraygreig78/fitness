@@ -24,3 +24,7 @@ vite.config.ts.timestamp-*
 
 # Local phone exports / personal plans (not committed)
 /reference/
+
+# Local live-site debug dumps
+.goatcheck-*
+.goatcheck-*/
