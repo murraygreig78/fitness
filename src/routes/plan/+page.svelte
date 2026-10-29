@@ -357,6 +357,11 @@
 								</p>
 							</div>
 
+							<div>
+								<p class="font-semibold text-zinc-200">5. It stays on this device</p>
+								<p class="mt-1">Your plan stays on this device, as does your activity.</p>
+							</div>
+
 							<p>
 								Ideas and pull requests are welcome on
 								<a class="text-lime-300 underline" href={REPO_URL} target="_blank" rel="noreferrer"
