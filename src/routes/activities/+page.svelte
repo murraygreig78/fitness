@@ -517,30 +517,29 @@
 								{@const plotted = sparkPoints(row.points, row.dates, domain)}
 								{@const line = spark(row.points, row.dates, domain)}
 								{@const marks = timelineMarks(row.dates, domain)}
-								<svg
-									class="mt-3 h-8 w-full text-lime-400"
-									viewBox="0 0 100 32"
-									preserveAspectRatio="none"
-								>
-									{#if line}
-										<polyline
-											fill="none"
-											stroke="currentColor"
-											stroke-width="2"
-											points={line}
-										/>
-									{/if}
+								<!-- Line uses preserveAspectRatio=none so it fills width; dots are HTML so they stay round. -->
+								<div class="relative mt-3 h-8 w-full text-lime-400">
+									<svg
+										class="absolute inset-0 h-full w-full"
+										viewBox="0 0 100 32"
+										preserveAspectRatio="none"
+									>
+										{#if line}
+											<polyline
+												fill="none"
+												stroke="currentColor"
+												stroke-width="2"
+												points={line}
+											/>
+										{/if}
+									</svg>
 									{#each plotted as point, index (`${row.id}:${index}`)}
-										<circle
-											cx={point.x}
-											cy={point.y}
-											r="1.6"
-											fill="#fdba74"
-											stroke="#18181b"
-											stroke-width="0.4"
-										/>
+										<span
+											class="absolute h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-current"
+											style="left: {point.x}%; top: {(point.y / 32) * 100}%"
+										></span>
 									{/each}
-								</svg>
+								</div>
 								{#if marks.length}
 									<div class="mt-1 space-y-1">
 										<div class="relative h-3">
@@ -588,30 +587,28 @@
 								{@const plotted = sparkPoints(row.points, row.dates, domain)}
 								{@const line = spark(row.points, row.dates, domain)}
 								{@const marks = timelineMarks(row.dates, domain)}
-								<svg
-									class="mt-3 h-8 w-full text-lime-400"
-									viewBox="0 0 100 32"
-									preserveAspectRatio="none"
-								>
-									{#if line}
-										<polyline
-											fill="none"
-											stroke="currentColor"
-											stroke-width="2"
-											points={line}
-										/>
-									{/if}
+								<div class="relative mt-3 h-8 w-full text-lime-400">
+									<svg
+										class="absolute inset-0 h-full w-full"
+										viewBox="0 0 100 32"
+										preserveAspectRatio="none"
+									>
+										{#if line}
+											<polyline
+												fill="none"
+												stroke="currentColor"
+												stroke-width="2"
+												points={line}
+											/>
+										{/if}
+									</svg>
 									{#each plotted as point, index (`${row.id}:${index}`)}
-										<circle
-											cx={point.x}
-											cy={point.y}
-											r="1.6"
-											fill="#fdba74"
-											stroke="#18181b"
-											stroke-width="0.4"
-										/>
+										<span
+											class="absolute h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-current"
+											style="left: {point.x}%; top: {(point.y / 32) * 100}%"
+										></span>
 									{/each}
-								</svg>
+								</div>
 								{#if marks.length}
 									<div class="mt-1 space-y-1">
 										<div class="relative h-3">
@@ -661,30 +658,28 @@
 								{@const plotted = sparkPoints(row.points, row.dates, domain)}
 								{@const line = spark(row.points, row.dates, domain)}
 								{@const marks = timelineMarks(row.dates, domain)}
-								<svg
-									class="mt-3 h-8 w-full text-lime-400"
-									viewBox="0 0 100 32"
-									preserveAspectRatio="none"
-								>
-									{#if line}
-										<polyline
-											fill="none"
-											stroke="currentColor"
-											stroke-width="2"
-											points={line}
-										/>
-									{/if}
+								<div class="relative mt-3 h-8 w-full text-lime-400">
+									<svg
+										class="absolute inset-0 h-full w-full"
+										viewBox="0 0 100 32"
+										preserveAspectRatio="none"
+									>
+										{#if line}
+											<polyline
+												fill="none"
+												stroke="currentColor"
+												stroke-width="2"
+												points={line}
+											/>
+										{/if}
+									</svg>
 									{#each plotted as point, index (`${row.id}:${index}`)}
-										<circle
-											cx={point.x}
-											cy={point.y}
-											r="1.6"
-											fill="#fdba74"
-											stroke="#18181b"
-											stroke-width="0.4"
-										/>
+										<span
+											class="absolute h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-current"
+											style="left: {point.x}%; top: {(point.y / 32) * 100}%"
+										></span>
 									{/each}
-								</svg>
+								</div>
 								{#if marks.length}
 									<div class="mt-1 space-y-1">
 										<div class="relative h-3">
