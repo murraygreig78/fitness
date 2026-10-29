@@ -508,9 +508,9 @@
 					{#each shownLifts as row (row.id)}
 						<li class="rounded-3xl border border-zinc-800 bg-zinc-900 p-4">
 							<p class="text-lg font-semibold">{row.name}</p>
-							<p class="mt-1 font-mono text-sm text-zinc-300">
-								Latest {row.latestLabel}
-								<span class="text-zinc-500">({row.bestLabel})</span>
+							<p class="mt-1 font-mono text-xs">
+								<span class="text-zinc-100">Latest {row.latestLabel}</span>
+								<span class="text-zinc-500"> ({row.bestLabel})</span>
 							</p>
 							{#if showListGraph(row)}
 								{@const domain = listDomain()}
@@ -583,9 +583,9 @@
 					{#each shownCardio as row (row.id)}
 						<li class="rounded-3xl border border-zinc-800 bg-zinc-900 p-4">
 							<p class="text-lg font-semibold">{row.name}</p>
-							<p class="mt-1 font-mono text-sm text-zinc-300">
-								Latest {row.latestLabel}
-								<span class="text-zinc-500">({row.bestLabel})</span>
+							<p class="mt-1 font-mono text-xs">
+								<span class="text-zinc-100">Latest {row.latestLabel}</span>
+								<span class="text-zinc-500"> ({row.bestLabel})</span>
 							</p>
 							{#if showListGraph(row)}
 								{@const domain = listDomain()}
@@ -659,9 +659,9 @@
 					{#each shownStats as row (row.id)}
 						<li class="rounded-3xl border border-zinc-800 bg-zinc-900 p-4">
 							<p class="text-lg font-semibold">{row.name}</p>
-							<p class="mt-1 font-mono text-sm text-zinc-300">
-								Latest {row.latestLabel}
-								<span class="text-zinc-500">({row.bestLabel})</span>
+							<p class="mt-1 font-mono text-xs">
+								<span class="text-zinc-100">Latest {row.latestLabel}</span>
+								<span class="text-zinc-500"> ({row.bestLabel})</span>
 							</p>
 							{#if showListGraph(row)}
 								{@const domain = listDomain()}
