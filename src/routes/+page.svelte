@@ -9,6 +9,7 @@
 	import KindSheet from '$lib/components/KindSheet.svelte';
 	import WeekCalendar from '$lib/components/WeekCalendar.svelte';
 	import SamplePlanList from '$lib/components/SamplePlanList.svelte';
+	import { track } from '$lib/analytics';
 	import { KOFI_URL, starterPlans } from '$lib/samples';
 	import { activityPreview } from '$lib/metrics';
 	import {
@@ -136,6 +137,7 @@
 		if (!activity || !fitness.plan) return;
 		const day = sessionDay(fitness.plan, selectedWeekday, selectedDayId, activity);
 		await fitness.skipSession(day, activity, fitness.weekStart);
+		track('session_skip', { kind: activity.kind });
 	}
 
 	async function unskipMenuActivity() {
@@ -263,8 +265,12 @@
 
 	<p class="mt-auto pt-10 pb-2 text-center text-sm leading-6 text-zinc-500">
 		If this helps your training,
-		<a class="text-lime-300 underline" href={KOFI_URL} target="_blank" rel="noreferrer"
-			>buy us a coffee</a
+		<a
+			class="text-lime-300 underline"
+			href={KOFI_URL}
+			target="_blank"
+			rel="noreferrer"
+			onclick={() => track('coffee_click', { surface: 'week' })}>buy us a coffee</a
 		>.
 	</p>
 </div>

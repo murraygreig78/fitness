@@ -1,15 +1,32 @@
 <script lang="ts">
 	import './layout.css';
 	import { onMount } from 'svelte';
+	import {
+		analyticsEnabled,
+		displayMode,
+		plausibleDomain,
+		plausibleScriptSrc,
+		track
+	} from '$lib/analytics';
 	import { fitness } from '$lib/app-state.svelte';
 	import Nav from '$lib/components/Nav.svelte';
 	import { startPlanReminder, stopPlanReminder } from '$lib/plan-reminder';
 	import { APP_NAME } from '$lib/samples';
 
 	let { children } = $props();
+	const analyticsOn = analyticsEnabled();
+	const analyticsDomain = plausibleDomain();
+	const analyticsSrc = plausibleScriptSrc();
 
 	onMount(() => {
-		void fitness.init();
+		void fitness.init().then(() => {
+			if (!analyticsOn) return;
+			track('app_open', {
+				display_mode: displayMode(),
+				theme: fitness.preferences.theme,
+				has_plan: Boolean(fitness.plan)
+			});
+		});
 		return () => stopPlanReminder();
 	});
 
@@ -49,6 +66,9 @@
 		href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@400;600;700&display=swap"
 		rel="stylesheet"
 	/>
+	{#if analyticsOn}
+		<script defer data-domain={analyticsDomain} src={analyticsSrc}></script>
+	{/if}
 </svelte:head>
 
 <div class="mx-auto min-h-dvh max-w-lg px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-24">

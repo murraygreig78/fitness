@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { asset } from '$app/paths';
+	import { track } from '$lib/analytics';
 	import { fitness } from '$lib/app-state.svelte';
 	import PlanOutline from '$lib/components/PlanOutline.svelte';
 	import {
@@ -54,6 +55,11 @@
 			return;
 		}
 		expandedId = plan.id;
+		track('starter_schedule_open', {
+			plan_id: plan.id,
+			equipment: plan.equipment,
+			days: plan.daysPerWeek
+		});
 		if (outlines[plan.id] || outlineError[plan.id]) return;
 		outlineLoading = plan.id;
 		try {

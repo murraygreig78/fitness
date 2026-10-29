@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { base, resolve } from '$app/paths';
+	import { track } from '$lib/analytics';
 	import { fitness } from '$lib/app-state.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import PlanOutline from '$lib/components/PlanOutline.svelte';
@@ -14,7 +15,12 @@
 	} from '$lib/plan-reminder';
 	import { APP_NAME, KOFI_URL, starterPlans } from '$lib/samples';
 	import { downloadSkillPack } from '$lib/skill-pack';
-	import { themeLabel } from '$lib/units';
+	import { themeLabel, type AppTheme } from '$lib/units';
+
+	async function chooseTheme(theme: AppTheme) {
+		await fitness.setTheme(theme);
+		track('theme_change', { theme });
+	}
 
 	type Panel =
 		| 'getting-started'
@@ -308,9 +314,8 @@
 					{:else if item.id === 'getting-started'}
 						<div class="space-y-4 text-sm leading-6 text-zinc-400">
 							<p>
-								{APP_NAME} is a local training log. Your week lives in a JSON plan and your history stays
-								in this browser — there is no account, and nothing leaves the device unless you download
-								a file.
+								{APP_NAME} is a local training log. Your week lives in a JSON plan and your workout history
+								stays in this browser — there is no account.
 							</p>
 
 							<div>
@@ -360,7 +365,11 @@
 
 							<div>
 								<p class="font-semibold text-zinc-200">5. It stays on this device</p>
-								<p class="mt-1">Your plan stays on this device, as does your activity.</p>
+								<p class="mt-1">
+									Your plan stays on this device, as does your activity. Anonymous, cookieless page
+									stats may be counted so we can see what testers use — never your sets, weights, or
+									notes.
+								</p>
 							</div>
 						</div>
 					{:else if item.id === 'ask-ai'}
@@ -514,7 +523,7 @@
 								class="rounded-2xl py-3 text-sm font-semibold {fitness.preferences.theme === 'swiss'
 									? 'bg-lime-400 text-zinc-950'
 									: 'border border-zinc-700 text-zinc-200'}"
-								onclick={() => void fitness.setTheme('swiss')}
+								onclick={() => void chooseTheme('swiss')}
 							>
 								Swiss
 							</button>
@@ -523,7 +532,7 @@
 								class="rounded-2xl py-3 text-sm font-semibold {fitness.preferences.theme === 'night'
 									? 'bg-lime-400 text-zinc-950'
 									: 'border border-zinc-700 text-zinc-200'}"
-								onclick={() => void fitness.setTheme('night')}
+								onclick={() => void chooseTheme('night')}
 							>
 								Night
 							</button>
@@ -614,6 +623,7 @@
 							href={KOFI_URL}
 							target="_blank"
 							rel="noreferrer"
+							onclick={() => track('coffee_click', { surface: 'admin' })}
 						>
 							Buy us a coffee
 						</a>

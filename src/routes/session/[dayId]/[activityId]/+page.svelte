@@ -3,6 +3,7 @@
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { kindIconName, kindTextClass } from '$lib/activity-style';
+	import { track } from '$lib/analytics';
 	import { fitness } from '$lib/app-state.svelte';
 	import EffortPicker from '$lib/components/EffortPicker.svelte';
 	import ExerciseLogger from '$lib/components/ExerciseLogger.svelte';
@@ -168,6 +169,7 @@
 			completed: true,
 			skipped: false
 		}));
+		track('session_complete', { kind: activity.kind });
 		await goto(resolve(`/?week=${weekStart}&day=${day.weekday}`));
 	}
 
@@ -356,8 +358,7 @@
 						...current,
 						notes: (event.currentTarget as HTMLTextAreaElement).value
 					});
-				}}
-			></textarea>
+				}}></textarea>
 		{/if}
 	</div>
 
