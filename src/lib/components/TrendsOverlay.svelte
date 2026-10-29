@@ -225,11 +225,11 @@
 		role="img"
 		aria-label="Activity trends over time. Press or drag to see a value."
 	>
-		<div class="grid grid-cols-[auto_minmax(0,1fr)] grid-rows-[minmax(0,1fr)_auto] gap-x-3 gap-y-2">
-			<div class="relative h-40 w-16 shrink-0">
+		<div class="grid grid-cols-[auto_minmax(0,1fr)] grid-rows-[minmax(0,1fr)_auto] gap-x-2 gap-y-1">
+			<div class="relative h-36 w-14 shrink-0">
 				{#each yTicks as tick (tick.t)}
 					<span
-						class="absolute right-0 -translate-y-1/2 text-right font-mono text-sm leading-none text-zinc-400 tabular-nums"
+						class="absolute right-0 -translate-y-1/2 text-right font-mono text-[10px] leading-none text-zinc-500 tabular-nums"
 						style="top: {(1 - tick.t) * 100}%"
 					>
 						{tick.label}
@@ -247,7 +247,7 @@
 				onpointercancel={clearTip}
 			>
 				<svg
-					class="block h-40 w-full"
+					class="block h-36 w-full"
 					viewBox="0 0 {width} {height}"
 					preserveAspectRatio="none"
 					aria-hidden="true"
@@ -301,13 +301,14 @@
 				</svg>
 
 				{#if tip}
-					{@const left = Math.min(Math.max(tip.x, 18), 82)}
+					{@const left = Math.min(Math.max(tip.x, 12), 88)}
 					<div
-						class="pointer-events-none absolute top-1 z-10 max-w-[92%] -translate-x-1/2 rounded-2xl px-3 py-2 text-zinc-950 shadow-sm"
+						class="pointer-events-none absolute top-1 z-10 max-w-[90%] -translate-x-1/2 rounded-full px-3 py-1 text-xs font-medium text-zinc-950 shadow-sm"
 						style="left: {left}%; background: {tip.color}"
 					>
-						<p class="truncate text-lg font-semibold leading-tight">{tip.name}</p>
-						<p class="mt-1 font-mono text-2xl leading-none tabular-nums">{tip.label}</p>
+						<span class="truncate">{tip.name}</span>
+						<span class="mx-1 opacity-50">·</span>
+						<span class="font-mono tabular-nums">{tip.label}</span>
 					</div>
 				{/if}
 			</div>
@@ -315,10 +316,10 @@
 			<div></div>
 
 			{#if timeDomain}
-				<div class="relative h-5">
+				<div class="relative h-4">
 					{#each timeDomain as mark (mark.date)}
 						<span
-							class="absolute -translate-x-1/2 font-mono text-sm leading-none text-zinc-400 tabular-nums"
+							class="absolute -translate-x-1/2 font-mono text-[10px] leading-none text-zinc-500 tabular-nums"
 							style="left: {mark.left}%"
 						>
 							{mark.label}
@@ -329,9 +330,9 @@
 		</div>
 
 		{#if active && plotted.length > 1}
-			<p class="mt-2 truncate text-sm text-zinc-400">
+			<p class="mt-2 truncate text-[11px] text-zinc-500">
 				Scale:
-				<span class="font-semibold" style="color: {active.color}">{active.name}</span>
+				<span style="color: {active.color}">{active.name}</span>
 			</p>
 		{/if}
 	</div>
