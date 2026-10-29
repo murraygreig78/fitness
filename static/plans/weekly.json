@@ -124,7 +124,7 @@
 					"id": "tue-mobility-flow",
 					"name": "Mobility stretching",
 					"kind": "mobility",
-					"instructions": "30-second holds. Move slowly into each position.",
+					"instructions": "30-second holds. For one-sided stretches, do both sides (two sets). Move slowly into each position.",
 					"exercises": [
 						{
 							"id": "upward-salute",
@@ -187,9 +187,10 @@
 							],
 							"restSeconds": 5,
 							"target": {
-								"sets": 1,
+								"sets": 2,
 								"durationSeconds": 30
-							}
+							},
+							"instructions": "Hold 30 seconds on the left, then swap to the right for set 2."
 						},
 						{
 							"id": "lunge-stretch",
@@ -200,9 +201,10 @@
 							],
 							"restSeconds": 5,
 							"target": {
-								"sets": 1,
+								"sets": 2,
 								"durationSeconds": 30
-							}
+							},
+							"instructions": "Hold 30 seconds on the left, then swap to the right for set 2."
 						},
 						{
 							"id": "upward-dog",
@@ -265,9 +267,10 @@
 							],
 							"restSeconds": 5,
 							"target": {
-								"sets": 1,
+								"sets": 2,
 								"durationSeconds": 30
-							}
+							},
+							"instructions": "Hold 30 seconds on the left, then swap to the right for set 2."
 						},
 						{
 							"id": "seated-twist",
@@ -278,9 +281,10 @@
 							],
 							"restSeconds": 5,
 							"target": {
-								"sets": 1,
+								"sets": 2,
 								"durationSeconds": 30
-							}
+							},
+							"instructions": "Hold 30 seconds twisting left, then swap to the right for set 2."
 						},
 						{
 							"id": "knees-to-chest",
@@ -304,9 +308,10 @@
 							],
 							"restSeconds": 5,
 							"target": {
-								"sets": 1,
+								"sets": 2,
 								"durationSeconds": 30
-							}
+							},
+							"instructions": "Hold 30 seconds with the left ankle crossed, then swap to the right for set 2."
 						},
 						{
 							"id": "lying-hamstring",
@@ -317,9 +322,10 @@
 							],
 							"restSeconds": 5,
 							"target": {
-								"sets": 1,
+								"sets": 2,
 								"durationSeconds": 30
-							}
+							},
+							"instructions": "Hold 30 seconds on the left leg, then swap to the right for set 2."
 						},
 						{
 							"id": "reclined-butterfly",
@@ -343,9 +349,10 @@
 							],
 							"restSeconds": 5,
 							"target": {
-								"sets": 1,
+								"sets": 2,
 								"durationSeconds": 30
-							}
+							},
+							"instructions": "Hold 30 seconds on the left, then swap to the right for set 2."
 						},
 						{
 							"id": "quad-stretch",
@@ -356,9 +363,10 @@
 							],
 							"restSeconds": 5,
 							"target": {
-								"sets": 1,
+								"sets": 2,
 								"durationSeconds": 30
-							}
+							},
+							"instructions": "Hold 30 seconds on the left, then swap to the right for set 2."
 						},
 						{
 							"id": "butterfly",
@@ -519,7 +527,7 @@
 					"id": "thu-mobility-flow",
 					"name": "Mobility stretching",
 					"kind": "mobility",
-					"instructions": "30-second holds. Move slowly into each position.",
+					"instructions": "30-second holds. For one-sided stretches, do both sides (two sets). Move slowly into each position.",
 					"exercises": [
 						{
 							"id": "upward-salute",
@@ -582,9 +590,10 @@
 							],
 							"restSeconds": 5,
 							"target": {
-								"sets": 1,
+								"sets": 2,
 								"durationSeconds": 30
-							}
+							},
+							"instructions": "Hold 30 seconds on the left, then swap to the right for set 2."
 						},
 						{
 							"id": "lunge-stretch",
@@ -595,9 +604,10 @@
 							],
 							"restSeconds": 5,
 							"target": {
-								"sets": 1,
+								"sets": 2,
 								"durationSeconds": 30
-							}
+							},
+							"instructions": "Hold 30 seconds on the left, then swap to the right for set 2."
 						},
 						{
 							"id": "upward-dog",
@@ -660,9 +670,10 @@
 							],
 							"restSeconds": 5,
 							"target": {
-								"sets": 1,
+								"sets": 2,
 								"durationSeconds": 30
-							}
+							},
+							"instructions": "Hold 30 seconds on the left, then swap to the right for set 2."
 						},
 						{
 							"id": "seated-twist",
@@ -673,9 +684,10 @@
 							],
 							"restSeconds": 5,
 							"target": {
-								"sets": 1,
+								"sets": 2,
 								"durationSeconds": 30
-							}
+							},
+							"instructions": "Hold 30 seconds twisting left, then swap to the right for set 2."
 						},
 						{
 							"id": "knees-to-chest",
@@ -699,9 +711,10 @@
 							],
 							"restSeconds": 5,
 							"target": {
-								"sets": 1,
+								"sets": 2,
 								"durationSeconds": 30
-							}
+							},
+							"instructions": "Hold 30 seconds with the left ankle crossed, then swap to the right for set 2."
 						},
 						{
 							"id": "lying-hamstring",
@@ -712,9 +725,10 @@
 							],
 							"restSeconds": 5,
 							"target": {
-								"sets": 1,
+								"sets": 2,
 								"durationSeconds": 30
-							}
+							},
+							"instructions": "Hold 30 seconds on the left leg, then swap to the right for set 2."
 						},
 						{
 							"id": "reclined-butterfly",
@@ -738,9 +752,10 @@
 							],
 							"restSeconds": 5,
 							"target": {
-								"sets": 1,
+								"sets": 2,
 								"durationSeconds": 30
-							}
+							},
+							"instructions": "Hold 30 seconds on the left, then swap to the right for set 2."
 						},
 						{
 							"id": "quad-stretch",
@@ -751,9 +766,10 @@
 							],
 							"restSeconds": 5,
 							"target": {
-								"sets": 1,
+								"sets": 2,
 								"durationSeconds": 30
-							}
+							},
+							"instructions": "Hold 30 seconds on the left, then swap to the right for set 2."
 						},
 						{
 							"id": "butterfly",
@@ -932,7 +948,7 @@
 					"id": "long-run",
 					"name": "Long run",
 					"kind": "cardio",
-					"instructions": "5–8km. Log the distance you actually ran and the time it took.",
+					"instructions": "5\u20138km. Log the distance you actually ran and the time it took.",
 					"target": {
 						"distanceKm": 6,
 						"distanceKmMin": 5,
