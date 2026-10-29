@@ -268,28 +268,47 @@
 		}
 	}
 
-	function spark(points: number[]): string {
-		if (points.length < 2) return '';
+	function sparkPoints(
+		points: number[],
+		dates: string[],
+		domain: string[] | null
+	): { x: number; y: number }[] {
+		if (!points.length) return [];
+		const axis = domain?.length ? domain : dates;
+		if (!axis.length) return [];
 		const min = Math.min(...points);
 		const max = Math.max(...points);
 		const span = max - min || 1;
-		return points
-			.map((value, index) => {
-				const x = (index / (points.length - 1)) * 100;
-				const y = 28 - ((value - min) / span) * 24;
-				return `${x},${y}`;
-			})
-			.join(' ');
+		const axisIndex = new Map(axis.map((date, index) => [date, index]));
+		const plotted: { x: number; y: number }[] = [];
+		for (let index = 0; index < points.length; index += 1) {
+			const date = dates[index]!;
+			const slot = axisIndex.get(date) ?? index;
+			const x = axis.length === 1 ? 50 : (slot / (axis.length - 1)) * 100;
+			const y = 28 - ((points[index]! - min) / span) * 24;
+			plotted.push({ x, y });
+		}
+		return plotted;
+	}
+
+	function spark(points: number[], dates: string[], domain: string[] | null): string {
+		const plotted = sparkPoints(points, dates, domain);
+		if (plotted.length < 2) return '';
+		return plotted.map((point) => `${point.x},${point.y}`).join(' ');
 	}
 
 	function timelineMarks(
-		dates: string[]
+		dates: string[],
+		domain: string[] | null = null
 	): { key: string; day: string; month: string | null; left: number }[] {
-		if (dates.length < 2) return [];
-		return dates.map((date, index) => {
+		const axis = domain?.length ? domain : dates;
+		if (!axis.length) return [];
+		// Week view with a single point still needs no axis; day view always shows the week.
+		if (!domain && axis.length < 2) return [];
+		return axis.map((date, index) => {
 			const parsed = parseDateOnly(date);
 			const monthKey = `${parsed.getFullYear()}-${parsed.getMonth()}`;
-			const previous = index > 0 ? parseDateOnly(dates[index - 1]!) : null;
+			const previous = index > 0 ? parseDateOnly(axis[index - 1]!) : null;
 			const previousKey = previous
 				? `${previous.getFullYear()}-${previous.getMonth()}`
 				: null;
@@ -300,9 +319,17 @@
 					monthKey !== previousKey
 						? parsed.toLocaleDateString(undefined, { month: 'short' })
 						: null,
-				left: (index / (dates.length - 1)) * 100
+				left: axis.length === 1 ? 50 : (index / (axis.length - 1)) * 100
 			};
 		});
+	}
+
+	function listDomain(): string[] | null {
+		return chartRange === 'day' ? dayDomain : null;
+	}
+
+	function showListGraph(row: ListRow): boolean {
+		return chartRange === 'day' ? row.points.length > 0 : row.points.length > 1;
 	}
 </script>
 
@@ -406,21 +433,29 @@
 							<p class="text-lg font-semibold">{row.name}</p>
 							<p class="mt-1 font-mono text-xl font-semibold">{row.latestLabel}</p>
 							<p class="mt-1 text-sm text-zinc-400">{row.bestLabel}</p>
-							{#if row.points.length > 1}
+							{#if showListGraph(row)}
+								{@const domain = listDomain()}
+								{@const plotted = sparkPoints(row.points, row.dates, domain)}
+								{@const line = spark(row.points, row.dates, domain)}
+								{@const marks = timelineMarks(row.dates, domain)}
 								<svg
 									class="mt-3 h-8 w-full text-lime-400"
 									viewBox="0 0 100 32"
 									preserveAspectRatio="none"
 								>
-									<polyline
-										fill="none"
-										stroke="currentColor"
-										stroke-width="2"
-										points={spark(row.points)}
-									/>
+									{#if line}
+										<polyline
+											fill="none"
+											stroke="currentColor"
+											stroke-width="2"
+											points={line}
+										/>
+									{/if}
+									{#each plotted as point, index (`${row.id}:${index}`)}
+										<circle cx={point.x} cy={point.y} r="1.8" fill="currentColor" />
+									{/each}
 								</svg>
-								{#if row.dates.length > 1}
-									{@const marks = timelineMarks(row.dates)}
+								{#if marks.length}
 									<div class="mt-1 space-y-1">
 										<div class="relative h-3">
 											{#each marks as mark (mark.key)}
@@ -462,21 +497,29 @@
 							<p class="text-lg font-semibold">{row.name}</p>
 							<p class="mt-1 font-mono text-xl font-semibold">{row.latestLabel}</p>
 							<p class="mt-1 text-sm text-zinc-400">{row.bestLabel}</p>
-							{#if row.points.length > 1}
+							{#if showListGraph(row)}
+								{@const domain = listDomain()}
+								{@const plotted = sparkPoints(row.points, row.dates, domain)}
+								{@const line = spark(row.points, row.dates, domain)}
+								{@const marks = timelineMarks(row.dates, domain)}
 								<svg
 									class="mt-3 h-8 w-full text-lime-400"
 									viewBox="0 0 100 32"
 									preserveAspectRatio="none"
 								>
-									<polyline
-										fill="none"
-										stroke="currentColor"
-										stroke-width="2"
-										points={spark(row.points)}
-									/>
+									{#if line}
+										<polyline
+											fill="none"
+											stroke="currentColor"
+											stroke-width="2"
+											points={line}
+										/>
+									{/if}
+									{#each plotted as point, index (`${row.id}:${index}`)}
+										<circle cx={point.x} cy={point.y} r="1.8" fill="currentColor" />
+									{/each}
 								</svg>
-								{#if row.dates.length > 1}
-									{@const marks = timelineMarks(row.dates)}
+								{#if marks.length}
 									<div class="mt-1 space-y-1">
 										<div class="relative h-3">
 											{#each marks as mark (mark.key)}
@@ -520,21 +563,29 @@
 							<p class="text-lg font-semibold">{row.name}</p>
 							<p class="mt-1 font-mono text-xl font-semibold">{row.latestLabel}</p>
 							<p class="mt-1 text-sm text-zinc-400">{row.bestLabel}</p>
-							{#if row.points.length > 1}
+							{#if showListGraph(row)}
+								{@const domain = listDomain()}
+								{@const plotted = sparkPoints(row.points, row.dates, domain)}
+								{@const line = spark(row.points, row.dates, domain)}
+								{@const marks = timelineMarks(row.dates, domain)}
 								<svg
 									class="mt-3 h-8 w-full text-lime-400"
 									viewBox="0 0 100 32"
 									preserveAspectRatio="none"
 								>
-									<polyline
-										fill="none"
-										stroke="currentColor"
-										stroke-width="2"
-										points={spark(row.points)}
-									/>
+									{#if line}
+										<polyline
+											fill="none"
+											stroke="currentColor"
+											stroke-width="2"
+											points={line}
+										/>
+									{/if}
+									{#each plotted as point, index (`${row.id}:${index}`)}
+										<circle cx={point.x} cy={point.y} r="1.8" fill="currentColor" />
+									{/each}
 								</svg>
-								{#if row.dates.length > 1}
-									{@const marks = timelineMarks(row.dates)}
+								{#if marks.length}
 									<div class="mt-1 space-y-1">
 										<div class="relative h-3">
 											{#each marks as mark (mark.key)}
