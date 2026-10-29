@@ -14,6 +14,8 @@ export type ExerciseTrend = {
 	name: string;
 	kind: Exercise['kind'];
 	points: number[];
+	/** ISO date (week start) aligned with each point. */
+	dates: string[];
 	bestLabel: string;
 	latestLabel: string;
 };
@@ -22,6 +24,7 @@ export type CardioTrend = {
 	id: 'distance' | 'duration';
 	name: string;
 	points: number[];
+	dates: string[];
 	bestLabel: string;
 	latestLabel: string;
 };
@@ -31,6 +34,7 @@ export type StatTrend = {
 	name: string;
 	unit: string;
 	points: number[];
+	dates: string[];
 	bestLabel: string;
 	latestLabel: string;
 };
@@ -61,7 +65,10 @@ export function exerciseTrends(
 	weightUnit: WeightUnit = 'kg'
 ): ExerciseTrend[] {
 	const catalog = catalogExercises(plan);
-	const byExercise = new Map<string, { kg: number[]; volume: number[]; reps: number[] }>();
+	const byExercise = new Map<
+		string,
+		{ kg: number[]; kgDates: string[]; volume: number[]; reps: number[]; repDates: string[] }
+	>();
 
 	const ordered = [...sessions]
 		.filter((session) => !session.skipped)
@@ -75,13 +82,25 @@ export function exerciseTrends(
 			grouped.set(set.exerciseId, list);
 		}
 		for (const [exerciseId, sets] of grouped) {
-			const bucket = byExercise.get(exerciseId) ?? { kg: [], volume: [], reps: [] };
+			const bucket = byExercise.get(exerciseId) ?? {
+				kg: [],
+				kgDates: [],
+				volume: [],
+				reps: [],
+				repDates: []
+			};
 			const kgs = sets.map((set) => set.kg).filter((value): value is number => value != null);
 			const vols = sets.map((set) => volumeForSet(set));
 			const reps = sets.map((set) => set.reps).filter((value): value is number => value != null);
-			if (kgs.length) bucket.kg.push(Math.max(...kgs));
+			if (kgs.length) {
+				bucket.kg.push(Math.max(...kgs));
+				bucket.kgDates.push(session.weekStart);
+			}
 			if (vols.length) bucket.volume.push(Math.max(...vols));
-			if (reps.length) bucket.reps.push(Math.max(...reps));
+			if (reps.length) {
+				bucket.reps.push(Math.max(...reps));
+				bucket.repDates.push(session.weekStart);
+			}
 			byExercise.set(exerciseId, bucket);
 		}
 	}
@@ -89,7 +108,9 @@ export function exerciseTrends(
 	const trends: ExerciseTrend[] = [];
 	for (const [id, bucket] of byExercise) {
 		const meta = catalog.get(id);
-		const points = bucket.kg.length ? bucket.kg : bucket.reps;
+		const useKg = bucket.kg.length > 0;
+		const points = useKg ? bucket.kg : bucket.reps;
+		const dates = useKg ? bucket.kgDates : bucket.repDates;
 		if (!points.length) continue;
 		const bestKg = max(bucket.kg);
 		const bestReps = max(bucket.reps);
@@ -100,6 +121,7 @@ export function exerciseTrends(
 			name: meta?.name ?? id,
 			kind: meta?.kind ?? 'weighted',
 			points,
+			dates,
 			bestLabel:
 				bestKg != null
 					? `Best ${formatWeight(bestKg, weightUnit)}${
@@ -113,7 +135,7 @@ export function exerciseTrends(
 			latestLabel:
 				latest == null
 					? '—'
-					: bucket.kg.length
+					: useKg
 						? formatWeight(latest, weightUnit)
 						: `${latest} reps`
 		});
@@ -128,31 +150,43 @@ export function cardioTrends(
 	const ordered = [...sessions]
 		.filter((session) => session.kind === 'cardio' && !session.skipped)
 		.sort((a, b) => a.weekStart.localeCompare(b.weekStart));
-	const distances = ordered
-		.map((session) => session.distanceKm)
-		.filter((value): value is number => value != null);
-	const durations = ordered
-		.map((session) => session.durationSeconds)
-		.filter((value): value is number => value != null);
+	const distanceRows = ordered
+		.map((session) =>
+			session.distanceKm != null
+				? { value: session.distanceKm, date: session.weekStart }
+				: null
+		)
+		.filter((row): row is { value: number; date: string } => row != null);
+	const durationRows = ordered
+		.map((session) =>
+			session.durationSeconds != null
+				? { value: session.durationSeconds, date: session.weekStart }
+				: null
+		)
+		.filter((row): row is { value: number; date: string } => row != null);
 	const trends: CardioTrend[] = [];
-	if (distances.length) {
+	if (distanceRows.length) {
+		const distances = distanceRows.map((row) => row.value);
 		const best = max(distances) ?? 0;
 		const latest = distances.at(-1);
 		trends.push({
 			id: 'distance',
 			name: 'Walk / run distance',
 			points: distances,
+			dates: distanceRows.map((row) => row.date),
 			bestLabel: `Best ${formatDistance(best, distanceUnit)}`,
 			latestLabel: formatDistance(latest, distanceUnit)
 		});
 	}
-	if (durations.length) {
+	if (durationRows.length) {
+		const durations = durationRows.map((row) => row.value);
 		const best = max(durations) ?? 0;
 		const minutes = (seconds: number) => `${Math.round(seconds / 60)} min`;
 		trends.push({
 			id: 'duration',
 			name: 'Walk / run time',
 			points: durations,
+			dates: durationRows.map((row) => row.date),
 			bestLabel: `Longest ${minutes(best)}`,
 			latestLabel: minutes(durations.at(-1) ?? 0)
 		});
@@ -173,25 +207,27 @@ export function statTrends(plan: Plan | null, sessions: Session[]): StatTrend[] 
 	const ordered = [...sessions]
 		.filter((session) => session.kind === 'progress' && !session.skipped)
 		.sort((a, b) => a.weekStart.localeCompare(b.weekStart));
-	const byStat = new Map<string, number[]>();
+	const byStat = new Map<string, { points: number[]; dates: string[] }>();
 	for (const session of ordered) {
 		for (const stat of session.stats) {
 			if (stat.value == null) continue;
-			const list = byStat.get(stat.statId) ?? [];
-			list.push(stat.value);
-			byStat.set(stat.statId, list);
+			const bucket = byStat.get(stat.statId) ?? { points: [], dates: [] };
+			bucket.points.push(stat.value);
+			bucket.dates.push(session.weekStart);
+			byStat.set(stat.statId, bucket);
 			if (!names.has(stat.statId)) names.set(stat.statId, { name: stat.statId, unit: stat.unit });
 		}
 	}
-	return [...byStat.entries()].map(([id, points]) => {
+	return [...byStat.entries()].map(([id, bucket]) => {
 		const meta = names.get(id);
-		const best = max(points);
-		const latest = points.at(-1);
+		const best = max(bucket.points);
+		const latest = bucket.points.at(-1);
 		return {
 			id,
 			name: meta?.name ?? id,
 			unit: meta?.unit ?? '',
-			points,
+			points: bucket.points,
+			dates: bucket.dates,
 			bestLabel: best == null ? 'Best —' : `Best ${best} ${meta?.unit ?? ''}`.trim(),
 			latestLabel: latest == null ? '—' : `${latest} ${meta?.unit ?? ''}`.trim()
 		};

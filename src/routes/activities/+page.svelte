@@ -62,6 +62,7 @@
 				id: `lift:${row.id}`,
 				name: row.name,
 				points: row.points,
+				dates: row.dates,
 				labels: row.points.map((value) =>
 					usesWeight ? formatWeight(value, weightUnit) : `${value} reps`
 				)
@@ -72,6 +73,7 @@
 				id: `cardio:${row.id}`,
 				name: row.name,
 				points: row.points,
+				dates: row.dates,
 				labels: row.points.map((value) =>
 					row.id === 'distance'
 						? formatDistance(value, distanceUnit)
@@ -84,6 +86,7 @@
 				id: `stat:${row.id}`,
 				name: row.name,
 				points: row.points,
+				dates: row.dates,
 				labels: row.points.map((value) => `${value} ${row.unit}`.trim())
 			});
 		}
