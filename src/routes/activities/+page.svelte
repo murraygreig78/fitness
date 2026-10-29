@@ -2,7 +2,9 @@
 	import { onMount } from 'svelte';
 	import { track } from '$lib/analytics';
 	import { fitness } from '$lib/app-state.svelte';
+	import TrendsOverlay, { type TrendSeries } from '$lib/components/TrendsOverlay.svelte';
 	import { cardioTrends, exerciseTrends, statTrends } from '$lib/history';
+	import { formatDistance, formatWeight } from '$lib/units';
 
 	let query = $state('');
 
@@ -49,6 +51,45 @@
 		Boolean(needle) && !shownLifts.length && !shownCardio.length && !shownStats.length
 	);
 
+	const overlaySeries = $derived.by((): TrendSeries[] => {
+		const weightUnit = fitness.preferences.weightUnit;
+		const distanceUnit = fitness.preferences.distanceUnit;
+		const series: TrendSeries[] = [];
+
+		for (const row of shownLifts) {
+			const usesWeight = /\b(kg|lb)\b/i.test(row.latestLabel);
+			series.push({
+				id: `lift:${row.id}`,
+				name: row.name,
+				points: row.points,
+				labels: row.points.map((value) =>
+					usesWeight ? formatWeight(value, weightUnit) : `${value} reps`
+				)
+			});
+		}
+		for (const row of shownCardio) {
+			series.push({
+				id: `cardio:${row.id}`,
+				name: row.name,
+				points: row.points,
+				labels: row.points.map((value) =>
+					row.id === 'distance'
+						? formatDistance(value, distanceUnit)
+						: `${Math.round(value / 60)} min`
+				)
+			});
+		}
+		for (const row of shownStats) {
+			series.push({
+				id: `stat:${row.id}`,
+				name: row.name,
+				points: row.points,
+				labels: row.points.map((value) => `${value} ${row.unit}`.trim())
+			});
+		}
+		return series.filter((item) => item.points.length > 1);
+	});
+
 	function spark(points: number[]): string {
 		if (points.length < 2) return '';
 		const min = Math.min(...points);
@@ -80,6 +121,8 @@
 		Nothing logged yet. Finish a set, a walk, or Sunday stats and they will show up here.
 	</p>
 {:else}
+	<TrendsOverlay series={overlaySeries} />
+
 	<label class="mb-6 block">
 		<span class="sr-only">Search activities</span>
 		<input
