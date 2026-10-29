@@ -16,6 +16,7 @@
 	const width = 100;
 	const height = 56;
 	const padY = 4;
+	const padX = 2;
 
 	const palette = [
 		'#B8D4E8',
@@ -32,79 +33,105 @@
 		'#D7CCC8'
 	];
 
-	type Plotted = {
+	type Segment = {
 		id: string;
 		name: string;
 		color: string;
-		min: number;
-		max: number;
-		points: { x: number; y: number; label: string; value: number; date: string }[];
-		polyline: string;
-		format: (value: number) => string;
+		label: string;
+		y0: number;
+		y1: number;
+	};
+
+	type Column = {
+		date: string;
+		x: number;
+		barWidth: number;
+		count: number;
+		segments: Segment[];
 	};
 
 	function dayMs(value: string): number {
 		return parseDateOnly(value).getTime();
 	}
 
-	function lerp(min: number, max: number, t: number) {
-		return min + (max - min) * t;
-	}
+	const colored = $derived(
+		series
+			.filter((item) => item.points.length > 0 && item.dates.length > 0)
+			.map((item, index) => ({
+				...item,
+				color: palette[index % palette.length]!
+			}))
+	);
 
-	const plotted = $derived.by((): Plotted[] => {
-		const usable = series.filter((item) => item.points.length > 1 && item.dates.length > 1);
-		const allDates = usable.flatMap((item) => item.dates);
-		if (!allDates.length) return [];
-		const tMin = Math.min(...allDates.map(dayMs));
-		const tMax = Math.max(...allDates.map(dayMs));
-		const tSpan = tMax - tMin || 1;
+	const chart = $derived.by(() => {
+		const dates = [
+			...new Set(colored.flatMap((item) => item.dates))
+		].sort((a, b) => a.localeCompare(b));
+		if (!dates.length) {
+			return { columns: [] as Column[], maxCount: 0, dates };
+		}
 
-		return usable.map((item, index) => {
-			const min = Math.min(...item.points);
-			const max = Math.max(...item.points);
-			const span = max - min || 1;
-			const points = item.points.map((value, pointIndex) => {
-				const date = item.dates[pointIndex] ?? item.dates.at(-1) ?? item.dates[0];
-				const x = ((dayMs(date) - tMin) / tSpan) * width;
-				const y = padY + (1 - (value - min) / span) * (height - padY * 2);
-				return {
-					x,
-					y,
-					value,
-					date,
-					label: item.labels[pointIndex] ?? String(value)
-				};
+		const plotLeft = padX;
+		const plotRight = width - padX;
+		const plotWidth = plotRight - plotLeft;
+		const slot = dates.length > 0 ? plotWidth / dates.length : plotWidth;
+		const barWidth = Math.min(slot * 0.72, 10);
+		const plotBottom = height - padY;
+		const plotTop = padY;
+		const plotHeight = plotBottom - plotTop;
+
+		const columns: Column[] = dates.map((date, index) => {
+			const segmentsRaw = colored
+				.map((item) => {
+					const pointIndex = item.dates.findIndex((value) => value === date);
+					if (pointIndex < 0) return null;
+					return {
+						id: item.id,
+						name: item.name,
+						color: item.color,
+						label: item.labels[pointIndex] ?? String(item.points[pointIndex] ?? '')
+					};
+				})
+				.filter((item): item is NonNullable<typeof item> => item != null);
+
+			const count = segmentsRaw.length;
+			const xCenter = plotLeft + slot * (index + 0.5);
+			const segments: Segment[] = segmentsRaw.map((item, segmentIndex) => {
+				const y1 = plotBottom - (segmentIndex / Math.max(count, 1)) * plotHeight;
+				const y0 = plotBottom - ((segmentIndex + 1) / Math.max(count, 1)) * plotHeight;
+				return { ...item, y0, y1 };
 			});
+
 			return {
-				id: item.id,
-				name: item.name,
-				color: palette[index % palette.length],
-				min,
-				max,
-				points,
-				polyline: points.map((point) => `${point.x},${point.y}`).join(' '),
-				format: (value: number) => {
-					const nearest = points.reduce((best, point) =>
-						Math.abs(point.value - value) < Math.abs(best.value - value) ? point : best
-					);
-					if (Math.abs(nearest.value - value) < span * 0.0001) return nearest.label;
-					const sample = points.at(-1)?.label ?? String(value);
-					const rounded =
-						Math.abs(value) >= 10 ? Math.round(value) : Math.round(value * 10) / 10;
-					return sample.replace(/-?\d+(\.\d+)?/, String(rounded));
-				}
+				date,
+				x: xCenter - barWidth / 2,
+				barWidth,
+				count,
+				segments
 			};
 		});
+
+		const maxCount = Math.max(1, ...columns.map((column) => column.count));
+		// Re-scale segment heights against global max so Y = unique activity count
+		for (const column of columns) {
+			column.segments = column.segments.map((segment, segmentIndex) => {
+				const y1 = plotBottom - (segmentIndex / maxCount) * plotHeight;
+				const y0 = plotBottom - ((segmentIndex + 1) / maxCount) * plotHeight;
+				return { ...segment, y0, y1 };
+			});
+		}
+
+		return { columns, maxCount, dates };
 	});
 
 	const timeDomain = $derived.by(() => {
-		const dates = [
-			...new Set(plotted.flatMap((line) => line.points.map((point) => point.date)))
-		].sort((a, b) => a.localeCompare(b));
-		if (dates.length < 2) return null;
-		const tMin = dayMs(dates[0]!);
-		const tMax = dayMs(dates.at(-1)!);
-		const tSpan = tMax - tMin || 1;
+		const dates = chart.dates;
+		if (dates.length < 1) return null;
+		const plotLeft = padX;
+		const plotRight = width - padX;
+		const plotWidth = plotRight - plotLeft;
+		const slot = dates.length > 0 ? plotWidth / dates.length : plotWidth;
+
 		return dates.map((date, index) => {
 			const parsed = parseDateOnly(date);
 			const monthKey = `${parsed.getFullYear()}-${parsed.getMonth()}`;
@@ -112,6 +139,7 @@
 			const previousKey = previous
 				? `${previous.getFullYear()}-${previous.getMonth()}`
 				: null;
+			const xCenter = plotLeft + slot * (index + 0.5);
 			return {
 				key: `${date}:${index}`,
 				day: String(parsed.getDate()),
@@ -119,43 +147,47 @@
 					monthKey !== previousKey
 						? parsed.toLocaleDateString(undefined, { month: 'short' })
 						: null,
-				left: ((dayMs(date) - tMin) / tSpan) * 100
+				left: (xCenter / width) * 100
+			};
+		});
+	});
+
+	const yTicks = $derived.by(() => {
+		const maxCount = chart.maxCount;
+		if (maxCount <= 0) return [];
+		const values =
+			maxCount <= 4 ? [...Array(maxCount + 1).keys()] : [0, Math.round(maxCount / 2), maxCount];
+		const unique = [...new Set(values)].sort((a, b) => b - a);
+		const plotBottom = height - padY;
+		const plotHeight = height - padY * 2;
+		return unique.map((count) => {
+			const y = plotBottom - (count / maxCount) * plotHeight;
+			return {
+				count,
+				label: String(count),
+				top: (y / height) * 100
 			};
 		});
 	});
 
 	let tip = $state<{
-		seriesId: string;
+		id: string;
 		name: string;
 		label: string;
 		color: string;
+		count: number;
 		x: number;
 		y: number;
 	} | null>(null);
 
 	let frame: HTMLDivElement | undefined = $state();
 
-	const active = $derived.by(() => {
-		const current = tip;
-		if (!current) return plotted[0];
-		return plotted.find((line) => line.id === current.seriesId) ?? plotted[0];
-	});
-
-	const yTicks = $derived.by(() => {
-		if (!active) return [];
-		return [
-			{ t: 1, label: active.format(lerp(active.min, active.max, 1)) },
-			{ t: 0.5, label: active.format(lerp(active.min, active.max, 0.5)) },
-			{ t: 0, label: active.format(lerp(active.min, active.max, 0)) }
-		];
-	});
-
 	function clearTip() {
 		tip = null;
 	}
 
 	function onPointer(event: PointerEvent) {
-		if (!frame || !plotted.length) {
+		if (!frame || !chart.columns.length) {
 			clearTip();
 			return;
 		}
@@ -164,74 +196,69 @@
 			clearTip();
 			return;
 		}
-		const pointerX = event.clientX - rect.left;
-		const pointerY = event.clientY - rect.top;
+		const pointerX = ((event.clientX - rect.left) / rect.width) * width;
+		const pointerY = ((event.clientY - rect.top) / rect.height) * height;
 
-		let best: {
-			seriesId: string;
-			name: string;
-			label: string;
-			color: string;
-			distance: number;
-			x: number;
-			y: number;
-		} | null = null;
-
-		for (const line of plotted) {
-			for (const point of line.points) {
-				const screenX = (point.x / width) * rect.width;
-				const screenY = (point.y / height) * rect.height;
-				const dx = screenX - pointerX;
-				const dy = screenY - pointerY;
-				const distance = dx * dx + dy * dy;
-				if (!best || distance < best.distance) {
-					best = {
-						seriesId: line.id,
-						name: line.name,
-						label: point.label,
-						color: line.color,
-						distance,
-						x: point.x,
-						y: point.y
-					};
-				}
+		let bestColumn: Column | null = null;
+		let bestDx = Infinity;
+		for (const column of chart.columns) {
+			const center = column.x + column.barWidth / 2;
+			const dx = Math.abs(center - pointerX);
+			if (dx < bestDx) {
+				bestDx = dx;
+				bestColumn = column;
 			}
 		}
-
-		if (!best) {
+		if (!bestColumn || bestDx > Math.max(columnHitSlop(bestColumn), 8)) {
 			clearTip();
 			return;
 		}
 
-		const thresholdPx = 36;
-		if (best.distance > thresholdPx * thresholdPx) {
+		let bestSegment = bestColumn.segments[0];
+		for (const segment of bestColumn.segments) {
+			if (pointerY <= segment.y1 && pointerY >= segment.y0) {
+				bestSegment = segment;
+				break;
+			}
+			const mid = (segment.y0 + segment.y1) / 2;
+			const currentMid = bestSegment ? (bestSegment.y0 + bestSegment.y1) / 2 : mid;
+			if (Math.abs(mid - pointerY) < Math.abs(currentMid - pointerY)) {
+				bestSegment = segment;
+			}
+		}
+		if (!bestSegment) {
 			clearTip();
 			return;
 		}
 
 		tip = {
-			seriesId: best.seriesId,
-			name: best.name,
-			label: best.label,
-			color: best.color,
-			x: best.x,
-			y: best.y
+			id: bestSegment.id,
+			name: bestSegment.name,
+			label: bestSegment.label,
+			color: bestSegment.color,
+			count: bestColumn.count,
+			x: bestColumn.x + bestColumn.barWidth / 2,
+			y: (bestSegment.y0 + bestSegment.y1) / 2
 		};
+	}
+
+	function columnHitSlop(column: Column) {
+		return column.barWidth * 1.4;
 	}
 </script>
 
-{#if plotted.length}
+{#if chart.columns.length}
 	<div
 		class="mb-6 rounded-3xl border border-zinc-800 bg-zinc-900/80 px-3 pt-4 pb-3"
 		role="img"
-		aria-label="Activity trends over time. Press or drag to see a value."
+		aria-label="Unique activities over time as a stacked bar chart. Press or drag to see a value."
 	>
 		<div class="grid grid-cols-[auto_minmax(0,1fr)] grid-rows-[minmax(0,1fr)_auto] gap-x-2 gap-y-1">
-			<div class="relative h-36 w-14 shrink-0">
-				{#each yTicks as tick (tick.t)}
+			<div class="relative h-36 w-10 shrink-0">
+				{#each yTicks as tick (tick.count)}
 					<span
 						class="absolute right-0 -translate-y-1/2 text-right font-mono text-[10px] leading-none text-zinc-500 tabular-nums"
-						style="top: {(1 - tick.t) * 100}%"
+						style="top: {tick.top}%"
 					>
 						{tick.label}
 					</span>
@@ -253,46 +280,40 @@
 					preserveAspectRatio="none"
 					aria-hidden="true"
 				>
-					{#each [0, 0.5, 1] as t (t)}
+					{#each yTicks as tick (tick.count)}
+						{@const y =
+							height -
+							padY -
+							(tick.count / Math.max(chart.maxCount, 1)) * (height - padY * 2)}
 						<line
 							x1="0"
 							x2={width}
-							y1={padY + (1 - t) * (height - padY * 2)}
-							y2={padY + (1 - t) * (height - padY * 2)}
+							y1={y}
+							y2={y}
 							stroke="#3f3f46"
 							stroke-width="0.35"
 							vector-effect="non-scaling-stroke"
 							opacity="0.7"
 						/>
 					{/each}
-					{#each plotted as line (line.id)}
-						<polyline
-							fill="none"
-							stroke={line.color}
-							stroke-width="1.25"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							vector-effect="non-scaling-stroke"
-							opacity={tip && tip.seriesId !== line.id ? 0.35 : 0.95}
-							points={line.polyline}
-						/>
+					{#each chart.columns as column (column.date)}
+						{#each column.segments as segment (`${column.date}:${segment.id}`)}
+							<rect
+								x={column.x}
+								y={segment.y0}
+								width={column.barWidth}
+								height={Math.max(segment.y1 - segment.y0, 0.4)}
+								fill={segment.color}
+								opacity={tip && tip.id !== segment.id ? 0.45 : 0.95}
+								rx="0.6"
+							/>
+						{/each}
 					{/each}
 					{#if tip}
-						<line
-							x1={tip.x}
-							x2={tip.x}
-							y1={padY}
-							y2={height - padY}
-							stroke={tip.color}
-							stroke-width="0.4"
-							stroke-dasharray="1.5 1.5"
-							vector-effect="non-scaling-stroke"
-							opacity="0.8"
-						/>
 						<circle
 							cx={tip.x}
 							cy={tip.y}
-							r="1.6"
+							r="1.4"
 							fill={tip.color}
 							stroke="#18181b"
 							stroke-width="0.5"
@@ -344,11 +365,6 @@
 			{/if}
 		</div>
 
-		{#if active && plotted.length > 1}
-			<p class="mt-2 truncate text-[11px] text-zinc-500">
-				Scale:
-				<span style="color: {active.color}">{active.name}</span>
-			</p>
-		{/if}
+		<p class="mt-2 text-[11px] text-zinc-500">Unique activities per day</p>
 	</div>
 {/if}

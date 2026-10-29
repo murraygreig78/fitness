@@ -91,7 +91,7 @@
 				labels: row.points.map((value) => `${value} ${row.unit}`.trim())
 			});
 		}
-		return series.filter((item) => item.points.length > 1);
+		return series.filter((item) => item.points.length > 0);
 	});
 
 	function spark(points: number[]): string {
