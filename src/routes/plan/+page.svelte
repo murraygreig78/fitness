@@ -12,7 +12,7 @@
 		requestReminderPermission,
 		startPlanReminder
 	} from '$lib/plan-reminder';
-	import { APP_NAME, KOFI_URL, REPO_URL, starterPlans } from '$lib/samples';
+	import { APP_NAME, KOFI_URL, starterPlans } from '$lib/samples';
 	import { downloadSkillPack } from '$lib/skill-pack';
 	import { themeLabel } from '$lib/units';
 
@@ -361,13 +361,6 @@
 								<p class="font-semibold text-zinc-200">5. It stays on this device</p>
 								<p class="mt-1">Your plan stays on this device, as does your activity.</p>
 							</div>
-
-							<p>
-								Ideas and pull requests are welcome on
-								<a class="text-lime-300 underline" href={REPO_URL} target="_blank" rel="noreferrer"
-									>GitHub</a
-								>.
-							</p>
 						</div>
 					{:else if item.id === 'ask-ai'}
 						<ol class="list-decimal space-y-2 pl-5 text-sm leading-6 text-zinc-400">
