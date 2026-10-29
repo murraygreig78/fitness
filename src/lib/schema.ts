@@ -187,6 +187,71 @@ export const planSchema = z.object({
 
 export type Plan = z.infer<typeof planSchema>;
 
+function uniqueActivityId(preferred: string, used: Set<string>): string {
+	if (!used.has(preferred)) return preferred;
+	let n = 2;
+	while (used.has(`${preferred}-${n}`)) n += 1;
+	return `${preferred}-${n}`;
+}
+
+/** Plain deep copy. Avoids structuredClone, which cannot clone Svelte $state proxies. */
+function clonePlanValue<T>(value: T): T {
+	return JSON.parse(JSON.stringify(value)) as T;
+}
+
+/**
+ * Merge an incoming plan into a base week by weekday.
+ * Keeps the base plan id (so existing session logs stay attached) and appends activities.
+ */
+export function mergePlans(base: Plan, incoming: Plan): Plan {
+	const basePlan = clonePlanValue(base);
+	const incomingPlan = clonePlanValue(incoming);
+	const byWeekday = new Map<Weekday, PlanDay>();
+	for (const day of basePlan.days) {
+		byWeekday.set(day.weekday, {
+			...day,
+			activities: day.activities.map((activity) => clonePlanValue(activity))
+		});
+	}
+
+	for (const day of incomingPlan.days) {
+		const existing = byWeekday.get(day.weekday);
+		if (!existing) {
+			byWeekday.set(day.weekday, clonePlanValue(day));
+			continue;
+		}
+		const used = new Set(existing.activities.map((activity) => activity.id));
+		for (const activity of day.activities) {
+			const id = uniqueActivityId(activity.id, used);
+			used.add(id);
+			existing.activities.push({ ...clonePlanValue(activity), id });
+		}
+		const minutes = (existing.estimatedMinutes ?? 0) + (day.estimatedMinutes ?? 0);
+		if (minutes > 0) existing.estimatedMinutes = minutes;
+		if (!existing.name.includes(day.name)) {
+			existing.name = `${existing.name} · ${day.name}`;
+		}
+	}
+
+	const days = weekdays
+		.map((weekday) => byWeekday.get(weekday))
+		.filter((day): day is PlanDay => Boolean(day));
+
+	const combinedName = basePlan.name.includes(incomingPlan.name)
+		? basePlan.name
+		: `${basePlan.name} + ${incomingPlan.name}`;
+	const notes = [basePlan.notes, incomingPlan.notes].filter(Boolean).join(' ');
+
+	return {
+		version: 2,
+		id: basePlan.id,
+		name: combinedName,
+		notes: notes || undefined,
+		notificationTime: basePlan.notificationTime,
+		days
+	};
+}
+
 export const loggedSetSchema = z.object({
 	exerciseId: z.string().min(1),
 	setIndex: z.number().int().nonnegative(),
