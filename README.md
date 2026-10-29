@@ -67,7 +67,7 @@ Market-test usage uses [GoatCounter](https://www.goatcounter.com/) — free for 
    - optionally `PUBLIC_GOATCOUNTER_SRC` (default `https://gc.zgo.at/count.js`)
 4. Redeploy Pages. In GoatCounter, open **Events** for:
    `app_open`, `getting_started_open`, `plan_load`, `plan_import`, `plan_export`,
-   `session_open`, `exercise_open`, `session_complete`,
+   `session_open`, `exercise_open`, `set_complete`, `session_complete`,
    `session_skip`, `activities_view`, `mobility_auto_start`, `keypad_last`,
    `exercise_target_save`, `logs_import`, `logs_export`, `coffee_click`, `theme_change`.
 
