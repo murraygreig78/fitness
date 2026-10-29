@@ -60,10 +60,10 @@ Local `npm run dev` still serves from `/`.
 
 Market-test usage uses [GoatCounter](https://www.goatcounter.com/) — free for personal use, cookie-free, tiny script, no PII. Leave `PUBLIC_GOATCOUNTER_ENDPOINT` blank to keep analytics off (local default).
 
-1. Create a free GoatCounter site (code like `yourcode` → `https://yourcode.goatcounter.com`).
+1. GoatCounter site: [jsonactivitytracker.goatcounter.com](https://jsonactivitytracker.goatcounter.com).
 2. In site settings, allow the Pages origin `https://murraygreig78.github.io`.
 3. In GitHub → **Settings → Variables**, set:
-   - `PUBLIC_GOATCOUNTER_ENDPOINT` = `https://yourcode.goatcounter.com/count`
+   - `PUBLIC_GOATCOUNTER_ENDPOINT` = `https://jsonactivitytracker.goatcounter.com/count`
    - optionally `PUBLIC_GOATCOUNTER_SRC` (default `https://gc.zgo.at/count.js`)
 4. Redeploy Pages. In GoatCounter, open **Events** for:
    `app_open`, `getting_started_open`, `plan_load`, `plan_import`, `plan_export`,
