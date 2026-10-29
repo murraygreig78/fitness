@@ -106,6 +106,7 @@
 		message = null;
 		error = null;
 		selected = next;
+		if (next === 'getting-started') track('getting_started_open');
 	}
 
 	async function readJson(text: string): Promise<unknown> {
@@ -116,7 +117,7 @@
 		}
 	}
 
-	async function importObject(input: unknown) {
+	async function importObject(input: unknown, source: 'paste' | 'file') {
 		busy = true;
 		error = null;
 		message = null;
@@ -126,6 +127,11 @@
 				error = result.error;
 				return;
 			}
+			track('plan_import', {
+				source,
+				plan_id: fitness.plan?.id,
+				days: fitness.plan?.days.length
+			});
 			message = `Loaded ${fitness.plan?.name ?? 'weekly plan'}. It will repeat each week.`;
 			selected = 'week';
 			await goto(resolve('/'));
@@ -136,7 +142,7 @@
 
 	async function importPasted() {
 		try {
-			await importObject(await readJson(paste));
+			await importObject(await readJson(paste), 'paste');
 		} catch (caught) {
 			error = caught instanceof Error ? caught.message : 'Could not import';
 		}
@@ -147,7 +153,7 @@
 		const file = input.files?.[0];
 		if (!file) return;
 		try {
-			await importObject(await readJson(await file.text()));
+			await importObject(await readJson(await file.text()), 'file');
 		} catch (caught) {
 			error = caught instanceof Error ? caught.message : 'Could not import';
 		} finally {
@@ -203,6 +209,7 @@
 			return;
 		}
 		downloadJson(`${fitness.plan.id}.json`, fitness.plan);
+		track('plan_export', { plan_id: fitness.plan.id, days: fitness.plan.days.length });
 		message =
 			'Downloaded your weekly fitness plan. Send this JSON to a trainer or AI for an updated week.';
 	}
@@ -210,6 +217,7 @@
 	function exportLogs() {
 		const backup = fitness.exportBackup();
 		downloadJson(`fitness-activity-log-${backup.exportedAt.slice(0, 10)}.json`, backup);
+		track('logs_export', { sessions: backup.sessions.length });
 		message =
 			'Downloaded your activity log. Send this to a trainer or AI so they can recommend the next plan.';
 	}
@@ -227,6 +235,7 @@
 				error = result.error;
 				return;
 			}
+			track('logs_import', { sessions: fitness.sessions.length });
 			message = `Imported ${fitness.sessions.length} logged activities.`;
 			if (fitness.plan) selected = 'week';
 		} catch (caught) {

@@ -67,6 +67,16 @@
 		day && activity ? fitness.sessionFor(day.id, activity.id, weekStart) : undefined
 	);
 
+	let trackedSessionOpen = false;
+	$effect(() => {
+		if (!activity || trackedSessionOpen) return;
+		trackedSessionOpen = true;
+		track('session_open', {
+			kind: activity.kind,
+			adhoc: isAdhocActivityId(activity.id)
+		});
+	});
+
 	const dayIndexById = $derived.by(() => {
 		const map: Record<string, number> = {};
 		for (const item of calendarDays) {

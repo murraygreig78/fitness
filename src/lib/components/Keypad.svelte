@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { track } from '$lib/analytics';
 	import Icon from '$lib/components/Icon.svelte';
 	import { formatNumber, parseDraftNumber } from '$lib/format';
 	import { onDestroy, onMount, untrack } from 'svelte';
@@ -80,6 +81,7 @@
 		if (last == null) return;
 		draft = String(last);
 		replaceOnType = true;
+		track('keypad_last', { unit });
 	}
 
 	async function done(event?: Event) {
