@@ -407,22 +407,18 @@
 		Nothing logged yet. Finish a set, a walk, or Sunday stats and they will show up here.
 	</p>
 {:else}
-	<div class="mb-3 flex flex-wrap items-center gap-2">
-		<div class="flex rounded-2xl border border-zinc-800 bg-zinc-900 p-1">
+	<div class="mb-3 flex items-center gap-3 whitespace-nowrap">
+		<div class="flex shrink-0 items-center gap-2 text-sm">
 			<button
 				type="button"
-				class="rounded-xl px-3 py-1.5 text-sm font-semibold {chartRange === 'week'
-					? 'bg-lime-400 text-zinc-950'
-					: 'text-zinc-400'}"
+				class="font-medium {chartRange === 'week' ? 'text-lime-400' : 'text-zinc-500'}"
 				onclick={() => setChartRange('week')}
 			>
 				Week
 			</button>
 			<button
 				type="button"
-				class="rounded-xl px-3 py-1.5 text-sm font-semibold {chartRange === 'day'
-					? 'bg-lime-400 text-zinc-950'
-					: 'text-zinc-400'}"
+				class="font-medium {chartRange === 'day' ? 'text-lime-400' : 'text-zinc-500'}"
 				onclick={() => setChartRange('day')}
 			>
 				Day
@@ -430,20 +426,22 @@
 		</div>
 
 		{#if chartRange === 'day'}
-			<div class="ml-auto flex items-center gap-1">
+			<div class="ml-auto flex min-w-0 items-center gap-1">
 				<button
 					type="button"
-					class="rounded-xl border border-zinc-800 p-2 text-zinc-300 disabled:opacity-30"
+					class="rounded-lg p-1 text-zinc-300 disabled:opacity-30"
 					aria-label="Previous week"
 					disabled={!canPrevWeek}
 					onclick={() => (focusWeekStart = shiftWeek(focusWeekStart, -1))}
 				>
 					<Icon name="chevronLeft" class="h-4 w-4" />
 				</button>
-				<p class="min-w-36 text-center text-sm text-zinc-300">{formatWeekRange(focusWeekStart)}</p>
+				<p class="min-w-0 flex-1 truncate text-center text-sm text-zinc-300">
+					{formatWeekRange(focusWeekStart)}
+				</p>
 				<button
 					type="button"
-					class="rounded-xl border border-zinc-800 p-2 text-zinc-300 disabled:opacity-30"
+					class="rounded-lg p-1 text-zinc-300 disabled:opacity-30"
 					aria-label="Next week"
 					disabled={!canNextWeek}
 					onclick={() => (focusWeekStart = shiftWeek(focusWeekStart, 1))}
@@ -510,8 +508,10 @@
 					{#each shownLifts as row (row.id)}
 						<li class="rounded-3xl border border-zinc-800 bg-zinc-900 p-4">
 							<p class="text-lg font-semibold">{row.name}</p>
-							<p class="mt-1 font-mono text-xl font-semibold">{row.latestLabel}</p>
-							<p class="mt-1 text-sm text-zinc-400">{row.bestLabel}</p>
+							<p class="mt-1 font-mono text-xs">
+								<span class="text-zinc-100">Latest {row.latestLabel}</span>
+								<span class="text-zinc-500"> ({row.bestLabel})</span>
+							</p>
 							{#if showListGraph(row)}
 								{@const domain = listDomain()}
 								{@const plotted = sparkPoints(row.points, row.dates, domain)}
@@ -528,7 +528,10 @@
 											<polyline
 												fill="none"
 												stroke="currentColor"
-												stroke-width="2"
+												stroke-width="1.5"
+												vector-effect="non-scaling-stroke"
+												stroke-linecap="round"
+												stroke-linejoin="round"
 												points={line}
 											/>
 										{/if}
@@ -580,8 +583,10 @@
 					{#each shownCardio as row (row.id)}
 						<li class="rounded-3xl border border-zinc-800 bg-zinc-900 p-4">
 							<p class="text-lg font-semibold">{row.name}</p>
-							<p class="mt-1 font-mono text-xl font-semibold">{row.latestLabel}</p>
-							<p class="mt-1 text-sm text-zinc-400">{row.bestLabel}</p>
+							<p class="mt-1 font-mono text-xs">
+								<span class="text-zinc-100">Latest {row.latestLabel}</span>
+								<span class="text-zinc-500"> ({row.bestLabel})</span>
+							</p>
 							{#if showListGraph(row)}
 								{@const domain = listDomain()}
 								{@const plotted = sparkPoints(row.points, row.dates, domain)}
@@ -597,7 +602,10 @@
 											<polyline
 												fill="none"
 												stroke="currentColor"
-												stroke-width="2"
+												stroke-width="1.5"
+												vector-effect="non-scaling-stroke"
+												stroke-linecap="round"
+												stroke-linejoin="round"
 												points={line}
 											/>
 										{/if}
@@ -651,8 +659,10 @@
 					{#each shownStats as row (row.id)}
 						<li class="rounded-3xl border border-zinc-800 bg-zinc-900 p-4">
 							<p class="text-lg font-semibold">{row.name}</p>
-							<p class="mt-1 font-mono text-xl font-semibold">{row.latestLabel}</p>
-							<p class="mt-1 text-sm text-zinc-400">{row.bestLabel}</p>
+							<p class="mt-1 font-mono text-xs">
+								<span class="text-zinc-100">Latest {row.latestLabel}</span>
+								<span class="text-zinc-500"> ({row.bestLabel})</span>
+							</p>
 							{#if showListGraph(row)}
 								{@const domain = listDomain()}
 								{@const plotted = sparkPoints(row.points, row.dates, domain)}
@@ -668,7 +678,10 @@
 											<polyline
 												fill="none"
 												stroke="currentColor"
-												stroke-width="2"
+												stroke-width="1.5"
+												vector-effect="non-scaling-stroke"
+												stroke-linecap="round"
+												stroke-linejoin="round"
 												points={line}
 											/>
 										{/if}
