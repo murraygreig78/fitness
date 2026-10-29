@@ -2,12 +2,28 @@
 	import { onMount } from 'svelte';
 	import { track } from '$lib/analytics';
 	import { fitness } from '$lib/app-state.svelte';
+	import Icon from '$lib/components/Icon.svelte';
 	import TrendsOverlay, { type TrendSeries } from '$lib/components/TrendsOverlay.svelte';
-	import { cardioTrends, exerciseTrends, statTrends } from '$lib/history';
+	import { cardioTrends, exerciseTrends, statTrends, type TrendGrain } from '$lib/history';
+	import {
+		dayIdForWeekday,
+		freeDayId
+	} from '$lib/schema';
 	import { formatDistance, formatWeight } from '$lib/units';
-	import { parseDateOnly } from '$lib/week';
+	import {
+		calendarDays,
+		dateForWeekday,
+		formatWeekRange,
+		indexFromWeekday,
+		normalizeWeekStart,
+		parseDateOnly,
+		shiftWeek,
+		sundayOf
+	} from '$lib/week';
 
 	let query = $state('');
+	let chartRange = $state<TrendGrain>('week');
+	let focusWeekStart = $state(sundayOf());
 
 	onMount(() => {
 		const hasPlan = Boolean(fitness.plan);
@@ -16,6 +32,22 @@
 			has_plan: hasPlan,
 			has_logs: hasLogs
 		});
+		if (fitness.weekStart) focusWeekStart = normalizeWeekStart(fitness.weekStart);
+	});
+
+	const dayIndexById = $derived.by(() => {
+		const map: Record<string, number> = {};
+		for (const item of calendarDays) {
+			map[freeDayId(item)] = indexFromWeekday(item);
+			map[dayIdForWeekday(fitness.plan, item)] = indexFromWeekday(item);
+		}
+		for (const item of fitness.plan?.days ?? []) {
+			map[item.id] = indexFromWeekday(item.weekday);
+		}
+		for (const item of fitness.customActivities) {
+			map[item.dayId] = indexFromWeekday(item.weekday);
+		}
+		return map;
 	});
 
 	const lifts = $derived(
@@ -24,6 +56,45 @@
 	const cardio = $derived(cardioTrends(fitness.sessions, fitness.preferences.distanceUnit));
 	const stats = $derived(statTrends(fitness.plan, fitness.sessions));
 	const empty = $derived(!lifts.length && !cardio.length && !stats.length);
+
+	const chartLifts = $derived(
+		exerciseTrends(
+			fitness.plan,
+			fitness.sessions,
+			fitness.preferences.weightUnit,
+			chartRange,
+			dayIndexById
+		)
+	);
+	const chartCardio = $derived(
+		cardioTrends(
+			fitness.sessions,
+			fitness.preferences.distanceUnit,
+			chartRange,
+			dayIndexById
+		)
+	);
+	const chartStats = $derived(
+		statTrends(fitness.plan, fitness.sessions, chartRange, dayIndexById)
+	);
+
+	const weekBounds = $derived.by(() => {
+		const weeks = fitness.sessions
+			.filter((session) => !session.skipped)
+			.map((session) => session.weekStart)
+			.sort((a, b) => a.localeCompare(b));
+		return {
+			earliest: weeks[0] ?? focusWeekStart,
+			latest: weeks.at(-1) ?? focusWeekStart
+		};
+	});
+
+	const canPrevWeek = $derived(focusWeekStart > weekBounds.earliest);
+	const canNextWeek = $derived(focusWeekStart < weekBounds.latest);
+
+	const dayDomain = $derived(
+		calendarDays.map((weekday) => dateForWeekday(focusWeekStart, weekday))
+	);
 
 	const needle = $derived(query.trim().toLowerCase());
 
@@ -52,47 +123,77 @@
 		Boolean(needle) && !shownLifts.length && !shownCardio.length && !shownStats.length
 	);
 
+	const shownChartLifts = $derived(filterRows(chartLifts));
+	const shownChartCardio = $derived(filterRows(chartCardio));
+	const shownChartStats = $derived(filterRows(chartStats));
+
 	const overlaySeries = $derived.by((): TrendSeries[] => {
 		const weightUnit = fitness.preferences.weightUnit;
 		const distanceUnit = fitness.preferences.distanceUnit;
 		const series: TrendSeries[] = [];
+		const weekSet = new Set(dayDomain);
 
-		for (const row of shownLifts) {
+		function keepDate(date: string) {
+			return chartRange === 'week' || weekSet.has(date);
+		}
+
+		for (const row of shownChartLifts) {
 			const usesWeight = /\b(kg|lb)\b/i.test(row.latestLabel);
+			const indexes = row.dates
+				.map((date, index) => (keepDate(date) ? index : -1))
+				.filter((index) => index >= 0);
+			if (!indexes.length) continue;
 			series.push({
 				id: `lift:${row.id}`,
 				name: row.name,
-				points: row.points,
-				dates: row.dates,
-				labels: row.points.map((value) =>
-					usesWeight ? formatWeight(value, weightUnit) : `${value} reps`
-				)
+				points: indexes.map((index) => row.points[index]!),
+				dates: indexes.map((index) => row.dates[index]!),
+				labels: indexes.map((index) => {
+					const value = row.points[index]!;
+					return usesWeight ? formatWeight(value, weightUnit) : `${value} reps`;
+				})
 			});
 		}
-		for (const row of shownCardio) {
+		for (const row of shownChartCardio) {
+			const indexes = row.dates
+				.map((date, index) => (keepDate(date) ? index : -1))
+				.filter((index) => index >= 0);
+			if (!indexes.length) continue;
 			series.push({
 				id: `cardio:${row.id}`,
 				name: row.name,
-				points: row.points,
-				dates: row.dates,
-				labels: row.points.map((value) =>
-					row.id === 'distance'
+				points: indexes.map((index) => row.points[index]!),
+				dates: indexes.map((index) => row.dates[index]!),
+				labels: indexes.map((index) => {
+					const value = row.points[index]!;
+					return row.id === 'distance'
 						? formatDistance(value, distanceUnit)
-						: `${Math.round(value / 60)} min`
-				)
+						: `${Math.round(value / 60)} min`;
+				})
 			});
 		}
-		for (const row of shownStats) {
+		for (const row of shownChartStats) {
+			const indexes = row.dates
+				.map((date, index) => (keepDate(date) ? index : -1))
+				.filter((index) => index >= 0);
+			if (!indexes.length) continue;
 			series.push({
 				id: `stat:${row.id}`,
 				name: row.name,
-				points: row.points,
-				dates: row.dates,
-				labels: row.points.map((value) => `${value} ${row.unit}`.trim())
+				points: indexes.map((index) => row.points[index]!),
+				dates: indexes.map((index) => row.dates[index]!),
+				labels: indexes.map((index) => `${row.points[index]!} ${row.unit}`.trim())
 			});
 		}
 		return series.filter((item) => item.points.length > 0);
 	});
+
+	function setChartRange(next: TrendGrain) {
+		chartRange = next;
+		if (next === 'day') {
+			focusWeekStart = normalizeWeekStart(weekBounds.latest);
+		}
+	}
 
 	function spark(points: number[]): string {
 		if (points.length < 2) return '';
@@ -148,7 +249,58 @@
 		Nothing logged yet. Finish a set, a walk, or Sunday stats and they will show up here.
 	</p>
 {:else}
-	<TrendsOverlay series={overlaySeries} />
+	<div class="mb-3 flex flex-wrap items-center gap-2">
+		<div class="flex rounded-2xl border border-zinc-800 bg-zinc-900 p-1">
+			<button
+				type="button"
+				class="rounded-xl px-3 py-1.5 text-sm font-semibold {chartRange === 'week'
+					? 'bg-lime-400 text-zinc-950'
+					: 'text-zinc-400'}"
+				onclick={() => setChartRange('week')}
+			>
+				Week
+			</button>
+			<button
+				type="button"
+				class="rounded-xl px-3 py-1.5 text-sm font-semibold {chartRange === 'day'
+					? 'bg-lime-400 text-zinc-950'
+					: 'text-zinc-400'}"
+				onclick={() => setChartRange('day')}
+			>
+				Day
+			</button>
+		</div>
+
+		{#if chartRange === 'day'}
+			<div class="ml-auto flex items-center gap-1">
+				<button
+					type="button"
+					class="rounded-xl border border-zinc-800 p-2 text-zinc-300 disabled:opacity-30"
+					aria-label="Previous week"
+					disabled={!canPrevWeek}
+					onclick={() => (focusWeekStart = shiftWeek(focusWeekStart, -1))}
+				>
+					<Icon name="chevronLeft" class="h-4 w-4" />
+				</button>
+				<p class="min-w-36 text-center text-sm text-zinc-300">{formatWeekRange(focusWeekStart)}</p>
+				<button
+					type="button"
+					class="rounded-xl border border-zinc-800 p-2 text-zinc-300 disabled:opacity-30"
+					aria-label="Next week"
+					disabled={!canNextWeek}
+					onclick={() => (focusWeekStart = shiftWeek(focusWeekStart, 1))}
+				>
+					<Icon name="chevronRight" class="h-4 w-4" />
+				</button>
+			</div>
+		{/if}
+	</div>
+
+	<TrendsOverlay
+		series={overlaySeries}
+		domainDates={chartRange === 'day' ? dayDomain : null}
+		caption={chartRange === 'day' ? 'Unique activities per day' : 'Unique activities per week'}
+	/>
 
 	<label class="mb-6 block">
 		<span class="sr-only">Search activities</span>

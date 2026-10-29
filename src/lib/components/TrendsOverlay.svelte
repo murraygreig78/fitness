@@ -11,7 +11,16 @@
 		labels: string[];
 	};
 
-	let { series }: { series: TrendSeries[] } = $props();
+	let {
+		series,
+		/** When set, force these dates as columns (e.g. the seven days of a week). */
+		domainDates = null,
+		caption = 'Unique activities'
+	}: {
+		series: TrendSeries[];
+		domainDates?: string[] | null;
+		caption?: string;
+	} = $props();
 
 	const width = 100;
 	const height = 56;
@@ -60,9 +69,11 @@
 	);
 
 	const chart = $derived.by(() => {
-		const dates = [
-			...new Set(colored.flatMap((item) => item.dates))
-		].sort((a, b) => a.localeCompare(b));
+		const dates = (
+			domainDates?.length
+				? [...domainDates]
+				: [...new Set(colored.flatMap((item) => item.dates))]
+		).sort((a, b) => a.localeCompare(b));
 		if (!dates.length) {
 			return { columns: [] as Column[], maxCount: 0, dates };
 		}
@@ -361,6 +372,6 @@
 			{/if}
 		</div>
 
-		<p class="mt-2 text-[11px] text-zinc-500">Unique activities per day</p>
+		<p class="mt-2 text-[11px] text-zinc-500">{caption}</p>
 	</div>
 {/if}

@@ -8,6 +8,20 @@ import {
 	type DistanceUnit,
 	type WeightUnit
 } from './units';
+import { calendarDays, dateForWeekday } from './week';
+
+export type TrendGrain = 'week' | 'day';
+
+function sessionTrendDate(
+	session: Session,
+	grain: TrendGrain,
+	dayIndexById: Record<string, number>
+): string {
+	if (grain === 'week') return session.weekStart;
+	const index = dayIndexById[session.dayId];
+	if (index == null) return session.weekStart;
+	return dateForWeekday(session.weekStart, calendarDays[index]!);
+}
 
 export type ExerciseTrend = {
 	id: string;
@@ -62,7 +76,9 @@ export function catalogExercises(
 export function exerciseTrends(
 	plan: Plan | null,
 	sessions: Session[],
-	weightUnit: WeightUnit = 'kg'
+	weightUnit: WeightUnit = 'kg',
+	grain: TrendGrain = 'week',
+	dayIndexById: Record<string, number> = {}
 ): ExerciseTrend[] {
 	const catalog = catalogExercises(plan);
 	const byExercise = new Map<
@@ -75,6 +91,7 @@ export function exerciseTrends(
 		.sort((a, b) => a.weekStart.localeCompare(b.weekStart) || a.id.localeCompare(b.id));
 
 	for (const session of ordered) {
+		const date = sessionTrendDate(session, grain, dayIndexById);
 		const grouped = new Map<string, typeof session.sets>();
 		for (const set of session.sets.filter((item) => item.completed && !item.warmup)) {
 			const list = grouped.get(set.exerciseId) ?? [];
@@ -94,12 +111,12 @@ export function exerciseTrends(
 			const reps = sets.map((set) => set.reps).filter((value): value is number => value != null);
 			if (kgs.length) {
 				bucket.kg.push(Math.max(...kgs));
-				bucket.kgDates.push(session.weekStart);
+				bucket.kgDates.push(date);
 			}
 			if (vols.length) bucket.volume.push(Math.max(...vols));
 			if (reps.length) {
 				bucket.reps.push(Math.max(...reps));
-				bucket.repDates.push(session.weekStart);
+				bucket.repDates.push(date);
 			}
 			byExercise.set(exerciseId, bucket);
 		}
@@ -145,7 +162,9 @@ export function exerciseTrends(
 
 export function cardioTrends(
 	sessions: Session[],
-	distanceUnit: DistanceUnit = 'km'
+	distanceUnit: DistanceUnit = 'km',
+	grain: TrendGrain = 'week',
+	dayIndexById: Record<string, number> = {}
 ): CardioTrend[] {
 	const ordered = [...sessions]
 		.filter((session) => session.kind === 'cardio' && !session.skipped)
@@ -153,14 +172,17 @@ export function cardioTrends(
 	const distanceRows = ordered
 		.map((session) =>
 			session.distanceKm != null
-				? { value: session.distanceKm, date: session.weekStart }
+				? { value: session.distanceKm, date: sessionTrendDate(session, grain, dayIndexById) }
 				: null
 		)
 		.filter((row): row is { value: number; date: string } => row != null);
 	const durationRows = ordered
 		.map((session) =>
 			session.durationSeconds != null
-				? { value: session.durationSeconds, date: session.weekStart }
+				? {
+						value: session.durationSeconds,
+						date: sessionTrendDate(session, grain, dayIndexById)
+					}
 				: null
 		)
 		.filter((row): row is { value: number; date: string } => row != null);
@@ -194,7 +216,12 @@ export function cardioTrends(
 	return trends;
 }
 
-export function statTrends(plan: Plan | null, sessions: Session[]): StatTrend[] {
+export function statTrends(
+	plan: Plan | null,
+	sessions: Session[],
+	grain: TrendGrain = 'week',
+	dayIndexById: Record<string, number> = {}
+): StatTrend[] {
 	const names = new Map<string, { name: string; unit: string }>();
 	for (const day of plan?.days ?? []) {
 		for (const activity of day.activities) {
@@ -209,11 +236,12 @@ export function statTrends(plan: Plan | null, sessions: Session[]): StatTrend[] 
 		.sort((a, b) => a.weekStart.localeCompare(b.weekStart));
 	const byStat = new Map<string, { points: number[]; dates: string[] }>();
 	for (const session of ordered) {
+		const date = sessionTrendDate(session, grain, dayIndexById);
 		for (const stat of session.stats) {
 			if (stat.value == null) continue;
 			const bucket = byStat.get(stat.statId) ?? { points: [], dates: [] };
 			bucket.points.push(stat.value);
-			bucket.dates.push(session.weekStart);
+			bucket.dates.push(date);
 			byStat.set(stat.statId, bucket);
 			if (!names.has(stat.statId)) names.set(stat.statId, { name: stat.statId, unit: stat.unit });
 		}
