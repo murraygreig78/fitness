@@ -149,8 +149,8 @@
 					{#each shownLifts as row (row.id)}
 						<li class="rounded-3xl border border-zinc-800 bg-zinc-900 p-4">
 							<p class="text-lg font-semibold">{row.name}</p>
-							<p class="mt-1 font-mono text-2xl">{row.latestLabel}</p>
-							<p class="mt-1 text-sm text-lime-300">{row.bestLabel}</p>
+							<p class="mt-1 font-mono text-xl font-semibold">{row.latestLabel}</p>
+							<p class="mt-1 text-sm text-zinc-400">{row.bestLabel}</p>
 							{#if row.points.length > 1}
 								<svg
 									class="mt-3 h-8 w-full text-lime-400"
@@ -178,8 +178,8 @@
 					{#each shownCardio as row (row.id)}
 						<li class="rounded-3xl border border-zinc-800 bg-zinc-900 p-4">
 							<p class="text-lg font-semibold">{row.name}</p>
-							<p class="mt-1 font-mono text-2xl">{row.latestLabel}</p>
-							<p class="mt-1 text-sm text-lime-300">{row.bestLabel}</p>
+							<p class="mt-1 font-mono text-xl font-semibold">{row.latestLabel}</p>
+							<p class="mt-1 text-sm text-zinc-400">{row.bestLabel}</p>
 							{#if row.points.length > 1}
 								<svg
 									class="mt-3 h-8 w-full text-lime-400"
@@ -209,8 +209,8 @@
 					{#each shownStats as row (row.id)}
 						<li class="rounded-3xl border border-zinc-800 bg-zinc-900 p-4">
 							<p class="text-lg font-semibold">{row.name}</p>
-							<p class="mt-1 font-mono text-2xl">{row.latestLabel}</p>
-							<p class="mt-1 text-sm text-lime-300">{row.bestLabel}</p>
+							<p class="mt-1 font-mono text-xl font-semibold">{row.latestLabel}</p>
+							<p class="mt-1 text-sm text-zinc-400">{row.bestLabel}</p>
 							{#if row.points.length > 1}
 								<svg
 									class="mt-3 h-8 w-full text-lime-400"
