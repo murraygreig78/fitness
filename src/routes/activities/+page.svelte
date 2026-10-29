@@ -108,25 +108,27 @@
 			.join(' ');
 	}
 
-	function formatSparkDate(date: string): string {
-		return parseDateOnly(date).toLocaleDateString(undefined, {
-			day: 'numeric',
-			month: 'short'
-		});
-	}
-
-	function timelineMarks(dates: string[]): { date: string; label: string; left: number }[] {
+	function timelineMarks(
+		dates: string[]
+	): { key: string; day: string; month: string | null; left: number }[] {
 		if (dates.length < 2) return [];
-		const picks =
-			dates.length <= 3
-				? dates
-				: [dates[0], dates[Math.floor((dates.length - 1) / 2)], dates.at(-1)!];
-		const unique = [...new Set(picks)];
-		return unique.map((date, index) => ({
-			date,
-			label: formatSparkDate(date),
-			left: unique.length === 1 ? 50 : (index / (unique.length - 1)) * 100
-		}));
+		return dates.map((date, index) => {
+			const parsed = parseDateOnly(date);
+			const monthKey = `${parsed.getFullYear()}-${parsed.getMonth()}`;
+			const previous = index > 0 ? parseDateOnly(dates[index - 1]!) : null;
+			const previousKey = previous
+				? `${previous.getFullYear()}-${previous.getMonth()}`
+				: null;
+			return {
+				key: `${date}:${index}`,
+				day: String(parsed.getDate()),
+				month:
+					monthKey !== previousKey
+						? parsed.toLocaleDateString(undefined, { month: 'short' })
+						: null,
+				left: (index / (dates.length - 1)) * 100
+			};
+		});
 	}
 </script>
 
@@ -187,15 +189,30 @@
 									/>
 								</svg>
 								{#if row.dates.length > 1}
-									<div class="relative mt-1 h-4">
-										{#each timelineMarks(row.dates) as mark (mark.date)}
-											<span
-												class="absolute -translate-x-1/2 font-mono text-[10px] leading-none text-zinc-500 tabular-nums"
-												style="left: {mark.left}%"
-											>
-												{mark.label}
-											</span>
-										{/each}
+									{@const marks = timelineMarks(row.dates)}
+									<div class="mt-1 space-y-1">
+										<div class="relative h-3">
+											{#each marks as mark (mark.key)}
+												<span
+													class="absolute -translate-x-1/2 font-mono text-[10px] leading-none text-zinc-500 tabular-nums"
+													style="left: {mark.left}%"
+												>
+													{mark.day}
+												</span>
+											{/each}
+										</div>
+										<div class="relative h-3">
+											{#each marks as mark (mark.key)}
+												{#if mark.month}
+													<span
+														class="absolute -translate-x-1/2 text-[10px] leading-none text-zinc-500"
+														style="left: {mark.left}%"
+													>
+														{mark.month}
+													</span>
+												{/if}
+											{/each}
+										</div>
 									</div>
 								{/if}
 							{/if}
@@ -228,15 +245,30 @@
 									/>
 								</svg>
 								{#if row.dates.length > 1}
-									<div class="relative mt-1 h-4">
-										{#each timelineMarks(row.dates) as mark (mark.date)}
-											<span
-												class="absolute -translate-x-1/2 font-mono text-[10px] leading-none text-zinc-500 tabular-nums"
-												style="left: {mark.left}%"
-											>
-												{mark.label}
-											</span>
-										{/each}
+									{@const marks = timelineMarks(row.dates)}
+									<div class="mt-1 space-y-1">
+										<div class="relative h-3">
+											{#each marks as mark (mark.key)}
+												<span
+													class="absolute -translate-x-1/2 font-mono text-[10px] leading-none text-zinc-500 tabular-nums"
+													style="left: {mark.left}%"
+												>
+													{mark.day}
+												</span>
+											{/each}
+										</div>
+										<div class="relative h-3">
+											{#each marks as mark (mark.key)}
+												{#if mark.month}
+													<span
+														class="absolute -translate-x-1/2 text-[10px] leading-none text-zinc-500"
+														style="left: {mark.left}%"
+													>
+														{mark.month}
+													</span>
+												{/if}
+											{/each}
+										</div>
 									</div>
 								{/if}
 							{/if}
