@@ -17,8 +17,8 @@
 	import { themeLabel } from '$lib/units';
 
 	type Panel =
+		| 'getting-started'
 		| 'week'
-		| 'how-it-works'
 		| 'ask-ai'
 		| 'import-plan'
 		| 'import-log'
@@ -35,19 +35,19 @@
 	let permission = $state(reminderPermission());
 	let selected = $state<Panel | null>(null);
 
-	const panel = $derived(selected ?? 'week');
+	const panel = $derived(selected ?? (fitness.plan ? 'week' : 'getting-started'));
 
 	const menuItems = $derived.by(() => {
 		const items: { id: Panel; label: string; hint: string }[] = [
 			{
+				id: 'getting-started',
+				label: 'Getting started',
+				hint: 'Install the app, load a week, and log'
+			},
+			{
 				id: 'week',
 				label: 'Weekly plan',
 				hint: fitness.plan ? fitness.plan.name : 'Choose or build a starter week'
-			},
-			{
-				id: 'how-it-works',
-				label: 'How it works',
-				hint: 'Local plans, logging, and AI updates'
 			},
 			{
 				id: 'ask-ai',
@@ -307,26 +307,60 @@
 							</p>
 						{/if}
 						<SamplePlanList plans={starterPlans} bind:busy bind:error onLoaded={loadedSample} />
-					{:else if item.id === 'how-it-works'}
-						<div class="space-y-3 text-sm leading-6 text-zinc-400">
+					{:else if item.id === 'getting-started'}
+						<div class="space-y-4 text-sm leading-6 text-zinc-400">
 							<p>
-								{APP_NAME} keeps your week in a JSON fitness plan and your logs in this browser. There
-								is no account and nothing leaves the device unless you download a file.
+								{APP_NAME} is a local training log. Your week lives in a JSON plan and your history stays
+								in this browser — there is no account, and nothing leaves the device unless you download
+								a file.
 							</p>
+
+							<div>
+								<p class="font-semibold text-zinc-200">1. Save it on your phone</p>
+								<p class="mt-1">
+									Add this site to your Home Screen so it opens like an app, stays in portrait, and
+									is easier to reach mid-workout.
+								</p>
+								<ul class="mt-2 list-disc space-y-2 pl-5">
+									<li>
+										<span class="font-medium text-zinc-300">iPhone (Safari):</span> open this site, tap
+										Share, then Add to Home Screen. Open it from the new icon afterwards.
+									</li>
+									<li>
+										<span class="font-medium text-zinc-300">Android (Chrome):</span> open this site, tap
+										the menu (⋮), then Add to Home screen or Install app. Open it from the new icon afterwards.
+									</li>
+								</ul>
+							</div>
+
+							<div>
+								<p class="font-semibold text-zinc-200">2. Load a week</p>
+								<p class="mt-1">
+									Open Weekly plan and pick a starter. Use Show schedule to see which exercises fall
+									on which days. You can Replace week, or Add to week to combine modules — for
+									example Home dumbbell week, then Daily cardio, then Full-body stretch.
+								</p>
+							</div>
+
+							<div>
+								<p class="font-semibold text-zinc-200">3. Log as you train</p>
+								<p class="mt-1">
+									From the home screen, open a day, then an activity. Mark sets complete and enter
+									kg, reps, or time. The keypad can fill the last value you used for that exercise.
+								</p>
+							</div>
+
+							<div>
+								<p class="font-semibold text-zinc-200">4. Change or move the week</p>
+								<p class="mt-1">
+									Ask AI to update your week downloads skills and your plan for Claude or ChatGPT.
+									Import the JSON it returns here. Moving phones? Download your activity log, then
+									import it on the other device.
+								</p>
+							</div>
+
 							<p>
-								Load a starter week or import your own plan. Open a day from the home screen, then
-								log each activity. The keypad remembers last kg and reps for an exercise.
-							</p>
-							<p>
-								To change the week with Claude or ChatGPT: download the AI skills and your plan, ask
-								for an updated JSON, then import it here.
-							</p>
-							<p>
-								Moving phones or browsers? Download your activity log, then import it on the other
-								device.
-							</p>
-							<p>
-								Pull requests and ideas are welcome on
+								Ideas and pull requests are welcome on
 								<a class="text-lime-300 underline" href={REPO_URL} target="_blank" rel="noreferrer"
 									>GitHub</a
 								>.
@@ -592,4 +626,3 @@
 		</section>
 	{/each}
 </div>
-
