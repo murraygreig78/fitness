@@ -9,7 +9,7 @@
 	import KindSheet from '$lib/components/KindSheet.svelte';
 	import WeekCalendar from '$lib/components/WeekCalendar.svelte';
 	import SamplePlanList from '$lib/components/SamplePlanList.svelte';
-	import { starterPlans } from '$lib/samples';
+	import { KOFI_URL, starterPlans } from '$lib/samples';
 	import { activityPreview } from '$lib/metrics';
 	import {
 		cloneActivityAsAdhoc,
@@ -259,6 +259,13 @@
 			{/each}
 		</ol>
 	{/if}
+
+	<p class="mt-10 pb-2 text-center text-sm leading-6 text-zinc-500">
+		If this helps your training,
+		<a class="text-lime-300 underline" href={KOFI_URL} target="_blank" rel="noreferrer"
+			>buy us a coffee</a
+		>.
+	</p>
 
 {#if picking}
 	<KindSheet
