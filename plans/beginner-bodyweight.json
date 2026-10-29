@@ -1,0 +1,158 @@
+{
+	"version": 2,
+	"id": "beginner-bodyweight-3day",
+	"name": "Beginner bodyweight",
+	"notes": "No equipment. Three short full-body days aimed at beginners. Kneeling push-ups and shorter holds are fine. Rest at least a day between sessions when you can.",
+	"notificationTime": "09:00",
+	"days": [
+		{
+			"id": "wed-bodyweight",
+			"weekday": "wednesday",
+			"name": "Bodyweight strength",
+			"estimatedMinutes": 30,
+			"activities": [
+				{
+					"id": "wed-bw-strength",
+					"name": "Bodyweight strength",
+					"kind": "strength",
+					"restSeconds": 90,
+					"instructions": "Move slowly. Rest about 90 seconds between sets. Stop with 1–2 reps in reserve.",
+					"exercises": [
+						{
+							"id": "bw-squat",
+							"name": "Bodyweight squat",
+							"kind": "bodyweight",
+							"primaryMuscles": ["quads", "glutes"],
+							"instructions": "Feet about shoulder width. Sit the hips back and down, then stand tall.",
+							"target": { "sets": 3, "reps": 10, "repsMin": 8 }
+						},
+						{
+							"id": "push-up",
+							"name": "Push-up",
+							"kind": "bodyweight",
+							"primaryMuscles": ["chest", "triceps"],
+							"instructions": "Hands under the shoulders. Lower the chest, then press up. Use knees if you need to.",
+							"target": { "sets": 3, "reps": 8, "repsMin": 5 }
+						},
+						{
+							"id": "glute-bridge",
+							"name": "Glute bridge",
+							"kind": "bodyweight",
+							"primaryMuscles": ["glutes", "hamstrings"],
+							"instructions": "Lie on your back, feet flat. Squeeze the glutes and lift the hips.",
+							"target": { "sets": 3, "reps": 10, "repsMin": 8 }
+						},
+						{
+							"id": "front-plank",
+							"name": "Front plank",
+							"kind": "timed",
+							"primaryMuscles": ["core"],
+							"instructions": "Ribs down, glutes on. Hold a straight line from head to heels.",
+							"target": { "sets": 2, "durationSeconds": 20 }
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "sat-bodyweight",
+			"weekday": "saturday",
+			"name": "Weekend bodyweight",
+			"estimatedMinutes": 30,
+			"activities": [
+				{
+					"id": "sat-bw-strength",
+					"name": "Weekend bodyweight",
+					"kind": "strength",
+					"restSeconds": 90,
+					"instructions": "Weekend session. Keep the effort moderate and the form tidy.",
+					"exercises": [
+						{
+							"id": "reverse-lunge",
+							"name": "Reverse lunge",
+							"kind": "bodyweight",
+							"primaryMuscles": ["quads", "glutes"],
+							"instructions": "Step one foot back, lower the back knee, then stand. Alternate sides each rep, or finish one side then the other.",
+							"notes": "Count total lunges across both legs.",
+							"target": { "sets": 3, "reps": 10, "repsMin": 8 }
+						},
+						{
+							"id": "push-up",
+							"name": "Push-up",
+							"kind": "bodyweight",
+							"primaryMuscles": ["chest", "triceps"],
+							"instructions": "Hands under the shoulders. Lower the chest, then press up. Use knees if you need to.",
+							"target": { "sets": 3, "reps": 8, "repsMin": 5 }
+						},
+						{
+							"id": "hip-hinge-good-morning",
+							"name": "Standing hip hinge",
+							"kind": "bodyweight",
+							"primaryMuscles": ["hamstrings", "glutes", "back"],
+							"instructions": "Soft knees, push the hips back, keep a long spine, then stand tall.",
+							"target": { "sets": 3, "reps": 10, "repsMin": 8 }
+						},
+						{
+							"id": "dead-bug",
+							"name": "Dead bug",
+							"kind": "bodyweight",
+							"primaryMuscles": ["core"],
+							"instructions": "On your back, ribs down. Reach one arm and the opposite leg away, then switch.",
+							"target": { "sets": 3, "reps": 8, "repsMin": 6 }
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "sun-bodyweight",
+			"weekday": "sunday",
+			"name": "Weekend bodyweight",
+			"estimatedMinutes": 30,
+			"activities": [
+				{
+					"id": "sun-bw-strength",
+					"name": "Weekend bodyweight",
+					"kind": "strength",
+					"restSeconds": 90,
+					"instructions": "Second weekend session. Same movements, steady pace.",
+					"exercises": [
+						{
+							"id": "bw-squat",
+							"name": "Bodyweight squat",
+							"kind": "bodyweight",
+							"primaryMuscles": ["quads", "glutes"],
+							"instructions": "Feet about shoulder width. Sit the hips back and down, then stand tall.",
+							"target": { "sets": 3, "reps": 10, "repsMin": 8 }
+						},
+						{
+							"id": "incline-push-up",
+							"name": "Incline push-up",
+							"kind": "bodyweight",
+							"primaryMuscles": ["chest", "triceps"],
+							"instructions": "Hands on a bench, sofa, or wall. Lower the chest, then press up.",
+							"notes": "Higher hands make it easier.",
+							"target": { "sets": 3, "reps": 8, "repsMin": 6 }
+						},
+						{
+							"id": "glute-bridge",
+							"name": "Glute bridge",
+							"kind": "bodyweight",
+							"primaryMuscles": ["glutes", "hamstrings"],
+							"instructions": "Lie on your back, feet flat. Squeeze the glutes and lift the hips.",
+							"target": { "sets": 3, "reps": 10, "repsMin": 8 }
+						},
+						{
+							"id": "side-plank",
+							"name": "Side plank",
+							"kind": "timed",
+							"primaryMuscles": ["core", "obliques"],
+							"instructions": "Hold 20 seconds on the left, then swap to the right for set 2. Knees down is fine.",
+							"target": { "sets": 2, "durationSeconds": 20 }
+						}
+					]
+				}
+			]
+		}
+	]
+}

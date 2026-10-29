@@ -1,0 +1,210 @@
+{
+	"version": 2,
+	"id": "beginner-mobility-3day",
+	"name": "Beginner stretching",
+	"notes": "Gentle mobility for beginners. Short holds, easy breathing. One-sided stretches use two sets so you cover left and right.",
+	"notificationTime": "09:00",
+	"days": [
+		{
+			"id": "tue-beginner-mobility",
+			"weekday": "tuesday",
+			"name": "Easy stretch",
+			"estimatedMinutes": 20,
+			"activities": [
+				{
+					"id": "tue-beginner-stretch",
+					"name": "Easy stretch",
+					"kind": "mobility",
+					"instructions": "30-second holds. For one-sided stretches, do both sides (two sets). Stop if anything pinches.",
+					"exercises": [
+						{
+							"id": "upward-salute",
+							"name": "Upward salute",
+							"kind": "stretch",
+							"primaryMuscles": ["mobility"],
+							"restSeconds": 5,
+							"instructions": "Reach the arms up and lengthen through the sides.",
+							"target": { "sets": 1, "durationSeconds": 30 }
+						},
+						{
+							"id": "chest-opener",
+							"name": "Chest opener",
+							"kind": "stretch",
+							"primaryMuscles": ["chest", "shoulders"],
+							"restSeconds": 5,
+							"instructions": "Open the arms wide or clasp behind the back. Soft knees.",
+							"target": { "sets": 1, "durationSeconds": 30 }
+						},
+						{
+							"id": "side-lunge",
+							"name": "Side lunge",
+							"kind": "stretch",
+							"primaryMuscles": ["hips", "adductors"],
+							"restSeconds": 5,
+							"instructions": "Hold 30 seconds on the left, then swap to the right for set 2.",
+							"target": { "sets": 2, "durationSeconds": 30 }
+						},
+						{
+							"id": "lunge-stretch",
+							"name": "Lunge",
+							"kind": "stretch",
+							"primaryMuscles": ["hips", "quads"],
+							"restSeconds": 5,
+							"instructions": "Hold 30 seconds on the left, then swap to the right for set 2.",
+							"target": { "sets": 2, "durationSeconds": 30 }
+						},
+						{
+							"id": "childs-pose",
+							"name": "Child's pose",
+							"kind": "stretch",
+							"primaryMuscles": ["back", "hips"],
+							"restSeconds": 5,
+							"instructions": "Sit the hips toward the heels and reach the arms forward.",
+							"target": { "sets": 1, "durationSeconds": 30 }
+						},
+						{
+							"id": "seated-twist",
+							"name": "Seated twist",
+							"kind": "stretch",
+							"primaryMuscles": ["back"],
+							"restSeconds": 5,
+							"instructions": "Hold 30 seconds twisting left, then swap to the right for set 2.",
+							"target": { "sets": 2, "durationSeconds": 30 }
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "thu-beginner-mobility",
+			"weekday": "thursday",
+			"name": "Easy stretch",
+			"estimatedMinutes": 20,
+			"activities": [
+				{
+					"id": "thu-beginner-stretch",
+					"name": "Easy stretch",
+					"kind": "mobility",
+					"instructions": "30-second holds. For one-sided stretches, do both sides (two sets).",
+					"exercises": [
+						{
+							"id": "toe-touch",
+							"name": "Toe touch",
+							"kind": "stretch",
+							"primaryMuscles": ["hamstrings"],
+							"restSeconds": 5,
+							"instructions": "Soft knees. Fold forward only as far as comfortable.",
+							"target": { "sets": 1, "durationSeconds": 30 }
+						},
+						{
+							"id": "figure-four-seated",
+							"name": "Seated figure four",
+							"kind": "stretch",
+							"primaryMuscles": ["glutes", "hips"],
+							"restSeconds": 5,
+							"instructions": "Hold 30 seconds with the left ankle crossed, then swap to the right for set 2.",
+							"target": { "sets": 2, "durationSeconds": 30 }
+						},
+						{
+							"id": "quad-stretch",
+							"name": "Quad stretch",
+							"kind": "stretch",
+							"primaryMuscles": ["quads"],
+							"restSeconds": 5,
+							"instructions": "Hold 30 seconds on the left, then swap to the right for set 2. Hold a wall for balance.",
+							"target": { "sets": 2, "durationSeconds": 30 }
+						},
+						{
+							"id": "lying-hamstring",
+							"name": "Lying hamstring",
+							"kind": "stretch",
+							"primaryMuscles": ["hamstrings"],
+							"restSeconds": 5,
+							"instructions": "Hold 30 seconds on the left leg, then swap to the right for set 2.",
+							"target": { "sets": 2, "durationSeconds": 30 }
+						},
+						{
+							"id": "reclined-butterfly",
+							"name": "Reclined butterfly",
+							"kind": "stretch",
+							"primaryMuscles": ["hips"],
+							"restSeconds": 5,
+							"instructions": "Soles of the feet together, knees open. Soften the inner thighs.",
+							"target": { "sets": 1, "durationSeconds": 30 }
+						},
+						{
+							"id": "knees-to-chest",
+							"name": "Knees to chest",
+							"kind": "stretch",
+							"primaryMuscles": ["back", "hips"],
+							"restSeconds": 5,
+							"instructions": "Hug both knees in and breathe into the lower back.",
+							"target": { "sets": 1, "durationSeconds": 30 }
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "sun-beginner-mobility",
+			"weekday": "sunday",
+			"name": "Easy stretch",
+			"estimatedMinutes": 20,
+			"activities": [
+				{
+					"id": "sun-beginner-stretch",
+					"name": "Easy stretch",
+					"kind": "mobility",
+					"instructions": "A short Sunday reset. Keep every hold gentle.",
+					"exercises": [
+						{
+							"id": "cat-cow",
+							"name": "Cat-cow",
+							"kind": "stretch",
+							"primaryMuscles": ["back"],
+							"restSeconds": 5,
+							"instructions": "On all fours, slowly round and arch the spine with the breath.",
+							"target": { "sets": 1, "durationSeconds": 30 }
+						},
+						{
+							"id": "downward-dog",
+							"name": "Downward dog",
+							"kind": "stretch",
+							"primaryMuscles": ["hamstrings", "shoulders"],
+							"restSeconds": 5,
+							"instructions": "Hips high, soft knees. Pedal the feet if the legs feel tight.",
+							"target": { "sets": 1, "durationSeconds": 30 }
+						},
+						{
+							"id": "pigeon",
+							"name": "Pigeon",
+							"kind": "stretch",
+							"primaryMuscles": ["hips", "glutes"],
+							"restSeconds": 5,
+							"instructions": "Hold 30 seconds on the left, then swap to the right for set 2. Keep the hips level.",
+							"target": { "sets": 2, "durationSeconds": 30 }
+						},
+						{
+							"id": "spinal-twist",
+							"name": "Spinal twist",
+							"kind": "stretch",
+							"primaryMuscles": ["back"],
+							"restSeconds": 5,
+							"instructions": "Hold 30 seconds on the left, then swap to the right for set 2.",
+							"target": { "sets": 2, "durationSeconds": 30 }
+						},
+						{
+							"id": "childs-pose",
+							"name": "Child's pose",
+							"kind": "stretch",
+							"primaryMuscles": ["back", "hips"],
+							"restSeconds": 5,
+							"instructions": "Sit the hips toward the heels and reach the arms forward.",
+							"target": { "sets": 1, "durationSeconds": 30 }
+						}
+					]
+				}
+			]
+		}
+	]
+}
