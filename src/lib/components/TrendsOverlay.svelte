@@ -47,13 +47,6 @@
 		return parseDateOnly(value).getTime();
 	}
 
-	function formatAxisDate(value: string): string {
-		return parseDateOnly(value).toLocaleDateString(undefined, {
-			day: 'numeric',
-			month: 'short'
-		});
-	}
-
 	function lerp(min: number, max: number, t: number) {
 		return min + (max - min) * t;
 	}
@@ -108,19 +101,27 @@
 		const dates = [
 			...new Set(plotted.flatMap((line) => line.points.map((point) => point.date)))
 		].sort((a, b) => a.localeCompare(b));
-		if (!dates.length) return null;
-		const tMin = dayMs(dates[0]);
+		if (dates.length < 2) return null;
+		const tMin = dayMs(dates[0]!);
 		const tMax = dayMs(dates.at(-1)!);
 		const tSpan = tMax - tMin || 1;
-		const picks =
-			dates.length <= 3
-				? dates
-				: [dates[0], dates[Math.floor((dates.length - 1) / 2)], dates.at(-1)!];
-		return [...new Set(picks)].map((date) => ({
-			date,
-			label: formatAxisDate(date),
-			left: ((dayMs(date) - tMin) / tSpan) * 100
-		}));
+		return dates.map((date, index) => {
+			const parsed = parseDateOnly(date);
+			const monthKey = `${parsed.getFullYear()}-${parsed.getMonth()}`;
+			const previous = index > 0 ? parseDateOnly(dates[index - 1]!) : null;
+			const previousKey = previous
+				? `${previous.getFullYear()}-${previous.getMonth()}`
+				: null;
+			return {
+				key: `${date}:${index}`,
+				day: String(parsed.getDate()),
+				month:
+					monthKey !== previousKey
+						? parsed.toLocaleDateString(undefined, { month: 'short' })
+						: null,
+				left: ((dayMs(date) - tMin) / tSpan) * 100
+			};
+		});
 	});
 
 	let tip = $state<{
@@ -316,15 +317,29 @@
 			<div></div>
 
 			{#if timeDomain}
-				<div class="relative h-4">
-					{#each timeDomain as mark (mark.date)}
-						<span
-							class="absolute -translate-x-1/2 font-mono text-[10px] leading-none text-zinc-500 tabular-nums"
-							style="left: {mark.left}%"
-						>
-							{mark.label}
-						</span>
-					{/each}
+				<div class="space-y-1">
+					<div class="relative h-3">
+						{#each timeDomain as mark (mark.key)}
+							<span
+								class="absolute -translate-x-1/2 font-mono text-[10px] leading-none text-zinc-500 tabular-nums"
+								style="left: {mark.left}%"
+							>
+								{mark.day}
+							</span>
+						{/each}
+					</div>
+					<div class="relative h-3">
+						{#each timeDomain as mark (mark.key)}
+							{#if mark.month}
+								<span
+									class="absolute -translate-x-1/2 text-[10px] leading-none text-zinc-500"
+									style="left: {mark.left}%"
+								>
+									{mark.month}
+								</span>
+							{/if}
+						{/each}
+					</div>
 				</div>
 			{/if}
 		</div>
